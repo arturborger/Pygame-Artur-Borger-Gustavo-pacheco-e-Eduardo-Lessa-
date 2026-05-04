@@ -1,1 +1,7 @@
-# Pygame-Artur-Borger-Gustavo-pacheco-e-Eduardo-Lessa-
+# Tennis Cartoon - Projeto Final DesSoft
+
+## Integrantes
+
+- Arthur Borger
+- Eduardo Lessa
+- Gustavo Pacheco
