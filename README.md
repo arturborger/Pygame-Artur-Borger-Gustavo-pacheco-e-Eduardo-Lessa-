@@ -190,3 +190,11 @@ conforme orientação do curso.
   sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
   movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
   direta com angulo e forca sorteados).
+
+## src/systems/score_manager.py
+- Sub-tarefa: F.1
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foi criada a classe `ScoreManager` com placar de
+  game no formato 0-15-30-40, regras de deuce e advantage, incremento de games
+  ao fechar pontos com dois de vantagem e estatísticas simples de aces e
+  winners).
