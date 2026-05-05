@@ -134,3 +134,10 @@ conforme orientação do curso.
   `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
   `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
   retornando `True` quando a rebatida é aplicada).
+
+## src/systems/physics.py
+- Sub-tarefa: C.3
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foram criadas funções puras para refletir a bola nas
+  bordas laterais com `bounce_off_walls`, detectar saída pelo topo ou fundo com
+  `is_out_of_bounds` e identificar contato com a rede usando `hit_net`).
