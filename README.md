@@ -250,3 +250,11 @@ conforme orientação do curso.
   navegacao por setas, ENTER para acionar e ESC para sair; `Game` passou a
   iniciar pelo menu, manter `tournament_progress` e consultar `next_scene()` a
   cada quadro para permitir transicoes entre cenas).
+
+## src/scenes/instructions_scene.py
+- Sub-tarefa: H.2
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi criada a `InstructionsScene`, com controles,
+  explicacao da mecanica sequencial de angulo e forca, frase de pontuacao,
+  retorno ao menu por ENTER/ESC e demonstracao visual das duas barras com
+  cursores ilustrativos).
