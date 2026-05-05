@@ -99,6 +99,13 @@ foi usada no desenvolvimento. O detalhamento por arquivo também pode ser mantid
   criadas as funcoes `make_court`, `make_player_sprite` e `make_ai_sprite`
   usando apenas `pygame.draw`, com sombras simples e contornos pretos.
 
+## src/assets_generator.py
+- Sub-tarefa: B.2
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foram criadas as funcoes `make_ball`,
+  `make_trophy` e `make_button`, usando apenas `pygame.draw`, superficies com
+  `SRCALPHA`, contornos pretos e texto centralizado em fonte default negrito).
+
 Toda a equipe revisou criticamente o código gerado, validou seu funcionamento e é
 capaz de explicar cada trecho. Bugs introduzidos pela IA foram corrigidos pela equipe,
 conforme orientação do curso.

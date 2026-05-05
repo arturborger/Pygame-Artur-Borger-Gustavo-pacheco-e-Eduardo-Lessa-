@@ -5,6 +5,7 @@ from __future__ import annotations
 import pygame
 
 from src.settings import (
+    BALL_RADIUS,
     BLACK,
     COURT_MARGIN,
     HEIGHT,
@@ -14,7 +15,9 @@ from src.settings import (
     PLAYER_WIDTH,
     SCENERY_COLORS,
     TOURNAMENT_OPPONENTS,
+    WHITE,
     WIDTH,
+    YELLOW,
 )
 
 OUTLINE_WIDTH = 3
@@ -180,3 +183,107 @@ def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
         Superficie transparente com o sprite do adversario.
     """
     return make_player_sprite(_get_opponent_color(opponent_id))
+
+
+def make_ball() -> pygame.Surface:
+    """Cria a imagem cartoon da bola de tenis.
+
+    Returns:
+        Superficie transparente com uma bola amarela, contorno preto e linhas
+        curvas brancas de bola de tenis.
+    """
+    diameter = BALL_RADIUS * 2 + OUTLINE_WIDTH * 2
+    surface = pygame.Surface((diameter, diameter), pygame.SRCALPHA)
+    center = (diameter // 2, diameter // 2)
+    radius = BALL_RADIUS + OUTLINE_WIDTH
+
+    pygame.draw.circle(surface, BLACK, center, radius)
+    pygame.draw.circle(surface, YELLOW, center, BALL_RADIUS)
+
+    arc_width = 2
+    left_arc = pygame.Rect(1, 3, diameter - 6, diameter - 6)
+    right_arc = pygame.Rect(5, 3, diameter - 6, diameter - 6)
+    pygame.draw.arc(surface, WHITE, left_arc, -1.35, 1.35, arc_width)
+    pygame.draw.arc(surface, WHITE, right_arc, 1.8, 4.48, arc_width)
+
+    return surface
+
+
+def make_trophy() -> pygame.Surface:
+    """Cria a imagem cartoon de um trofeu dourado.
+
+    Returns:
+        Superficie transparente com um trofeu dourado em estilo cartoon e base
+        preta.
+    """
+    surface = pygame.Surface((96, 96), pygame.SRCALPHA)
+    gold = (255, 200, 60)
+    gold_light = (255, 230, 120)
+    gold_shadow = (215, 145, 35)
+
+    left_handle = pygame.Rect(12, 18, 32, 34)
+    right_handle = pygame.Rect(52, 18, 32, 34)
+    pygame.draw.arc(surface, BLACK, left_handle, 1.55, 4.75, OUTLINE_WIDTH + 2)
+    pygame.draw.arc(surface, BLACK, right_handle, -1.6, 1.6, OUTLINE_WIDTH + 2)
+    pygame.draw.arc(surface, gold, left_handle, 1.55, 4.75, OUTLINE_WIDTH)
+    pygame.draw.arc(surface, gold, right_handle, -1.6, 1.6, OUTLINE_WIDTH)
+
+    cup_points = [(28, 14), (68, 14), (64, 54), (56, 66), (40, 66), (32, 54)]
+    pygame.draw.polygon(surface, BLACK, cup_points)
+    inner_cup = [(32, 18), (64, 18), (60, 52), (53, 61), (43, 61), (36, 52)]
+    pygame.draw.polygon(surface, gold, inner_cup)
+    pygame.draw.rect(surface, gold_light, pygame.Rect(36, 22, 8, 28), border_radius=4)
+    pygame.draw.arc(surface, gold_shadow, pygame.Rect(36, 39, 24, 22), 0.0, 3.14, 3)
+
+    pygame.draw.rect(surface, BLACK, pygame.Rect(42, 62, 12, 14), border_radius=2)
+    pygame.draw.rect(surface, gold, pygame.Rect(45, 62, 6, 14), border_radius=2)
+    pygame.draw.rect(surface, BLACK, pygame.Rect(30, 74, 36, 10), border_radius=3)
+    pygame.draw.rect(surface, gold_shadow, pygame.Rect(34, 74, 28, 6), border_radius=2)
+    pygame.draw.rect(surface, BLACK, pygame.Rect(20, 82, 56, 10), border_radius=3)
+
+    return surface
+
+
+def make_button(
+    text: str,
+    color: tuple[int, int, int],
+    width: int,
+    height: int,
+) -> pygame.Surface:
+    """Cria a imagem cartoon de um botao com texto centralizado.
+
+    Args:
+        text: Texto exibido no centro do botao.
+        color: Cor de preenchimento do botao.
+        width: Largura da superficie do botao, em pixels.
+        height: Altura da superficie do botao, em pixels.
+
+    Returns:
+        Superficie transparente com botao arredondado, contorno preto grosso e
+        texto branco em negrito.
+    """
+    surface = pygame.Surface((width, height), pygame.SRCALPHA)
+    border_width = OUTLINE_WIDTH + 1
+    border_radius = min(14, height // 3)
+    button_rect = pygame.Rect(0, 0, width, height)
+    inner_rect = button_rect.inflate(-border_width * 2, -border_width * 2)
+
+    pygame.draw.rect(surface, BLACK, button_rect, border_radius=border_radius)
+    pygame.draw.rect(
+        surface,
+        color,
+        inner_rect,
+        border_radius=max(0, border_radius - border_width),
+    )
+
+    if not pygame.font.get_init():
+        pygame.font.init()
+
+    font_size = max(16, min(36, height // 2))
+    font = pygame.font.Font(None, font_size)
+    font.set_bold(True)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect(center=button_rect.center)
+    surface.blit(text_surface, text_rect)
+
+    return surface
