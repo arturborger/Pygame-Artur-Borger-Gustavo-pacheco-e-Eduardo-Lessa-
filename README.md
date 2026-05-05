@@ -212,3 +212,11 @@ conforme orientação do curso.
 - Ajustes manuais: nenhum (o `ScoreManager` foi finalizado com match melhor
   de 3 sets, vencedor da partida, interface pública completa e alternância de
   saque por game e por pontos no tie-break).
+
+## src/systems/collision.py
+- Sub-tarefa: G.1
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi criada a função `player_hits_ball`, usando
+  `pygame.sprite.collide_mask` com cooldown em milissegundos para evitar
+  múltiplas detecções da mesma colisão; `check_ball_out_of_bounds` delega para
+  `physics.is_out_of_bounds`).
