@@ -177,7 +177,7 @@ conforme orientação do curso.
 
 ## src/entities/player.py
 - Sub-tarefa: E.2
-- Dev integrador: Arthur Borger
+- Dev integrador: Eduardo Lessa
 - Ajustes manuais: nenhum (a classe `Player` passou a processar a tecla de
   trava com `handle_event`, ativar `TimingBars` automaticamente quando a bola
   se aproxima na direcao correta, verificar `can_hit` por distancia ate
@@ -185,7 +185,7 @@ conforme orientação do curso.
 
 ## src/entities/ai_player.py
 - Sub-tarefa: E.3
-- Dev integrador: Gustavo Pacheco
+- Dev integrador: Eduardo Lessa
 - Ajustes manuais: nenhum (foi criada a classe `AIPlayer` herdando de `Player`,
   sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
   movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
