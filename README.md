@@ -166,3 +166,11 @@ conforme orientação do curso.
   cartoon de ângulo e força, contorno escuro, cantos arredondados, zona verde
   de sweet spot, cursores por estado e marca fixa do ângulo travado; os
   parâmetros visuais novos ficaram centralizados em `src/settings.py`).
+
+## src/entities/player.py
+- Sub-tarefa: E.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foi criada a classe `Player` herdando de
+  `pygame.sprite.Sprite`, com sprite vindo do `AssetCache`, controles
+  configuraveis, posicao inicial por lado da quadra, movimento por `dt`,
+  restricao ao proprio campo e instancia de `TimingBars`).
