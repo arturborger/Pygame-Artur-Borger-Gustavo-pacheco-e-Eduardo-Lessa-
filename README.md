@@ -258,3 +258,12 @@ conforme orientação do curso.
   explicacao da mecanica sequencial de angulo e forca, frase de pontuacao,
   retorno ao menu por ENTER/ESC e demonstracao visual das duas barras com
   cursores ilustrativos).
+
+## src/scenes/tournament_scene.py
+- Sub-tarefa: H.3
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foi criada a `TournamentScene`, lendo
+  `game.tournament_progress`, desenhando tres cards horizontais dos adversarios
+  do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
+  trofeu ao completar as tres fases e tentativa preparada de abrir
+  `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
