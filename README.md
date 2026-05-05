@@ -174,3 +174,11 @@ conforme orientação do curso.
   `pygame.sprite.Sprite`, com sprite vindo do `AssetCache`, controles
   configuraveis, posicao inicial por lado da quadra, movimento por `dt`,
   restricao ao proprio campo e instancia de `TimingBars`).
+
+## src/entities/player.py
+- Sub-tarefa: E.2
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (a classe `Player` passou a processar a tecla de
+  trava com `handle_event`, ativar `TimingBars` automaticamente quando a bola
+  se aproxima na direcao correta, verificar `can_hit` por distancia ate
+  `HIT_RADIUS` e aplicar rebatidas em `try_hit` usando os valores travados).

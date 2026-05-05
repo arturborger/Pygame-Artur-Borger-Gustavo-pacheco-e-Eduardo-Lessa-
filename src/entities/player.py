@@ -7,9 +7,11 @@ from pygame.math import Vector2
 
 from src.assets_generator import make_player_sprite
 from src.settings import (
+    BARS_ACTIVATION_DISTANCE,
     BLUE,
     COURT_MARGIN,
     HEIGHT,
+    HIT_RADIUS,
     NET_HEIGHT,
     NET_Y,
     PLAYER_HEIGHT,
@@ -100,14 +102,78 @@ class Player(pygame.sprite.Sprite):
             self._clamp_to_own_court()
             self.rect.center = (round(self.pos.x), round(self.pos.y))
 
-    def update(self, dt: float) -> None:
-        """Atualiza movimento e barras do jogador.
+    def handle_event(self, event: pygame.event.Event, ball) -> None:
+        """Processa eventos pontuais do jogador.
+
+        Args:
+            event: Evento recebido da fila do Pygame.
+            ball: Bola atual da partida, mantida na assinatura para integracao
+                com a cena de gameplay.
+        """
+        if event.type != pygame.KEYDOWN:
+            return
+
+        if event.key == self.controls.get("lock", pygame.K_SPACE):
+            self.timing_bars.handle_lock_press()
+
+    def can_hit(self, ball) -> bool:
+        """Verifica se a bola esta dentro do raio de rebatida.
+
+        Args:
+            ball: Bola com atributo `rect.center`.
+
+        Returns:
+            ``True`` quando a distancia ate a bola e menor ou igual a
+            `HIT_RADIUS`.
+        """
+        player_center = Vector2(self.rect.center)
+        ball_center = Vector2(ball.rect.center)
+        return player_center.distance_to(ball_center) <= HIT_RADIUS
+
+    def try_hit(self, ball) -> str:
+        """Tenta aplicar uma rebatida na bola.
+
+        Args:
+            ball: Bola que pode receber a rebatida.
+
+        Returns:
+            `"winner"` para rebatida no sweet spot, `"normal"` para rebatida
+            comum, `"miss"` quando a bola passou apos as barras travadas ou
+            `"no_hit"` quando nada deve acontecer neste quadro.
+        """
+        if not self.timing_bars.is_locked():
+            return "no_hit"
+
+        locked_values = self.timing_bars.get_locked_values()
+        if locked_values is None:
+            return "no_hit"
+
+        if self.can_hit(ball):
+            angle, power = locked_values
+            is_sweet = self.timing_bars.is_sweet_spot()
+            ball.apply_shot(angle, power, self.side, is_sweet)
+            ball.last_hitter = self.side
+            ball.bounce_count = 0
+            self.timing_bars.reset()
+            return "winner" if is_sweet else "normal"
+
+        if self._ball_has_passed(ball):
+            self.timing_bars.reset()
+            return "miss"
+
+        return "no_hit"
+
+    def update(self, dt: float, ball=None) -> None:
+        """Atualiza movimento, barras e ativacao automatica da mira.
 
         Args:
             dt: Tempo decorrido desde o ultimo quadro, em segundos.
+            ball: Bola usada para ativar as barras quando se aproxima.
         """
         keys = pygame.key.get_pressed()
         self.handle_input(keys, dt)
+        if ball is not None:
+            self._activate_bars_if_needed(ball)
         self.timing_bars.update(dt)
 
     def _clamp_to_own_court(self) -> None:
@@ -125,3 +191,27 @@ class Player(pygame.sprite.Sprite):
 
         self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(min_y, min(max_y, self.pos.y))
+
+    def _activate_bars_if_needed(self, ball) -> None:
+        if self.timing_bars.is_active():
+            return
+
+        if not self._ball_is_approaching(ball):
+            return
+
+        player_center = Vector2(self.rect.center)
+        ball_center = Vector2(ball.rect.center)
+        if player_center.distance_to(ball_center) <= BARS_ACTIVATION_DISTANCE:
+            self.timing_bars.activate()
+
+    def _ball_is_approaching(self, ball) -> bool:
+        if self.side == "bottom":
+            return ball.velocity.y > 0
+
+        return ball.velocity.y < 0
+
+    def _ball_has_passed(self, ball) -> bool:
+        if self.side == "bottom":
+            return ball.rect.centery > self.rect.centery + HIT_RADIUS
+
+        return ball.rect.centery < self.rect.centery - HIT_RADIUS
