@@ -182,3 +182,11 @@ conforme orientação do curso.
   trava com `handle_event`, ativar `TimingBars` automaticamente quando a bola
   se aproxima na direcao correta, verificar `can_hit` por distancia ate
   `HIT_RADIUS` e aplicar rebatidas em `try_hit` usando os valores travados).
+
+## src/entities/ai_player.py
+- Sub-tarefa: E.3
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foi criada a classe `AIPlayer` herdando de `Player`,
+  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
+  movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
+  direta com angulo e forca sorteados).
