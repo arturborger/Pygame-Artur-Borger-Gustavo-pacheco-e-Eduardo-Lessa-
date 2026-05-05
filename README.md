@@ -117,3 +117,12 @@ conforme orientação do curso.
   `make_swing_animation_frames`, com 4 superficies de animacao de rebatida;
   tambem foi criada a classe `AssetCache` para reutilizar assets sob demanda,
   e `Game` passou a instanciar um unico cache em `self.assets`).
+
+## src/entities/ball.py
+- Sub-tarefa: C.1
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi criada a classe `Ball` herdando de
+  `pygame.sprite.Sprite`, com imagem vinda do `AssetCache` via `make_ball`,
+  `rect`, `mask`, posição e velocidade em `Vector2`, controle de último
+  rebatedor, contagem de quicadas, atualização por `dt` e reset para o lado
+  sacador).
