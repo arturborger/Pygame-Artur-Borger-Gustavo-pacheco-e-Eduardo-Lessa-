@@ -5,6 +5,7 @@ from __future__ import annotations
 import pygame
 
 from src.settings import FPS, GREEN_SWEET, HEIGHT, TITLE, WIDTH
+from src.utils.asset_cache import AssetCache
 
 
 class PlaceholderScene:
@@ -41,7 +42,7 @@ class Game:
         clock: Relógio usado para limitar o FPS e calcular o delta time.
         running: Indica se o loop principal deve continuar executando.
         scene: Cena ativa do jogo.
-        assets: Dicionário placeholder para assets carregados futuramente.
+        assets: Cache unico para assets gerados ou carregados sob demanda.
         sound_manager: Gerenciador de sons, ainda não implementado.
     """
 
@@ -53,7 +54,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.scene = PlaceholderScene()
-        self.assets = {}
+        self.assets = AssetCache()
         self.sound_manager = None
 
     def change_scene(self, scene: object) -> None:

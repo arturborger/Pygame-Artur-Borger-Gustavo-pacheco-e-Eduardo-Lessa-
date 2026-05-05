@@ -172,6 +172,61 @@ def make_player_sprite(color: tuple[int, int, int]) -> pygame.Surface:
     return surface
 
 
+def _blit_rotated_with_pivot(
+    target: pygame.Surface,
+    image: pygame.Surface,
+    pivot_pos: tuple[int, int],
+    pivot_offset: tuple[int, int],
+    angle: float,
+) -> None:
+    """Desenha uma imagem rotacionada mantendo um ponto de pivo fixo."""
+    rotated_image = pygame.transform.rotate(image, angle)
+    image_center = pygame.math.Vector2(image.get_rect().center)
+    pivot_vector = pygame.math.Vector2(pivot_offset)
+    rotated_offset = (pivot_vector - image_center).rotate(-angle)
+    rotated_center = pygame.math.Vector2(pivot_pos) - rotated_offset
+    rotated_rect = rotated_image.get_rect(center=rotated_center)
+    target.blit(rotated_image, rotated_rect)
+
+
+def make_swing_animation_frames(color: tuple[int, int, int]) -> list[pygame.Surface]:
+    """Cria quadros de animacao de rebatida para o jogador.
+
+    Args:
+        color: Cor chapada usada no corpo do jogador e no braco.
+
+    Returns:
+        Lista com 4 superficies transparentes, todas do mesmo tamanho,
+        representando uma rebatida com a raquete em angulos diferentes.
+    """
+    frame_size = (PLAYER_WIDTH + 80, PLAYER_HEIGHT + 52)
+    player_offset = ((frame_size[0] - PLAYER_WIDTH) // 2, 26)
+    shoulder = (
+        player_offset[0] + PLAYER_WIDTH // 2 + 12,
+        player_offset[1] + PLAYER_HEIGHT // 2 + 2,
+    )
+    angles = (-55, -20, 20, 55)
+
+    arm = pygame.Surface((58, 14), pygame.SRCALPHA)
+    pygame.draw.rect(arm, BLACK, pygame.Rect(0, 0, 58, 14), border_radius=6)
+    pygame.draw.rect(arm, color, pygame.Rect(3, 3, 34, 8), border_radius=4)
+    pygame.draw.rect(arm, WHITE, pygame.Rect(33, 4, 18, 6), border_radius=3)
+    pygame.draw.rect(arm, BLACK, pygame.Rect(48, 1, 9, 12), border_radius=5)
+    pygame.draw.rect(arm, WHITE, pygame.Rect(50, 3, 5, 8), border_radius=4)
+
+    player_sprite = make_player_sprite(color)
+    frames: list[pygame.Surface] = []
+    for angle in angles:
+        frame = pygame.Surface(frame_size, pygame.SRCALPHA)
+        frame.blit(player_sprite, player_offset)
+        _blit_rotated_with_pivot(frame, arm, shoulder, (0, arm.get_height() // 2), angle)
+        pygame.draw.circle(frame, BLACK, shoulder, 7)
+        pygame.draw.circle(frame, color, shoulder, 4)
+        frames.append(frame)
+
+    return frames
+
+
 def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
     """Cria o sprite cartoon de um adversario do torneio.
 

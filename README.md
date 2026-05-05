@@ -109,3 +109,11 @@ foi usada no desenvolvimento. O detalhamento por arquivo também pode ser mantid
 Toda a equipe revisou criticamente o código gerado, validou seu funcionamento e é
 capaz de explicar cada trecho. Bugs introduzidos pela IA foram corrigidos pela equipe,
 conforme orientação do curso.
+
+## src/assets_generator.py, src/utils/asset_cache.py e src/game.py
+- Sub-tarefa: B.3
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foi criada a funcao
+  `make_swing_animation_frames`, com 4 superficies de animacao de rebatida;
+  tambem foi criada a classe `AssetCache` para reutilizar assets sob demanda,
+  e `Game` passou a instanciar um unico cache em `self.assets`).
