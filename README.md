@@ -141,3 +141,11 @@ conforme orientação do curso.
 - Ajustes manuais: nenhum (foram criadas funções puras para refletir a bola nas
   bordas laterais com `bounce_off_walls`, detectar saída pelo topo ou fundo com
   `is_out_of_bounds` e identificar contato com a rede usando `hit_net`).
+
+## src/systems/timing_bars.py
+- Sub-tarefa: D.1
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foi criada a classe `TimingBars` com estados
+  `IDLE`, `AIMING`, `POWERING` e `LOCKED`, ativação da barra de ângulo,
+  oscilação entre `AIM_MIN_ANGLE` e `AIM_MAX_ANGLE`, reset, consulta de estado
+  ativo e stubs documentados para as próximas etapas).
