@@ -49,7 +49,9 @@ tie-break a 7 quando 6-6 · melhor de 3 sets vence a partida.
 
 ## Estatísticas
 
-Ao fim de cada partida você vê: aces e winners de cada jogador.
+Ao fim de cada partida você vê: aces e winners de cada jogador. Essas métricas
+ficam disponíveis por uma fachada simples (`StatsTracker`) para a UI consultar
+sem depender da lógica completa do placar.
 
 ## Assets
 
@@ -220,3 +222,10 @@ conforme orientação do curso.
   `pygame.sprite.collide_mask` com cooldown em milissegundos para evitar
   múltiplas detecções da mesma colisão; `check_ball_out_of_bounds` delega para
   `physics.is_out_of_bounds`).
+
+## src/systems/stats_tracker.py
+- Sub-tarefa: G.2
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi criada a classe `StatsTracker` com contadores de
+  aces e winners para `p1` e `p2`, métodos `register_ace`,
+  `register_winner`, `get` e `reset`, servindo como fachada simples para a UI).
