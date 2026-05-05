@@ -198,3 +198,10 @@ conforme orientação do curso.
   game no formato 0-15-30-40, regras de deuce e advantage, incremento de games
   ao fechar pontos com dois de vantagem e estatísticas simples de aces e
   winners).
+
+## src/systems/score_manager.py
+- Sub-tarefa: F.2
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (o `ScoreManager` passou a fechar sets em 6 games
+  com dois de vantagem, entrar em tie-break no 6-6, pontuar tie-break de forma
+  numérica até 7 com dois de vantagem e registrar o histórico de sets).
