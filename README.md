@@ -92,6 +92,13 @@ foi usada no desenvolvimento. O detalhamento por arquivo também pode ser mantid
   construtor recebendo `game`, métodos abstratos para eventos, atualização,
   desenho e transição de cena, além de docstrings Google em português).
 
+## src/assets_generator.py
+- Sub-tarefa: B.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: paleta de cores ajustada para melhor contraste; foram
+  criadas as funcoes `make_court`, `make_player_sprite` e `make_ai_sprite`
+  usando apenas `pygame.draw`, com sombras simples e contornos pretos.
+
 Toda a equipe revisou criticamente o código gerado, validou seu funcionamento e é
 capaz de explicar cada trecho. Bugs introduzidos pela IA foram corrigidos pela equipe,
 conforme orientação do curso.
