@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from src.settings import GAME_TARGET_POINTS, GAMES_TARGET_SET, TIEBREAK_TARGET
+from src.settings import (
+    GAME_TARGET_POINTS,
+    GAMES_TARGET_SET,
+    SETS_TO_WIN_MATCH,
+    TIEBREAK_TARGET,
+)
 
 
 class ScoreManager:
@@ -36,6 +41,9 @@ class ScoreManager:
         self._sets_history: list[tuple[int, int]] = []
         self._server = "p1"
         self._is_tiebreak = False
+        self._tiebreak_start_server: str | None = None
+        self._match_over = False
+        self._match_winner: str | None = None
         self._stats = {
             "p1": {"aces": 0, "winners": 0},
             "p2": {"aces": 0, "winners": 0},
@@ -51,6 +59,9 @@ class ScoreManager:
         Raises:
             ValueError: Se o lado ou o tipo do ponto forem invalidos.
         """
+        if self._match_over:
+            return
+
         self._validate_side(winner_side)
         self._validate_point_type(point_type)
 
@@ -61,6 +72,8 @@ class ScoreManager:
             self._stats[winner_side]["winners"] += 1
 
         self._check_game_winner()
+        if self._is_tiebreak:
+            self._update_tiebreak_server_after_point()
 
     def current_game_score(self) -> tuple[str, str]:
         """Retorna o placar textual do game atual.
@@ -95,6 +108,46 @@ class ScoreManager:
             regra numerica do tie-break.
         """
         return self._is_tiebreak
+
+    def current_set_games(self) -> tuple[int, int]:
+        """Retorna os games vencidos no set atual.
+
+        Returns:
+            Tupla ``(games_p1, games_p2)``.
+        """
+        return self._set_games["p1"], self._set_games["p2"]
+
+    def sets_won(self) -> tuple[int, int]:
+        """Retorna a quantidade de sets vencidos por cada lado.
+
+        Returns:
+            Tupla ``(sets_p1, sets_p2)``.
+        """
+        return self._sets_won["p1"], self._sets_won["p2"]
+
+    def server(self) -> str:
+        """Retorna o lado que deve sacar o proximo ponto.
+
+        Returns:
+            ``"p1"`` ou ``"p2"``.
+        """
+        return self._server
+
+    def is_match_over(self) -> bool:
+        """Indica se a partida ja terminou.
+
+        Returns:
+            ``True`` quando algum lado venceu a melhor de tres sets.
+        """
+        return self._match_over
+
+    def winner(self) -> str | None:
+        """Retorna o vencedor da partida, se houver.
+
+        Returns:
+            ``"p1"``, ``"p2"`` ou ``None`` se a partida ainda estiver ativa.
+        """
+        return self._match_winner
 
     def stats(self, side: str) -> dict[str, int]:
         """Retorna uma copia das estatisticas simples do lado informado.
@@ -141,6 +194,7 @@ class ScoreManager:
 
     def _on_game_won(self, side: str) -> None:
         self._set_games[side] += 1
+        self._toggle_server()
         self._check_set_winner()
 
     def _check_set_winner(self) -> None:
@@ -156,9 +210,12 @@ class ScoreManager:
 
         if p1_games == GAMES_TARGET_SET and p2_games == GAMES_TARGET_SET:
             self._is_tiebreak = True
+            self._tiebreak_start_server = self._server
             self._game_points = {"p1": 0, "p2": 0}
 
     def _finish_tiebreak(self, winner_side: str) -> None:
+        first_server = self._tiebreak_start_server or self._server
+        self._server = self._other_side(first_server)
         self._game_points = {"p1": 0, "p2": 0}
         self._set_games[winner_side] += 1
         self._on_set_won(winner_side)
@@ -169,6 +226,21 @@ class ScoreManager:
         self._set_games = {"p1": 0, "p2": 0}
         self._game_points = {"p1": 0, "p2": 0}
         self._is_tiebreak = False
+        self._tiebreak_start_server = None
+        if self._sets_won[side] >= SETS_TO_WIN_MATCH:
+            self._match_over = True
+            self._match_winner = side
+
+    def _update_tiebreak_server_after_point(self) -> None:
+        total_points = self._game_points["p1"] + self._game_points["p2"]
+        if total_points % 2 == 1:
+            self._toggle_server()
+
+    def _toggle_server(self) -> None:
+        self._server = self._other_side(self._server)
+
+    def _other_side(self, side: str) -> str:
+        return "p2" if side == "p1" else "p1"
 
     def _validate_side(self, side: str) -> None:
         if side not in self._VALID_SIDES:
@@ -215,11 +287,18 @@ if __name__ == "__main__":
     assert manager._set_games == {"p1": 0, "p2": 0}
 
     manager = ScoreManager("Voce", "CPU")
+    assert manager.server() == "p1"
+    win_regular_game(manager, "p1")
+    assert manager.server() == "p2"
+    win_regular_game(manager, "p2")
+    assert manager.server() == "p1"
+
+    manager = ScoreManager("Voce", "CPU")
     for _ in range(6):
         win_regular_game(manager, "p1")
-    assert manager._sets_won == {"p1": 1, "p2": 0}
+    assert manager.sets_won() == (1, 0)
     assert manager._sets_history == [(6, 0)]
-    assert manager._set_games == {"p1": 0, "p2": 0}
+    assert manager.current_set_games() == (0, 0)
 
     manager = ScoreManager("Voce", "CPU")
     for _ in range(6):
@@ -235,5 +314,50 @@ if __name__ == "__main__":
     manager.add_point("p1")
     manager.add_point("p1")
     assert not manager.is_tiebreak()
-    assert manager._sets_won == {"p1": 1, "p2": 0}
+    assert manager.sets_won() == (1, 0)
     assert manager._sets_history == [(7, 6)]
+
+    manager = ScoreManager("Voce", "CPU")
+    for _ in range(6):
+        win_regular_game(manager, "p1")
+        win_regular_game(manager, "p2")
+    assert manager.is_tiebreak()
+    assert manager.server() == "p1"
+    manager.add_point("p1")
+    assert manager.server() == "p2"
+    manager.add_point("p1")
+    assert manager.server() == "p2"
+    manager.add_point("p1")
+    assert manager.server() == "p1"
+
+    manager = ScoreManager("Voce", "CPU")
+    for _ in range(6):
+        win_regular_game(manager, "p1")
+    for _ in range(6):
+        win_regular_game(manager, "p1")
+    assert manager.is_match_over()
+    assert manager.winner() == "p1"
+    assert manager.sets_won() == (2, 0)
+
+    manager = ScoreManager("Voce", "CPU")
+    for _ in range(6):
+        win_regular_game(manager, "p1")
+    for _ in range(6):
+        win_regular_game(manager, "p2")
+    for _ in range(6):
+        win_regular_game(manager, "p1")
+        win_regular_game(manager, "p2")
+    for _ in range(5):
+        manager.add_point("p1")
+        manager.add_point("p2")
+    manager.add_point("p1")
+    manager.add_point("p1")
+    assert manager.is_match_over()
+    assert manager.winner() == "p1"
+    assert manager.sets_won() == (2, 1)
+
+    manager = ScoreManager("Voce", "CPU")
+    manager.add_point("p1", "ace")
+    manager.add_point("p2", "winner")
+    assert manager.stats("p1") == {"aces": 1, "winners": 0}
+    assert manager.stats("p2") == {"aces": 0, "winners": 1}
