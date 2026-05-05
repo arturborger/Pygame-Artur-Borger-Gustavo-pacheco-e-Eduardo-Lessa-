@@ -8,6 +8,19 @@ from src.settings import (
     AIM_MAX_ANGLE,
     AIM_MIN_ANGLE,
     AIM_OSC_SPEED,
+    BAR_BORDER_RADIUS,
+    BAR_CURSOR_WIDTH,
+    BAR_HEIGHT,
+    BAR_OUTLINE_WIDTH,
+    BAR_SPACING,
+    BAR_WIDTH,
+    COURT_MARGIN,
+    GRAY_INACTIVE,
+    GRAY_LIGHT,
+    GREEN_LOCKED,
+    GREEN_SWEET,
+    LINE_OUTLINE,
+    ORANGE,
     POWER_MAX,
     POWER_MIN,
     POWER_OSC_SPEED,
@@ -171,9 +184,164 @@ class TimingBars:
 
         return SWEET_SPOT_LOW <= self.locked_power <= SWEET_SPOT_HIGH
 
-    def draw(self, surface) -> None:
+    def draw(self, surface: pygame.Surface) -> None:
         """Desenha as barras na superfície informada.
 
         Args:
             surface: Superfície onde as barras devem ser desenhadas.
         """
+        if self.state == self.STATE_IDLE:
+            return
+
+        angle_rect, power_rect = self._bar_rects(surface)
+
+        self._draw_bar_background(surface, angle_rect)
+        self._draw_angle_cursor(surface, angle_rect)
+
+        self._draw_bar_background(surface, power_rect)
+        self._draw_sweet_spot(surface, power_rect)
+        self._draw_power_cursor(surface, power_rect)
+
+    def _bar_rects(self, surface: pygame.Surface) -> tuple[pygame.Rect, pygame.Rect]:
+        total_height = BAR_HEIGHT * 2 + BAR_SPACING
+        x = (surface.get_width() - BAR_WIDTH) // 2
+
+        if self.owner_side == "top":
+            y = COURT_MARGIN // 2
+        else:
+            y = surface.get_height() - COURT_MARGIN // 2 - total_height
+
+        angle_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
+        power_rect = angle_rect.move(0, BAR_HEIGHT + BAR_SPACING)
+        return angle_rect, power_rect
+
+    def _draw_bar_background(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+    ) -> None:
+        inner_rect = rect.inflate(-BAR_OUTLINE_WIDTH * 2, -BAR_OUTLINE_WIDTH * 2)
+        inner_radius = max(0, BAR_BORDER_RADIUS - BAR_OUTLINE_WIDTH)
+
+        pygame.draw.rect(
+            surface,
+            LINE_OUTLINE,
+            rect,
+            border_radius=BAR_BORDER_RADIUS,
+        )
+        pygame.draw.rect(
+            surface,
+            GRAY_LIGHT,
+            inner_rect,
+            border_radius=inner_radius,
+        )
+
+    def _draw_angle_cursor(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+    ) -> None:
+        if self.state in (self.STATE_POWERING, self.STATE_LOCKED):
+            self._draw_locked_angle_marker(surface, rect)
+
+        color = ORANGE if self.state == self.STATE_AIMING else GRAY_INACTIVE
+        self._draw_cursor(
+            surface,
+            rect,
+            self.aim_value,
+            AIM_MIN_ANGLE,
+            AIM_MAX_ANGLE,
+            color,
+        )
+
+    def _draw_locked_angle_marker(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+    ) -> None:
+        if self.locked_angle is None:
+            return
+
+        marker_width = BAR_CURSOR_WIDTH + BAR_OUTLINE_WIDTH * 2
+        self._draw_cursor(
+            surface,
+            rect,
+            self.locked_angle,
+            AIM_MIN_ANGLE,
+            AIM_MAX_ANGLE,
+            GREEN_LOCKED,
+            marker_width,
+        )
+
+    def _draw_sweet_spot(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
+        track_rect = rect.inflate(-BAR_OUTLINE_WIDTH * 2, -BAR_OUTLINE_WIDTH * 2)
+        start_ratio = self._normalized_ratio(SWEET_SPOT_LOW, POWER_MIN, POWER_MAX)
+        end_ratio = self._normalized_ratio(SWEET_SPOT_HIGH, POWER_MIN, POWER_MAX)
+        sweet_left = track_rect.left + round(start_ratio * track_rect.width)
+        sweet_right = track_rect.left + round(end_ratio * track_rect.width)
+        sweet_rect = pygame.Rect(
+            sweet_left,
+            track_rect.top,
+            sweet_right - sweet_left,
+            track_rect.height,
+        )
+
+        pygame.draw.rect(
+            surface,
+            GREEN_SWEET,
+            sweet_rect,
+            border_radius=max(0, BAR_BORDER_RADIUS - BAR_OUTLINE_WIDTH),
+        )
+
+    def _draw_power_cursor(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
+        if self.state == self.STATE_LOCKED:
+            value = self.locked_power
+        else:
+            value = self.power_value
+
+        if value is None:
+            value = self.power_value
+
+        if self.state == self.STATE_POWERING:
+            color = ORANGE
+        elif self.state == self.STATE_LOCKED:
+            color = GREEN_LOCKED
+        else:
+            color = GRAY_INACTIVE
+
+        self._draw_cursor(surface, rect, value, POWER_MIN, POWER_MAX, color)
+
+    def _draw_cursor(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+        value: float,
+        minimum: float,
+        maximum: float,
+        color: tuple[int, int, int],
+        width: int = BAR_CURSOR_WIDTH,
+    ) -> None:
+        ratio = self._normalized_ratio(value, minimum, maximum)
+        min_x = rect.left + width // 2
+        max_x = rect.right - width // 2
+        cursor_x = min_x + round(ratio * (max_x - min_x))
+        cursor_height = BAR_HEIGHT + BAR_OUTLINE_WIDTH * 2
+        cursor_rect = pygame.Rect(0, 0, width, cursor_height)
+        cursor_rect.center = (cursor_x, rect.centery)
+
+        pygame.draw.rect(
+            surface,
+            LINE_OUTLINE,
+            cursor_rect,
+            border_radius=BAR_BORDER_RADIUS,
+        )
+        pygame.draw.rect(
+            surface,
+            color,
+            cursor_rect.inflate(-BAR_OUTLINE_WIDTH * 2, -BAR_OUTLINE_WIDTH * 2),
+            border_radius=max(0, BAR_BORDER_RADIUS - BAR_OUTLINE_WIDTH),
+        )
+
+    def _normalized_ratio(self, value: float, minimum: float, maximum: float) -> float:
+        ratio = (value - minimum) / (maximum - minimum)
+        return max(0.0, min(1.0, ratio))

@@ -158,3 +158,11 @@ conforme orientação do curso.
   `handle_lock_press`, guardar o tempo de congelamento em `frozen_until`,
   expor `get_locked_values`, identificar `LOCKED` em `is_locked` e detectar o
   sweet spot pela faixa configurada em `settings.py`).
+
+## src/systems/timing_bars.py e src/settings.py
+- Sub-tarefa: D.3
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (foi implementado `TimingBars.draw` com barras
+  cartoon de ângulo e força, contorno escuro, cantos arredondados, zona verde
+  de sweet spot, cursores por estado e marca fixa do ângulo travado; os
+  parâmetros visuais novos ficaram centralizados em `src/settings.py`).
