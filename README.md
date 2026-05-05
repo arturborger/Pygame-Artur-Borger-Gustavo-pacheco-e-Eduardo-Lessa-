@@ -126,3 +126,11 @@ conforme orientação do curso.
   `rect`, `mask`, posição e velocidade em `Vector2`, controle de último
   rebatedor, contagem de quicadas, atualização por `dt` e reset para o lado
   sacador).
+
+## src/entities/ball.py
+- Sub-tarefa: C.2
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi adicionado o método `apply_shot`, que calcula
+  `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
+  `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
+  retornando `True` quando a rebatida é aplicada).

@@ -2,10 +2,23 @@
 
 from __future__ import annotations
 
+import random
+from math import cos, radians, sin
+
 import pygame
+from pygame.math import Vector2
 
 from src.assets_generator import make_ball
-from src.settings import COURT_MARGIN, HEIGHT, WIDTH
+from src.settings import (
+    BALL_BASE_SPEED,
+    BALL_MAX_SPEED,
+    COURT_MARGIN,
+    HEIGHT,
+    MISS_JITTER,
+    SWEET_SPOT_HIGH,
+    SWEET_SPOT_LOW,
+    WIDTH,
+)
 from src.utils.asset_cache import AssetCache
 
 
@@ -51,6 +64,46 @@ class Ball(pygame.sprite.Sprite):
         """
         self.pos += self.velocity * dt
         self.rect.center = (round(self.pos.x), round(self.pos.y))
+
+    def apply_shot(
+        self,
+        angle_deg: float,
+        power: float,
+        side_origin: str,
+        is_sweet_spot: bool,
+    ) -> bool:
+        """Aplica uma rebatida calculando o novo vetor de velocidade.
+
+        Args:
+            angle_deg: Ângulo travado pela barra de mira, em graus.
+            power: Força travada pela barra de força, entre 0 e 1.
+            side_origin: Lado de origem da rebatida. Use ``"bottom"`` para a
+                metade inferior da quadra.
+            is_sweet_spot: Indica se a rebatida já foi classificada como sweet
+                spot pelo sistema de barras.
+
+        Returns:
+            ``True`` se a rebatida foi aplicada.
+        """
+        angle_locked = angle_deg
+        power_locked = power
+
+        if SWEET_SPOT_LOW <= power_locked <= SWEET_SPOT_HIGH:
+            angle_jitter = 0
+            is_sweet_spot = True
+        else:
+            angle_jitter = random.uniform(-MISS_JITTER, MISS_JITTER)
+            is_sweet_spot = False
+
+        final_angle = angle_locked + angle_jitter
+        final_speed = BALL_BASE_SPEED + power_locked * (BALL_MAX_SPEED - BALL_BASE_SPEED)
+        direction_y = -1 if side_origin == "bottom" else +1
+
+        self.velocity = Vector2(
+            sin(radians(final_angle)) * final_speed,
+            cos(radians(final_angle)) * final_speed * direction_y,
+        )
+        return True
 
     def reset(self, server_side: str) -> None:
         """Reposiciona a bola para o lado de quem sacará o próximo ponto.
