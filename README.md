@@ -242,3 +242,11 @@ conforme orientação do curso.
 - Ajustes manuais: nenhum (foi criada a classe `HighscoreManager`, com carga
   resiliente de JSON, categorias `tournament`, `2p` e `training`, salvamento
   indentado, data ISO e manutenção automática do top 5 por categoria).
+
+## src/scenes/menu_scene.py e src/game.py
+- Sub-tarefa: H.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foi criada a `MenuScene` cartoon com seis opcoes,
+  navegacao por setas, ENTER para acionar e ESC para sair; `Game` passou a
+  iniciar pelo menu, manter `tournament_progress` e consultar `next_scene()` a
+  cada quadro para permitir transicoes entre cenas).

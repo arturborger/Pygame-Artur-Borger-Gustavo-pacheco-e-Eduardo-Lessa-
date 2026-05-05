@@ -4,34 +4,9 @@ from __future__ import annotations
 
 import pygame
 
-from src.settings import FPS, GREEN_SWEET, HEIGHT, TITLE, WIDTH
+from src.scenes.menu_scene import MenuScene
+from src.settings import FPS, HEIGHT, TITLE, WIDTH
 from src.utils.asset_cache import AssetCache
-
-
-class PlaceholderScene:
-    """Cena inicial temporária usada enquanto as cenas reais não existem."""
-
-    def handle_events(self, events: list[pygame.event.Event]) -> None:
-        """Processa eventos da cena.
-
-        Args:
-            events: Lista de eventos capturados pelo Pygame neste quadro.
-        """
-
-    def update(self, dt: float) -> None:
-        """Atualiza o estado da cena.
-
-        Args:
-            dt: Tempo decorrido desde o último quadro, em segundos.
-        """
-
-    def draw(self, screen: pygame.Surface) -> None:
-        """Desenha a cena na tela.
-
-        Args:
-            screen: Superfície principal onde a cena deve ser desenhada.
-        """
-        screen.fill(GREEN_SWEET)
 
 
 class Game:
@@ -53,9 +28,10 @@ class Game:
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
-        self.scene = PlaceholderScene()
         self.assets = AssetCache()
         self.sound_manager = None
+        self.tournament_progress = 0
+        self.scene = MenuScene(self)
 
     def change_scene(self, scene: object) -> None:
         """Troca a cena ativa do jogo.
@@ -77,6 +53,10 @@ class Game:
 
             self.scene.handle_events(events)
             self.scene.update(dt)
+            next_scene = self.scene.next_scene()
+            if next_scene is not None:
+                self.change_scene(next_scene)
+
             self.scene.draw(self.screen)
             pygame.display.flip()
 
