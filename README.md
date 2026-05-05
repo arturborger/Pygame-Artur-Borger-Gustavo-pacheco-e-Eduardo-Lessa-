@@ -53,6 +53,12 @@ Ao fim de cada partida você vê: aces e winners de cada jogador. Essas métrica
 ficam disponíveis por uma fachada simples (`StatsTracker`) para a UI consultar
 sem depender da lógica completa do placar.
 
+## Highscores
+
+O jogo salva rankings top 5 em `data/highscores.json` para torneio, 2 jogadores
+local e treino. Se o arquivo não existir ou estiver inválido, o ranking começa
+vazio e é recriado automaticamente ao salvar um novo resultado.
+
 ## Assets
 
 **Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
@@ -229,3 +235,10 @@ conforme orientação do curso.
 - Ajustes manuais: nenhum (foi criada a classe `StatsTracker` com contadores de
   aces e winners para `p1` e `p2`, métodos `register_ace`,
   `register_winner`, `get` e `reset`, servindo como fachada simples para a UI).
+
+## src/systems/highscore.py
+- Sub-tarefa: G.3
+- Dev integrador: Arthur Borger
+- Ajustes manuais: nenhum (foi criada a classe `HighscoreManager`, com carga
+  resiliente de JSON, categorias `tournament`, `2p` e `training`, salvamento
+  indentado, data ISO e manutenção automática do top 5 por categoria).
