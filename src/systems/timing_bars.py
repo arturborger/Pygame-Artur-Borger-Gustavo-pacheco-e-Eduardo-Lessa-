@@ -2,7 +2,19 @@
 
 from __future__ import annotations
 
-from src.settings import AIM_MAX_ANGLE, AIM_MIN_ANGLE, AIM_OSC_SPEED, POWER_MIN
+import pygame
+
+from src.settings import (
+    AIM_MAX_ANGLE,
+    AIM_MIN_ANGLE,
+    AIM_OSC_SPEED,
+    POWER_MAX,
+    POWER_MIN,
+    POWER_OSC_SPEED,
+    SHOW_FROZEN_TIME,
+    SWEET_SPOT_HIGH,
+    SWEET_SPOT_LOW,
+)
 
 
 class TimingBars:
@@ -63,17 +75,25 @@ class TimingBars:
         Args:
             dt: Tempo decorrido desde o último quadro, em segundos.
         """
-        if self.state != self.STATE_AIMING:
-            return
+        if self.state == self.STATE_AIMING:
+            self.aim_value += self.aim_direction * AIM_OSC_SPEED * dt
 
-        self.aim_value += self.aim_direction * AIM_OSC_SPEED * dt
+            if self.aim_value >= AIM_MAX_ANGLE:
+                self.aim_value = AIM_MAX_ANGLE
+                self.aim_direction = -1
+            elif self.aim_value <= AIM_MIN_ANGLE:
+                self.aim_value = AIM_MIN_ANGLE
+                self.aim_direction = 1
 
-        if self.aim_value >= AIM_MAX_ANGLE:
-            self.aim_value = AIM_MAX_ANGLE
-            self.aim_direction = -1
-        elif self.aim_value <= AIM_MIN_ANGLE:
-            self.aim_value = AIM_MIN_ANGLE
-            self.aim_direction = 1
+        if self.state == self.STATE_POWERING:
+            self.power_value += self.power_direction * POWER_OSC_SPEED * dt
+
+            if self.power_value >= POWER_MAX:
+                self.power_value = POWER_MAX
+                self.power_direction = -1
+            elif self.power_value <= POWER_MIN:
+                self.power_value = POWER_MIN
+                self.power_direction = 1
 
     def reset(self) -> None:
         """Retorna as barras ao estado inicial inativo."""
@@ -90,9 +110,9 @@ class TimingBars:
         """Indica se as barras já foram travadas.
 
         Returns:
-            ``False`` enquanto o travamento completo ainda não existe nesta etapa.
+            ``True`` quando as barras estão no estado ``LOCKED``.
         """
-        return False
+        return self.state == self.STATE_LOCKED
 
     def is_active(self) -> bool:
         """Indica se alguma etapa das barras está ativa.
@@ -106,26 +126,50 @@ class TimingBars:
         """Processa a tecla de travamento.
 
         Returns:
-            ``False`` nesta etapa, pois o travamento sequencial será completado
-            depois.
+            ``True`` quando o pressionamento muda a etapa atual; caso contrário,
+            ``False``.
         """
+        if self.state == self.STATE_AIMING:
+            self.locked_angle = self.aim_value
+            self.state = self.STATE_POWERING
+            self.power_value = POWER_MIN
+            self.power_direction = 1
+            return True
+
+        if self.state == self.STATE_POWERING:
+            self.locked_power = self.power_value
+            self.state = self.STATE_LOCKED
+            self.frozen_until = pygame.time.get_ticks() + int(SHOW_FROZEN_TIME * 1000)
+            return True
+
         return False
 
     def get_locked_values(self) -> tuple[float, float] | None:
         """Retorna os valores travados de ângulo e força.
 
         Returns:
-            ``None`` nesta etapa, pois ainda não há valores travados completos.
+            Tupla ``(locked_angle, locked_power)`` quando as barras estão
+            travadas, ou ``None`` antes disso.
         """
-        return None
+        if (
+            self.state != self.STATE_LOCKED
+            or self.locked_angle is None
+            or self.locked_power is None
+        ):
+            return None
+
+        return self.locked_angle, self.locked_power
 
     def is_sweet_spot(self) -> bool:
         """Indica se a força travada está na zona ideal.
 
         Returns:
-            ``False`` nesta etapa, pois a barra de força ainda não foi implementada.
+            ``True`` quando a força travada está entre os limites do sweet spot.
         """
-        return False
+        if self.locked_power is None:
+            return False
+
+        return SWEET_SPOT_LOW <= self.locked_power <= SWEET_SPOT_HIGH
 
     def draw(self, surface) -> None:
         """Desenha as barras na superfície informada.

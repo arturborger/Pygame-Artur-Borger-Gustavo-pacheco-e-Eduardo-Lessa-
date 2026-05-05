@@ -149,3 +149,12 @@ conforme orientação do curso.
   `IDLE`, `AIMING`, `POWERING` e `LOCKED`, ativação da barra de ângulo,
   oscilação entre `AIM_MIN_ANGLE` e `AIM_MAX_ANGLE`, reset, consulta de estado
   ativo e stubs documentados para as próximas etapas).
+
+## src/systems/timing_bars.py
+- Sub-tarefa: D.2
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: nenhum (a classe `TimingBars` passou a oscilar a barra de
+  força em `POWERING`, travar ângulo e força em sequência com
+  `handle_lock_press`, guardar o tempo de congelamento em `frozen_until`,
+  expor `get_locked_values`, identificar `LOCKED` em `is_locked` e detectar o
+  sweet spot pela faixa configurada em `settings.py`).
