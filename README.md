@@ -307,3 +307,11 @@ conforme orientação do curso.
 - Ajustes manuais: foi criada a `StatsScene`, exibindo estatisticas finais em
   duas colunas com nome, sets vencidos, aces, winners e historico de sets; a
   `GameplayScene` passou a repassar o modo de jogo para a tela de estatisticas.
+
+## src/scenes/game_over_scene.py e src/game.py
+- Sub-tarefa: J.3
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: foi criada a `GameOverScene`, com texto de vitoria/derrota,
+  trofeu animado quando o jogador vence no torneio, retorno ao torneio ou menu
+  por ENTER, incremento de `game.tournament_progress` e salvamento de recordes
+  via `HighscoreManager`, agora instanciado em `Game`.
