@@ -6,7 +6,7 @@ timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial 
 
 ## Integrantes
 
-- Arthur Borger
+- Artur Borger
 - Eduardo Lessa
 - Gustavo Pacheco
 
@@ -128,7 +128,7 @@ conforme orientação do curso.
 
 ## src/entities/ball.py
 - Sub-tarefa: C.1
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a classe `Ball` herdando de
   `pygame.sprite.Sprite`, com imagem vinda do `AssetCache` via `make_ball`,
   `rect`, `mask`, posição e velocidade em `Vector2`, controle de último
@@ -137,7 +137,7 @@ conforme orientação do curso.
 
 ## src/entities/ball.py
 - Sub-tarefa: C.2
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi adicionado o método `apply_shot`, que calcula
   `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
   `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
@@ -223,7 +223,7 @@ conforme orientação do curso.
 
 ## src/systems/collision.py
 - Sub-tarefa: G.1
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a função `player_hits_ball`, usando
   `pygame.sprite.collide_mask` com cooldown em milissegundos para evitar
   múltiplas detecções da mesma colisão; `check_ball_out_of_bounds` delega para
@@ -231,21 +231,21 @@ conforme orientação do curso.
 
 ## src/systems/stats_tracker.py
 - Sub-tarefa: G.2
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a classe `StatsTracker` com contadores de
   aces e winners para `p1` e `p2`, métodos `register_ace`,
   `register_winner`, `get` e `reset`, servindo como fachada simples para a UI).
 
 ## src/systems/highscore.py
 - Sub-tarefa: G.3
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a classe `HighscoreManager`, com carga
   resiliente de JSON, categorias `tournament`, `2p` e `training`, salvamento
   indentado, data ISO e manutenção automática do top 5 por categoria).
 
 ## src/scenes/menu_scene.py e src/game.py
 - Sub-tarefa: H.1
-- Dev integrador: Eduardo Lessa
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a `MenuScene` cartoon com seis opcoes,
   navegacao por setas, ENTER para acionar e ESC para sair; `Game` passou a
   iniciar pelo menu, manter `tournament_progress` e consultar `next_scene()` a
@@ -253,7 +253,7 @@ conforme orientação do curso.
 
 ## src/scenes/instructions_scene.py
 - Sub-tarefa: H.2
-- Dev integrador: Arthur Borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a `InstructionsScene`, com controles,
   explicacao da mecanica sequencial de angulo e forca, frase de pontuacao,
   retorno ao menu por ENTER/ESC e demonstracao visual das duas barras com
@@ -261,7 +261,7 @@ conforme orientação do curso.
 
 ## src/scenes/tournament_scene.py
 - Sub-tarefa: H.3
-- Dev integrador: Gustavo Pacheco
+- Dev integrador: Artur borger
 - Ajustes manuais: nenhum (foi criada a `TournamentScene`, lendo
   `game.tournament_progress`, desenhando tres cards horizontais dos adversarios
   do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
