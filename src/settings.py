@@ -95,7 +95,7 @@ SETS_TO_WIN_MATCH = 2
 TOURNAMENT_OPPONENTS = [
     {
         "id": "beach",
-        "name": "Pedro Praia",
+        "name": "Rafael Nadal",
         "reaction": 0.40,
         "aim_error": 14.0,
         "max_speed": 260,

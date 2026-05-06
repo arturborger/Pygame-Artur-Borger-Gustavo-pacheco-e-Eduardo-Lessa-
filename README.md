@@ -4,10 +4,8 @@ Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-gam
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
 (15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
 
-## Integrantes
+## Desenvolvedor
 
-- Artur Borger
-- Eduardo Lessa
 - Gustavo Pacheco
 
 ## Modos de Jogo
@@ -66,8 +64,10 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 
 ## Assets
 
-**Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
-cartoon coloridas) — nenhum sprite externo foi usado. Veja `src/assets_generator.py`.
+**A maior parte dos gráficos é gerada em código Python via `pygame.draw`** (formas
+geométricas cartoon coloridas). A exceção é o sprite do Rafael Nadal, carregado
+de `assets/sprites/Nadal.png` para o primeiro adversário do torneio. Veja
+`src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -394,3 +394,10 @@ conforme orientação do curso.
   humano quando colide com ele; as barras sequenciais agora são ativadas nesse
   contato, travam ângulo e força em ordem e liberam a bola imediatamente após a
   seleção da força.
+
+## src/assets_generator.py, src/settings.py e assets/sprites/Nadal.png
+- Sub-tarefa: Ajuste de adversário do torneio
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: o adversário da praia passou a ser Rafael Nadal, usando o
+  PNG em `assets/sprites/Nadal.png` no lugar do sprite gerado por
+  `pygame.draw`.

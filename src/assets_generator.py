@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pygame
 
 from src.settings import (
@@ -24,6 +26,9 @@ OUTLINE_WIDTH = 3
 SHADOW_OFFSET = (3, 3)
 SHADOW_COLOR = (0, 0, 0, 60)
 COURT_LINE_WIDTH = 4
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SPRITES_DIR = PROJECT_ROOT / "assets" / "sprites"
+NADAL_SPRITE_PATH = SPRITES_DIR / "Nadal.png"
 
 
 def _shadowed_rect(
@@ -172,6 +177,15 @@ def make_player_sprite(color: tuple[int, int, int]) -> pygame.Surface:
     return surface
 
 
+def _load_sprite(path: Path, size: tuple[int, int]) -> pygame.Surface:
+    """Carrega um sprite PNG externo e ajusta para o tamanho do jogo."""
+    image = pygame.image.load(str(path))
+    if pygame.display.get_init() and pygame.display.get_surface() is not None:
+        image = image.convert_alpha()
+
+    return pygame.transform.smoothscale(image, size)
+
+
 def _blit_rotated_with_pivot(
     target: pygame.Surface,
     image: pygame.Surface,
@@ -228,7 +242,7 @@ def make_swing_animation_frames(color: tuple[int, int, int]) -> list[pygame.Surf
 
 
 def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
-    """Cria o sprite cartoon de um adversario do torneio.
+    """Cria ou carrega o sprite de um adversario do torneio.
 
     Args:
         opponent_id: Indice ou identificador textual do adversario em
@@ -237,6 +251,12 @@ def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
     Returns:
         Superficie transparente com o sprite do adversario.
     """
+    if opponent_id == "beach" or (
+        isinstance(opponent_id, int)
+        and TOURNAMENT_OPPONENTS[opponent_id]["id"] == "beach"
+    ):
+        return _load_sprite(NADAL_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
     return make_player_sprite(_get_opponent_color(opponent_id))
 
 

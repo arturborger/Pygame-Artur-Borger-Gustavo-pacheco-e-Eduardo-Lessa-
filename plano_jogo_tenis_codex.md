@@ -14,7 +14,7 @@ a **barra de ângulo** com ESPAÇO, depois a **barra de força** também com ESP
 
 Pontuação no **sistema oficial do tênis** (15-30-40-game-set), modo principal em
 **torneio progressivo** com 3 fases, e **assets gerados via código Python** (formas
-geométricas com `pygame.draw`).
+geométricas com `pygame.draw`), com exceção do sprite do Rafael Nadal em PNG.
 
 **Stack:** Python 3.10+, PyGame, Git/GitHub.
 **Equipe:** 3 desenvolvedores (cada componente é dividido em 3 micro-tarefas).
@@ -31,9 +31,9 @@ geométricas com `pygame.draw`).
 | Movimento | Setas movem o jogador, restrito ao próprio campo |
 | Modos | **M1 = 1P vs CPU (Torneio)** · **M2 = 2P local** · **M3 = Modo Treino** |
 | Pontuação | **Tênis oficial**: 0-15-30-40-game · 6 games = set (com 2 de vantagem) · tie-break a 7 no 6-6 · melhor de 3 sets |
-| Modo principal (M1) | **Torneio**: 🏖️ Pedro Praia → 🌲 Flor Floresta → 🏟️ Estela Estádio |
+| Modo principal (M1) | **Torneio**: 🏖️ Rafael Nadal → 🌲 Flor Floresta → 🏟️ Estela Estádio |
 | Recursos avançados | **High-score persistente** + **estatísticas simples** (aces e winners, contagem direta) |
-| Assets | **Gerados via código Python** (`assets_generator.py`) com `pygame.draw` — sem arquivos externos |
+| Assets | **Gerados via código Python** (`assets_generator.py`) com `pygame.draw`, exceto `assets/sprites/Nadal.png` |
 | Resolução | 960×600, 60 FPS |
 
 ### Controles 1P
@@ -173,11 +173,14 @@ projeto_tenis/
 ├── docs/
 │   ├── design_doc.md           # rascunhos, esboços (evidência de colaboração — Obj 3 → A)
 │   └── ai_usage.md             # registro detalhado de uso de IA por arquivo
+├── assets/
+│   └── sprites/
+│       └── Nadal.png           # sprite externo do Rafael Nadal
 └── src/
     ├── __init__.py
     ├── settings.py
     ├── game.py
-    ├── assets_generator.py     # gera todos os "assets" via pygame.draw — SEM ARQUIVOS EXTERNOS
+    ├── assets_generator.py     # gera assets via pygame.draw e carrega sprites externos pontuais
     ├── entities/
     │   ├── __init__.py
     │   ├── player.py
@@ -210,22 +213,22 @@ projeto_tenis/
 ```
 
 ### Sobre `assets_generator.py`
-Como decidimos **não usar arquivos de imagem externos**, todos os "sprites" são geradas
-em runtime via `pygame.draw` e cacheadas. Estilo cartoon = formas chapadas com **contorno
-preto grosso**.
+Quase todos os "sprites" são gerados em runtime via `pygame.draw` e cacheados. A exceção
+é o Rafael Nadal, carregado de `assets/sprites/Nadal.png`. Estilo cartoon = formas
+chapadas com **contorno preto grosso**.
 
 Funções esperadas neste módulo:
 - `make_court(scenery_id) -> pygame.Surface`
 - `make_player_sprite(color) -> pygame.Surface`
-- `make_ai_sprite(opponent_id) -> pygame.Surface` (cores diferentes por adversário)
+- `make_ai_sprite(opponent_id) -> pygame.Surface` (carrega Nadal para `beach`; gera cores diferentes nos demais adversários)
 - `make_ball() -> pygame.Surface`
 - `make_trophy() -> pygame.Surface`
 - `make_swing_animation_frames(color) -> list[pygame.Surface]` (3-5 frames)
 - `make_button(text, color) -> pygame.Surface`
 
 Sons também são sintéticos via `pygame.sndarray` ou `pygame.mixer.Sound` com waveforms simples.
-**Justificativa para o README:** "Optamos por gerar todos os assets visuais em código
-Python para garantir originalidade total e evitar dependências externas."
+**Justificativa para o README:** "Optamos por gerar a maior parte dos assets visuais
+em código Python, mantendo o sprite do Rafael Nadal organizado em `assets/sprites/`."
 
 ### Regras invioláveis de arquitetura
 1. Toda entidade interativa herda de `pygame.sprite.Sprite`.
@@ -310,7 +313,7 @@ SETS_TO_WIN_MATCH = 2
 
 # Adversários do torneio
 TOURNAMENT_OPPONENTS = [
-    {"id": "beach",   "name": "Pedro Praia",    "reaction": 0.40, "aim_error": 14.0, "max_speed": 260, "color": (220, 110, 80)},
+    {"id": "beach",   "name": "Rafael Nadal",   "reaction": 0.40, "aim_error": 14.0, "max_speed": 260, "color": (220, 110, 80)},
     {"id": "forest",  "name": "Flor Floresta",  "reaction": 0.25, "aim_error":  8.0, "max_speed": 320, "color": (140, 80, 200)},
     {"id": "stadium", "name": "Estela Estádio", "reaction": 0.12, "aim_error":  3.5, "max_speed": 400, "color": (60, 60, 60)},
 ]
@@ -377,7 +380,7 @@ cada método. Não importe nenhuma cena concreta.
 
 ---
 
-## Componente B — Geração de Assets (substitui sprites externos)
+## Componente B — Geração e Carregamento de Assets
 
 ### B.1 — Dev2: Sprites de quadra e personagens
 **Commit sugerido:** `feat(assets): gera quadras e sprites de jogadores via pygame.draw`
@@ -390,7 +393,8 @@ e make_ai_sprite(opponent_id). Estilo cartoon: cores chapadas das paletas em SCE
 preto com alpha 60). make_court desenha a quadra (court_color), as linhas brancas das
 quadras de tênis simples (limites + linha de saque + linha central) e a rede no centro.
 make_player_sprite desenha um círculo (cabeça) sobre um retângulo arredondado (corpo) com
-a cor recebida. make_ai_sprite usa a cor do TOURNAMENT_OPPONENTS[opponent_id]["color"].
+a cor recebida. make_ai_sprite carrega `assets/sprites/Nadal.png` para o adversário
+`beach` e usa a cor do TOURNAMENT_OPPONENTS[opponent_id]["color"] nos demais.
 Cada função retorna um pygame.Surface com tamanho apropriado e SRCALPHA. Inclua docstrings
 Google em português.
 ```
@@ -1050,10 +1054,8 @@ Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-gam
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
 (15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
 
-## Integrantes
-- Nome 1 — @github1
-- Nome 2 — @github2
-- Nome 3 — @github3
+## Desenvolvedor
+- Gustavo Pacheco
 
 ## Modos de Jogo
 - 🏆 Torneio (1P vs CPU): vença 3 adversários progressivos em praia, floresta e estádio
@@ -1090,8 +1092,9 @@ tie-break a 7 quando 6-6 · melhor de 3 sets vence a partida.
 Ao fim de cada partida você vê: aces e winners de cada jogador.
 
 ## Assets
-**Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
-cartoon coloridas) — nenhum sprite externo foi usado. Veja `src/assets_generator.py`.
+**A maior parte dos gráficos foi gerada em código Python via `pygame.draw`** (formas
+geométricas cartoon coloridas). O sprite do Rafael Nadal fica em
+`assets/sprites/Nadal.png`. Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
