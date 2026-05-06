@@ -63,4 +63,5 @@ class Game:
             self.scene.draw(self.screen)
             pygame.display.flip()
 
+        self.sound_manager.stop_music()
         pygame.quit()

@@ -332,3 +332,11 @@ conforme orientação do curso.
 - Ajustes manuais: nenhum (foram adicionados os sons sinteticos `score`,
   `ace` e `menu_click`, com sequencias tonais para pontuacao/ace, ruido branco
   curto filtrado por media movel para o menu, e chamadas na gameplay e no menu).
+
+## src/utils/sound_manager.py, src/scenes/gameplay_scene.py, src/scenes/pause_scene.py e src/game.py
+- Sub-tarefa: K.3
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (o `SoundManager` passou a gerar loops sinteticos
+  por cenario em `play_music`, parar a trilha com `stop_music`, iniciar a
+  musica ambiente na `GameplayScene` e interrompe-la ao fim da partida, ao
+  voltar ao menu pela pausa e ao encerrar o jogo).

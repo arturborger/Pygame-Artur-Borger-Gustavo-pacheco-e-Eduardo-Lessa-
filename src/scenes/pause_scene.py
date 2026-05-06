@@ -86,7 +86,17 @@ class PauseScene(BaseScene):
         if selected_option == "CONTINUAR":
             self._next_scene = self.previous_scene
         else:
+            self._stop_music()
             self._next_scene = MenuScene(self.game)
+
+    def _stop_music(self) -> None:
+        sound_manager = getattr(self.game, "sound_manager", None)
+        if sound_manager is None:
+            return
+
+        stop_music = getattr(sound_manager, "stop_music", None)
+        if callable(stop_music):
+            stop_music()
 
     def _draw_panel(self, surface: pygame.Surface) -> None:
         panel_rect = pygame.Rect(0, 0, 360, 260)

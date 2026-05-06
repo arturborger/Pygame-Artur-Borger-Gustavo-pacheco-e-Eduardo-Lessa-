@@ -79,6 +79,7 @@ class GameplayScene(BaseScene):
         self._score_font.set_bold(True)
         self._small_font = pygame.font.Font(None, 21)
         self._small_font.set_bold(True)
+        self._play_music(self.scenery)
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Processa eventos de gameplay e repassa travas ao jogador humano.
@@ -207,6 +208,7 @@ class GameplayScene(BaseScene):
 
         if self.score_manager.is_match_over():
             self._freeze_match()
+            self._stop_music()
             self._next_scene = self._build_stats_scene()
             return
 
@@ -286,6 +288,24 @@ class GameplayScene(BaseScene):
         play = getattr(sound_manager, "play", None)
         if callable(play):
             play(sound_name)
+
+    def _play_music(self, scenery_id: str) -> None:
+        sound_manager = getattr(self.game, "sound_manager", None)
+        if sound_manager is None:
+            return
+
+        play_music = getattr(sound_manager, "play_music", None)
+        if callable(play_music):
+            play_music(scenery_id)
+
+    def _stop_music(self) -> None:
+        sound_manager = getattr(self.game, "sound_manager", None)
+        if sound_manager is None:
+            return
+
+        stop_music = getattr(sound_manager, "stop_music", None)
+        if callable(stop_music):
+            stop_music()
 
     def _opponent_config(self, opponent_id: str | None) -> dict:
         if opponent_id is None:
