@@ -275,3 +275,13 @@ conforme orientação do curso.
   `src/settings.py`; a `GameplayScene` foi criada integrando quadra, jogador,
   IA, bola, `ScoreManager`, `StatsTracker`, atualização básica, colisão com
   cooldown e desenho das entidades e barras de timing.
+
+## src/scenes/gameplay_scene.py e src/entities/ball.py
+- Sub-tarefa: I.2
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: a cena passou a detectar bola fora pelo topo/fundo,
+  converter lados `bottom/top` para `p1/p2`, registrar pontos no
+  `ScoreManager`, atualizar `StatsTracker` para aces e winners, reiniciar o
+  ponto a partir do sacador atual e preparar a transicao para `StatsScene` ao
+  fim da partida; `Ball` recebeu estado explicito de saque e qualidade da
+  ultima rebatida para classificar o ponto.

@@ -33,6 +33,9 @@ class Ball(pygame.sprite.Sprite):
         velocity: Velocidade atual da bola em pixels por segundo.
         last_hitter: Identificador do último lado que rebateu a bola.
         bounce_count: Quantidade de quicadas desde a última rebatida.
+        was_served: Indica se o ponto ainda está no saque inicial.
+        server_side: Lado do placar que sacou o ponto atual.
+        last_hit_quality: Qualidade da última rebatida registrada.
     """
 
     def __init__(
@@ -54,6 +57,9 @@ class Ball(pygame.sprite.Sprite):
         self.velocity = pygame.math.Vector2()
         self.last_hitter: str | None = None
         self.bounce_count = 0
+        self.was_served = False
+        self.server_side = "p1"
+        self.last_hit_quality = "normal"
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
     def update(self, dt: float) -> None:
@@ -122,4 +128,7 @@ class Ball(pygame.sprite.Sprite):
         self.velocity.update(0, 0)
         self.last_hitter = None
         self.bounce_count = 0
+        self.was_served = False
+        self.server_side = server_side
+        self.last_hit_quality = "normal"
         self.rect.center = (round(self.pos.x), round(self.pos.y))

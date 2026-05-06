@@ -60,11 +60,10 @@ class GameplayScene(BaseScene):
         self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, "Voce")
         self.player2 = self._build_second_player()
         self.players = pygame.sprite.Group(self.player1, self.player2)
-        self.ball = Ball(self.game.assets, Vector2(WIDTH / 2, HEIGHT / 2))
-        self.ball.velocity.update(0, BALL_BASE_SPEED)
-        self.ball.was_served = True
         self.score_manager = ScoreManager(self.player1.name, self.player2.name)
         self.stats_tracker = StatsTracker()
+        self.ball = Ball(self.game.assets, Vector2(WIDTH / 2, HEIGHT / 2))
+        self._serve_ball()
         self.last_hit_time = 0
         self._next_scene = None
 
@@ -85,11 +84,20 @@ class GameplayScene(BaseScene):
         Args:
             dt: Tempo decorrido desde o último quadro, em segundos.
         """
+        if self._next_scene is not None:
+            return
+
         self.player1.update(dt, self.ball)
         self._update_second_player(dt)
         self.ball.update(dt)
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
+
+        out_side = physics.is_out_of_bounds(self.ball)
+        if out_side is not None:
+            self._award_point(out_side)
+            return
+
         self._handle_player_collision(self.player1)
         if self.mode == "2p":
             self._handle_player_collision(self.player2)
@@ -142,9 +150,89 @@ class GameplayScene(BaseScene):
             return
 
         self.last_hit_time = pygame.time.get_ticks()
-        self.ball.was_served = False
         self.ball.last_hit_quality = hit_result
         self.ball.last_hitter = player.side
+        if self._score_side_for_player_side(player.side) != self.ball.server_side:
+            self.ball.was_served = False
+
+    def _award_point(self, out_side: str) -> None:
+        winner_side = "p1" if out_side == "top" else "p2"
+        point_type = self._point_type_for(winner_side)
+        self.score_manager.add_point(winner_side, point_type)
+        self._register_point_stat(winner_side, point_type)
+        self._play_sound("score")
+
+        if self.score_manager.is_match_over():
+            self._freeze_match()
+            self._next_scene = self._build_stats_scene()
+            return
+
+        self._reset_point()
+
+    def _point_type_for(self, winner_side: str) -> str:
+        winner_player_side = self._player_side_for_score_side(winner_side)
+        direct_point = (
+            self.ball.last_hitter == winner_player_side
+            and self.ball.bounce_count == 0
+        )
+
+        if not direct_point:
+            return "normal"
+
+        if self.ball.was_served and self.ball.server_side == winner_side:
+            return "ace"
+
+        if getattr(self.ball, "last_hit_quality", "normal") == "winner":
+            return "winner"
+
+        return "normal"
+
+    def _register_point_stat(self, winner_side: str, point_type: str) -> None:
+        if point_type == "ace":
+            self.stats_tracker.register_ace(winner_side)
+        elif point_type == "winner":
+            self.stats_tracker.register_winner(winner_side)
+
+    def _reset_point(self) -> None:
+        self.ball.reset(self.score_manager.server())
+        self._serve_ball()
+        self.player1.timing_bars.reset()
+        self.player2.timing_bars.reset()
+        self.last_hit_time = pygame.time.get_ticks()
+
+    def _serve_ball(self) -> None:
+        server_side = self.score_manager.server()
+        player_side = self._player_side_for_score_side(server_side)
+        direction_y = -1 if server_side == "p1" else 1
+        self.ball.velocity.update(0, BALL_BASE_SPEED * direction_y)
+        self.ball.server_side = server_side
+        self.ball.was_served = True
+        self.ball.last_hitter = player_side
+        self.ball.last_hit_quality = "normal"
+        self.ball.bounce_count = 0
+
+    def _freeze_match(self) -> None:
+        self.ball.velocity.update(0, 0)
+        self.player1.timing_bars.reset()
+        self.player2.timing_bars.reset()
+
+    def _build_stats_scene(self):
+        try:
+            module = __import__("src.scenes.stats_scene", fromlist=["StatsScene"])
+        except ModuleNotFoundError:
+            return None
+
+        scene_class = getattr(module, "StatsScene")
+        return scene_class(self.game, self.score_manager, self.stats_tracker)
+
+    def _play_sound(self, sound_name: str) -> None:
+        sound_manager = getattr(self.game, "sound_manager", None)
+        if sound_manager is None:
+            return
+
+        play = getattr(sound_manager, "play", None)
+        if callable(play):
+            play(sound_name)
 
     def _opponent_config(self, opponent_id: str | None) -> dict:
         if opponent_id is None:
@@ -155,3 +243,9 @@ class GameplayScene(BaseScene):
                 return opponent
 
         return TOURNAMENT_OPPONENTS[0]
+
+    def _player_side_for_score_side(self, score_side: str) -> str:
+        return "bottom" if score_side == "p1" else "top"
+
+    def _score_side_for_player_side(self, player_side: str) -> str:
+        return "p1" if player_side == "bottom" else "p2"
