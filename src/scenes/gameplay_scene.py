@@ -12,11 +12,18 @@ from src.entities.player import Player
 from src.scenes.base_scene import BaseScene
 from src.settings import (
     BALL_BASE_SPEED,
+    BLACK,
     CONTROLS_P1,
     CONTROLS_P2,
+    GREEN_LOCKED,
     HEIGHT,
+    HUD_BG,
+    LINE_OUTLINE,
+    ORANGE,
     TOURNAMENT_OPPONENTS,
+    WHITE,
     WIDTH,
+    YELLOW,
 )
 from src.systems import physics
 from src.systems.collision import player_hits_ball
@@ -66,6 +73,12 @@ class GameplayScene(BaseScene):
         self._serve_ball()
         self.last_hit_time = 0
         self._next_scene = None
+        self._hud_font = pygame.font.Font(None, 26)
+        self._hud_font.set_bold(True)
+        self._score_font = pygame.font.Font(None, 48)
+        self._score_font.set_bold(True)
+        self._small_font = pygame.font.Font(None, 21)
+        self._small_font.set_bold(True)
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Processa eventos de gameplay e repassa travas ao jogador humano.
@@ -114,6 +127,27 @@ class GameplayScene(BaseScene):
         surface.blit(self.ball.image, self.ball.rect)
         self.player1.timing_bars.draw(surface)
         self.player2.timing_bars.draw(surface)
+        self.draw_hud(surface)
+
+    def draw_hud(self, surface: pygame.Surface) -> None:
+        """Desenha placar, games, sets e sacador no topo da partida.
+
+        Args:
+            surface: Superfície principal onde a HUD deve ser renderizada.
+        """
+        panel_rect = pygame.Rect(18, 12, WIDTH - 36, 74)
+        panel = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
+        local_rect = panel.get_rect()
+        pygame.draw.rect(panel, HUD_BG, local_rect, border_radius=14)
+        pygame.draw.rect(panel, LINE_OUTLINE, local_rect, width=4, border_radius=14)
+        surface.blit(panel, panel_rect)
+
+        self._draw_player_names(surface, panel_rect)
+        self._draw_game_score(surface, panel_rect)
+        self._draw_games_and_sets(surface, panel_rect)
+        self._draw_server_indicator(surface, panel_rect)
+        if self.score_manager.is_tiebreak():
+            self._draw_tiebreak_badge(surface, panel_rect)
 
     def next_scene(self):
         """Retorna a próxima cena solicitada pelo gameplay.
@@ -249,3 +283,88 @@ class GameplayScene(BaseScene):
 
     def _score_side_for_player_side(self, player_side: str) -> str:
         return "p1" if player_side == "bottom" else "p2"
+
+    def _draw_player_names(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        p1_text = self._hud_font.render(self.score_manager.p1_name, True, WHITE)
+        p2_text = self._hud_font.render(self.score_manager.p2_name, True, WHITE)
+        surface.blit(p1_text, (panel_rect.left + 44, panel_rect.top + 13))
+        surface.blit(p2_text, (panel_rect.left + 44, panel_rect.top + 42))
+
+    def _draw_game_score(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        p1_score, p2_score = self.score_manager.current_game_score()
+        score_text = self._score_font.render(
+            f"{p1_score} - {p2_score}",
+            True,
+            WHITE,
+        )
+        surface.blit(score_text, score_text.get_rect(center=panel_rect.center))
+
+    def _draw_games_and_sets(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        games = self.score_manager.current_set_games()
+        game_text = self._hud_font.render(
+            f"Games {games[0]} - {games[1]}",
+            True,
+            WHITE,
+        )
+        surface.blit(game_text, (panel_rect.right - 205, panel_rect.top + 13))
+        self._draw_set_dots(surface, panel_rect)
+
+    def _draw_set_dots(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        p1_sets, p2_sets = self.score_manager.sets_won()
+        base_x = panel_rect.right - 156
+        y_positions = (panel_rect.top + 48, panel_rect.top + 63)
+
+        for row, sets_won in enumerate((p1_sets, p2_sets)):
+            label = self._small_font.render(f"P{row + 1}", True, WHITE)
+            surface.blit(label, (base_x - 38, y_positions[row] - 9))
+            for index in range(2):
+                color = GREEN_LOCKED if index < sets_won else WHITE
+                center = (base_x + index * 22, y_positions[row])
+                pygame.draw.circle(surface, BLACK, center, 8)
+                pygame.draw.circle(surface, color, center, 5)
+
+    def _draw_server_indicator(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        if self.score_manager.server() == "p1":
+            y = panel_rect.top + 24
+        else:
+            y = panel_rect.top + 53
+        center = (panel_rect.left + 25, y)
+        pygame.draw.circle(surface, BLACK, center, 9)
+        pygame.draw.circle(surface, YELLOW, center, 6)
+
+    def _draw_tiebreak_badge(
+        self,
+        surface: pygame.Surface,
+        panel_rect: pygame.Rect,
+    ) -> None:
+        badge_rect = pygame.Rect(0, 0, 120, 24)
+        badge_rect.center = (panel_rect.centerx, panel_rect.bottom - 12)
+        pygame.draw.rect(surface, BLACK, badge_rect, border_radius=8)
+        pygame.draw.rect(
+            surface,
+            ORANGE,
+            badge_rect.inflate(-4, -4),
+            border_radius=6,
+        )
+        text = self._small_font.render("TIE-BREAK", True, BLACK)
+        surface.blit(text, text.get_rect(center=badge_rect.center))

@@ -285,3 +285,10 @@ conforme orientação do curso.
   ponto a partir do sacador atual e preparar a transicao para `StatsScene` ao
   fim da partida; `Ball` recebeu estado explicito de saque e qualidade da
   ultima rebatida para classificar o ponto.
+
+## src/scenes/gameplay_scene.py
+- Sub-tarefa: I.3
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foi adicionado `draw_hud`, com painel semi-transparente,
+  nomes dos jogadores, placar 15-30-40/AD, games do set, bolinhas de sets
+  vencidos, indicador visual de saque e selo de tie-break.
