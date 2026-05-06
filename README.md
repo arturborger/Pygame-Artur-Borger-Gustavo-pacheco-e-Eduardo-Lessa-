@@ -43,8 +43,9 @@ joga pela direita.
 
 1. Quando a bola bate no jogador humano, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
 2. Pressione ESPAÇO para travar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
-3. Pressione ESPAÇO de novo para travar a força e soltar a bola a partir do jogador.
-4. Acertar no sweet spot evita erros de mira e marca um winner.
+3. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
+4. Pressione ESPAÇO de novo para travar a força e soltar a bola a partir do jogador.
+5. Acertar no sweet spot evita erros de mira e marca um winner.
 
 ## Pontuação
 
@@ -266,12 +267,20 @@ conforme orientação do curso.
 
 ## src/scenes/tournament_scene.py
 - Sub-tarefa: H.3
-- Dev integrador: Artur borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a `TournamentScene`, lendo
   `game.tournament_progress`, desenhando tres cards horizontais dos adversarios
   do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
   trofeu ao completar as tres fases e tentativa preparada de abrir
   `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
+
+## src/entities/player.py, src/systems/timing_bars.py, src/settings.py e src/scenes/gameplay_scene.py
+- Sub-tarefa: Polimento de mira
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi adicionada uma flecha de trajetoria durante a selecao
+  de angulo e forca; ela usa o mesmo vetor da rebatida, nasce perto da bola,
+  aumenta e diminui junto com a forca atual e respeita os modos 1P, 2P e
+  treino da `GameplayScene`.
 
 ## src/scenes/gameplay_scene.py e src/settings.py
 - Sub-tarefa: I.1

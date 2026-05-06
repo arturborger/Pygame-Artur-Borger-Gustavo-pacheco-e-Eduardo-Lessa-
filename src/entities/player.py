@@ -2,20 +2,34 @@
 
 from __future__ import annotations
 
+from math import cos, radians, sin
+
 import pygame
 from pygame.math import Vector2
 
 from src.assets_generator import make_player_sprite
 from src.settings import (
+    AIM_ARROW_HEAD_LENGTH,
+    AIM_ARROW_HEAD_WIDTH,
+    AIM_ARROW_MAX_LENGTH,
+    AIM_ARROW_MIN_LENGTH,
+    AIM_ARROW_OFFSET,
+    AIM_ARROW_OUTLINE_WIDTH,
+    AIM_ARROW_WIDTH,
     BLUE,
     COURT_MARGIN,
+    GREEN_LOCKED,
     HEIGHT,
     HIT_RADIUS,
+    LINE_OUTLINE,
     NET_WIDTH,
     NET_X,
+    ORANGE,
     PLAYER_HEIGHT,
     PLAYER_SPEED,
     PLAYER_WIDTH,
+    POWER_MAX,
+    POWER_MIN,
     RED,
     WIDTH,
 )
@@ -207,6 +221,30 @@ class Player(pygame.sprite.Sprite):
         if getattr(ball, "held_by_side", None) == self.side:
             ball.follow_captured_player(self)
 
+    def draw_aim_arrow(self, surface: pygame.Surface, ball=None) -> None:
+        """Desenha a flecha de direção e força durante a mira.
+
+        Args:
+            surface: Superfície principal onde a flecha será renderizada.
+            ball: Bola usada como origem visual da trajetória prevista. Quando
+                ausente, o centro do jogador é usado como origem.
+        """
+        preview_values = self.timing_bars.get_preview_values()
+        if preview_values is None:
+            return
+
+        angle, power = preview_values
+        direction = self._shot_direction(angle)
+        if ball is not None:
+            anchor = Vector2(ball.rect.center)
+        else:
+            anchor = Vector2(self.rect.center)
+
+        start = anchor + direction * AIM_ARROW_OFFSET
+        end = start + direction * self._arrow_length(power)
+        color = GREEN_LOCKED if self.timing_bars.is_locked() else ORANGE
+        self._draw_arrow(surface, start, end, color)
+
     def _clamp_to_own_court(self) -> None:
         half_width = PLAYER_WIDTH / 2
         half_height = PLAYER_HEIGHT / 2
@@ -234,3 +272,88 @@ class Player(pygame.sprite.Sprite):
             return ball.rect.centerx < self.rect.centerx - HIT_RADIUS
 
         return ball.rect.centerx > self.rect.centerx + HIT_RADIUS
+
+    def _shot_direction(self, angle: float) -> Vector2:
+        direction_x = 1 if self.side == "left" else -1
+        direction = Vector2(
+            cos(radians(angle)) * direction_x,
+            sin(radians(angle)),
+        )
+
+        if direction.length_squared() == 0:
+            return Vector2(direction_x, 0)
+
+        return direction.normalize()
+
+    def _arrow_length(self, power: float) -> float:
+        ratio = (power - POWER_MIN) / (POWER_MAX - POWER_MIN)
+        ratio = max(0.0, min(1.0, ratio))
+        return AIM_ARROW_MIN_LENGTH + ratio * (
+            AIM_ARROW_MAX_LENGTH - AIM_ARROW_MIN_LENGTH
+        )
+
+    def _draw_arrow(
+        self,
+        surface: pygame.Surface,
+        start: Vector2,
+        end: Vector2,
+        color: tuple[int, int, int],
+    ) -> None:
+        direction = end - start
+        if direction.length_squared() == 0:
+            return
+
+        unit = direction.normalize()
+        normal = Vector2(-unit.y, unit.x)
+        shaft_end = end - unit * AIM_ARROW_HEAD_LENGTH
+        outline_head = self._arrow_head_points(
+            end,
+            shaft_end,
+            normal,
+            AIM_ARROW_HEAD_WIDTH,
+        )
+
+        pygame.draw.line(
+            surface,
+            LINE_OUTLINE,
+            self._screen_point(start),
+            self._screen_point(shaft_end),
+            AIM_ARROW_WIDTH + AIM_ARROW_OUTLINE_WIDTH * 2,
+        )
+        pygame.draw.polygon(surface, LINE_OUTLINE, outline_head)
+
+        inner_head_length = max(1, AIM_ARROW_HEAD_LENGTH - AIM_ARROW_OUTLINE_WIDTH)
+        inner_head_width = max(1, AIM_ARROW_HEAD_WIDTH - AIM_ARROW_OUTLINE_WIDTH * 2)
+        inner_shaft_end = end - unit * inner_head_length
+        inner_head = self._arrow_head_points(
+            end,
+            inner_shaft_end,
+            normal,
+            inner_head_width,
+        )
+
+        pygame.draw.line(
+            surface,
+            color,
+            self._screen_point(start),
+            self._screen_point(inner_shaft_end),
+            AIM_ARROW_WIDTH,
+        )
+        pygame.draw.polygon(surface, color, inner_head)
+
+    def _arrow_head_points(
+        self,
+        tip: Vector2,
+        base: Vector2,
+        normal: Vector2,
+        width: int,
+    ) -> list[tuple[int, int]]:
+        half_width = width / 2
+        return [
+            self._screen_point(tip),
+            self._screen_point(base + normal * half_width),
+            self._screen_point(base - normal * half_width),
+        ]
+
+    def _screen_point(self, point: Vector2) -> tuple[int, int]:
+        return round(point.x), round(point.y)
