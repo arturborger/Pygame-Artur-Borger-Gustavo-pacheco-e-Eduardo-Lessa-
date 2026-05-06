@@ -357,3 +357,11 @@ conforme orientação do curso.
   rebate automaticamente no modo treino; `GameplayScene(mode="training")`
   desativa o placar oficial, usa `rally_count`, mostra HUD de rally e o menu
   passa a abrir o Modo Treino).
+
+## src/scenes/gameplay_scene.py
+- Sub-tarefa: L.3
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (o modo treino passou a alternar com TAB entre bot
+  e parede; no submodo parede a borda superior reflete a bola, `player2` fica
+  ausente, o maior rally e salvo em highscore quando a bola sai e a HUD mostra
+  `RECORDE: N`).

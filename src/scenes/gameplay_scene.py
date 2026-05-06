@@ -67,12 +67,14 @@ class GameplayScene(BaseScene):
         )
         player1_name = "Player 1" if mode == "2p" else "Voce"
         self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, player1_name)
-        self.player2 = self._build_second_player()
-        self.players = pygame.sprite.Group(self.player1, self.player2)
-        self.score_manager = self._build_score_manager()
-        self.stats_tracker = StatsTracker()
         self.training_submode = "bot" if mode == "training" else None
         self.rally_count = 0
+        self.saved_training_record = self._training_record()
+        self.max_rally = self.saved_training_record
+        self.player2 = self._build_second_player()
+        self.players = self._build_players_group()
+        self.score_manager = self._build_score_manager()
+        self.stats_tracker = StatsTracker()
         self.ball = Ball(self.game.assets, Vector2(WIDTH / 2, HEIGHT / 2))
         if self.mode == "training":
             self._serve_training_ball()
@@ -95,6 +97,14 @@ class GameplayScene(BaseScene):
             events: Lista de eventos capturados no quadro atual.
         """
         for event in events:
+            if (
+                self.mode == "training"
+                and event.type == pygame.KEYDOWN
+                and event.key == pygame.K_TAB
+            ):
+                self._toggle_training_submode()
+                return
+
             if event.type == pygame.KEYDOWN and event.key in (
                 pygame.K_ESCAPE,
                 pygame.K_p,
@@ -121,6 +131,9 @@ class GameplayScene(BaseScene):
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
             self._play_sound("bounce")
+        if self._bounce_training_wall():
+            self.ball.bounce_count += 1
+            self._play_sound("bounce")
 
         out_side = physics.is_out_of_bounds(self.ball)
         if out_side is not None:
@@ -143,10 +156,11 @@ class GameplayScene(BaseScene):
         """
         surface.blit(self.court_surface, (0, 0))
         surface.blit(self.player1.image, self.player1.rect)
-        surface.blit(self.player2.image, self.player2.rect)
+        if self.player2 is not None:
+            surface.blit(self.player2.image, self.player2.rect)
         surface.blit(self.ball.image, self.ball.rect)
         self.player1.timing_bars.draw(surface)
-        if hasattr(self.player2, "timing_bars"):
+        if self.player2 is not None and hasattr(self.player2, "timing_bars"):
             self.player2.timing_bars.draw(surface)
         self.draw_hud(surface)
 
@@ -191,10 +205,19 @@ class GameplayScene(BaseScene):
         if self.mode == "2p":
             return Player(self.game.assets, "top", CONTROLS_P2, "Player 2")
 
-        if self.mode == "training":
+        if self.mode == "training" and self.training_submode == "bot":
             return PracticeBot(self.game.assets)
 
+        if self.mode == "training":
+            return None
+
         return Player(self.game.assets, "top", CONTROLS_P2, "Jogador 2")
+
+    def _build_players_group(self) -> pygame.sprite.Group:
+        sprites = [self.player1]
+        if self.player2 is not None:
+            sprites.append(self.player2)
+        return pygame.sprite.Group(*sprites)
 
     def _build_score_manager(self) -> ScoreManager | None:
         if self.mode == "training":
@@ -203,6 +226,9 @@ class GameplayScene(BaseScene):
         return ScoreManager(self.player1.name, self.player2.name)
 
     def _update_second_player(self, dt: float) -> None:
+        if self.player2 is None:
+            return
+
         hit_result = self.player2.update(dt, self.ball)
         if isinstance(hit_result, str):
             self._register_hit_result(hit_result, self.player2)
@@ -225,6 +251,7 @@ class GameplayScene(BaseScene):
         if self.mode == "training":
             if player is self.player1:
                 self.rally_count += 1
+                self.max_rally = max(self.max_rally, self.rally_count)
             return
 
         if self._score_side_for_player_side(player.side) != self.ball.server_side:
@@ -277,10 +304,46 @@ class GameplayScene(BaseScene):
         self.last_hit_time = pygame.time.get_ticks()
 
     def _reset_training_rally(self) -> None:
+        self._save_training_record_if_needed()
         self.rally_count = 0
         self._serve_training_ball()
         self.player1.timing_bars.reset()
         self.last_hit_time = pygame.time.get_ticks()
+
+    def _toggle_training_submode(self) -> None:
+        if self.mode != "training":
+            return
+
+        self.training_submode = "wall" if self.training_submode == "bot" else "bot"
+        self.player2 = self._build_second_player()
+        self.players = self._build_players_group()
+        self.rally_count = 0
+        self._serve_training_ball()
+        self.player1.timing_bars.reset()
+        self._play_sound("menu_click")
+
+    def _bounce_training_wall(self) -> bool:
+        if self.mode != "training" or self.training_submode != "wall":
+            return False
+
+        if self.ball.rect.top > COURT_MARGIN or self.ball.velocity.y >= 0:
+            return False
+
+        self.ball.rect.top = COURT_MARGIN
+        self.ball.pos.y = self.ball.rect.centery
+        self.ball.velocity.y = abs(self.ball.velocity.y)
+        return True
+
+    def _save_training_record_if_needed(self) -> None:
+        if self.max_rally <= self.saved_training_record:
+            return
+
+        highscore_manager = getattr(self.game, "highscore_manager", None)
+        if highscore_manager is None:
+            return
+
+        highscore_manager.add_training_record(self.player1.name, self.max_rally)
+        self.saved_training_record = self.max_rally
 
     def _serve_ball(self) -> None:
         server_side = self.score_manager.server()
@@ -306,7 +369,7 @@ class GameplayScene(BaseScene):
     def _freeze_match(self) -> None:
         self.ball.velocity.update(0, 0)
         self.player1.timing_bars.reset()
-        if hasattr(self.player2, "timing_bars"):
+        if self.player2 is not None and hasattr(self.player2, "timing_bars"):
             self.player2.timing_bars.reset()
 
     def _build_stats_scene(self):
@@ -370,6 +433,15 @@ class GameplayScene(BaseScene):
 
     def _score_side_for_player_side(self, player_side: str) -> str:
         return "p1" if player_side == "bottom" else "p2"
+
+    def _training_record(self) -> int:
+        highscore_manager = getattr(self.game, "highscore_manager", None)
+        if highscore_manager is None:
+            return 0
+
+        records = highscore_manager.get_top("training")
+        values = [record.get("maior_rally", 0) for record in records]
+        return max((int(value) for value in values if str(value).isdigit()), default=0)
 
     def _draw_player_names(
         self,
@@ -464,7 +536,14 @@ class GameplayScene(BaseScene):
         pygame.draw.rect(panel, LINE_OUTLINE, local_rect, width=4, border_radius=14)
         surface.blit(panel, panel_rect)
 
-        label = self._hud_font.render("MODO TREINO", True, WHITE)
+        submode = "PAREDE" if self.training_submode == "wall" else "BOT"
+        record = max(self.max_rally, self._training_record())
+        label = self._hud_font.render(f"TREINO: {submode}", True, WHITE)
         rally = self._score_font.render(f"RALLY: {self.rally_count}", True, WHITE)
+        record_text = self._hud_font.render(f"RECORDE: {record}", True, WHITE)
         surface.blit(label, (panel_rect.left + 34, panel_rect.top + 22))
         surface.blit(rally, rally.get_rect(center=panel_rect.center))
+        surface.blit(
+            record_text,
+            record_text.get_rect(midright=(panel_rect.right - 34, panel_rect.centery)),
+        )
