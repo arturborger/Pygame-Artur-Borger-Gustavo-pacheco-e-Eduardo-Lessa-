@@ -264,7 +264,12 @@ class GameplayScene(BaseScene):
             return None
 
         scene_class = getattr(module, "StatsScene")
-        return scene_class(self.game, self.score_manager, self.stats_tracker)
+        return scene_class(
+            self.game,
+            self.score_manager,
+            self.stats_tracker,
+            self.mode,
+        )
 
     def _build_pause_scene(self):
         module = __import__("src.scenes.pause_scene", fromlist=["PauseScene"])

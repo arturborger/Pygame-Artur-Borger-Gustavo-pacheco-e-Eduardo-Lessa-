@@ -270,7 +270,7 @@ conforme orientação do curso.
 
 ## src/scenes/gameplay_scene.py e src/settings.py
 - Sub-tarefa: I.1
-- Dev integrador: Eduardo Lessa
+- Dev integrador: Gustavo Pacheco
 - Ajustes manuais: foram centralizados `CONTROLS_P1` e `CONTROLS_P2` em
   `src/settings.py`; a `GameplayScene` foi criada integrando quadra, jogador,
   IA, bola, `ScoreManager`, `StatsTracker`, atualização básica, colisão com
@@ -278,7 +278,7 @@ conforme orientação do curso.
 
 ## src/scenes/gameplay_scene.py e src/entities/ball.py
 - Sub-tarefa: I.2
-- Dev integrador: Eduardo Lessa
+- Dev integrador: Gustavo pacheco
 - Ajustes manuais: a cena passou a detectar bola fora pelo topo/fundo,
   converter lados `bottom/top` para `p1/p2`, registrar pontos no
   `ScoreManager`, atualizar `StatsTracker` para aces e winners, reiniciar o
@@ -288,15 +288,22 @@ conforme orientação do curso.
 
 ## src/scenes/gameplay_scene.py
 - Sub-tarefa: I.3
-- Dev integrador: Eduardo Lessa
+- Dev integrador: Gustavo Pacheco
 - Ajustes manuais: foi adicionado `draw_hud`, com painel semi-transparente,
   nomes dos jogadores, placar 15-30-40/AD, games do set, bolinhas de sets
   vencidos, indicador visual de saque e selo de tie-break.
 
 ## src/scenes/pause_scene.py e src/scenes/gameplay_scene.py
 - Sub-tarefa: J.1
-- Dev integrador: Eduardo Lessa
+- Dev integrador: Gustavo Pacheco
 - Ajustes manuais: foi criada a `PauseScene` como overlay, desenhando a
   gameplay congelada por tras, painel central com `CONTINUAR` e
   `MENU PRINCIPAL`, navegacao por setas/ENTER e retorno por ESC/P; a
   `GameplayScene` passou a abrir a pausa com ESC ou P.
+
+## src/scenes/stats_scene.py e src/scenes/gameplay_scene.py
+- Sub-tarefa: J.2
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: foi criada a `StatsScene`, exibindo estatisticas finais em
+  duas colunas com nome, sets vencidos, aces, winners e historico de sets; a
+  `GameplayScene` passou a repassar o modo de jogo para a tela de estatisticas.
