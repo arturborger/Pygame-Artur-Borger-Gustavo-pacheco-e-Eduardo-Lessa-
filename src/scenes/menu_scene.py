@@ -98,6 +98,8 @@ class MenuScene(BaseScene):
             self._next_scene = self._build_scene("tournament_scene", "TournamentScene")
         elif selected_option == "2 Jogadores Local":
             self._next_scene = self._build_gameplay_scene("2p")
+        elif selected_option == "Modo Treino":
+            self._next_scene = self._build_gameplay_scene("training")
         else:
             self._next_scene = None
 

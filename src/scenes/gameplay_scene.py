@@ -9,6 +9,7 @@ from src.assets_generator import make_court
 from src.entities.ai_player import AIPlayer
 from src.entities.ball import Ball
 from src.entities.player import Player
+from src.entities.practice_bot import PracticeBot
 from src.scenes.base_scene import BaseScene
 from src.settings import (
     BALL_BASE_SPEED,
@@ -68,10 +69,15 @@ class GameplayScene(BaseScene):
         self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, player1_name)
         self.player2 = self._build_second_player()
         self.players = pygame.sprite.Group(self.player1, self.player2)
-        self.score_manager = ScoreManager(self.player1.name, self.player2.name)
+        self.score_manager = self._build_score_manager()
         self.stats_tracker = StatsTracker()
+        self.training_submode = "bot" if mode == "training" else None
+        self.rally_count = 0
         self.ball = Ball(self.game.assets, Vector2(WIDTH / 2, HEIGHT / 2))
-        self._serve_ball()
+        if self.mode == "training":
+            self._serve_training_ball()
+        else:
+            self._serve_ball()
         self.last_hit_time = 0
         self._next_scene = None
         self._hud_font = pygame.font.Font(None, 26)
@@ -118,6 +124,10 @@ class GameplayScene(BaseScene):
 
         out_side = physics.is_out_of_bounds(self.ball)
         if out_side is not None:
+            if self.mode == "training":
+                self._reset_training_rally()
+                return
+
             self._award_point(out_side)
             return
 
@@ -136,7 +146,8 @@ class GameplayScene(BaseScene):
         surface.blit(self.player2.image, self.player2.rect)
         surface.blit(self.ball.image, self.ball.rect)
         self.player1.timing_bars.draw(surface)
-        self.player2.timing_bars.draw(surface)
+        if hasattr(self.player2, "timing_bars"):
+            self.player2.timing_bars.draw(surface)
         self.draw_hud(surface)
 
     def draw_hud(self, surface: pygame.Surface) -> None:
@@ -145,6 +156,10 @@ class GameplayScene(BaseScene):
         Args:
             surface: Superfície principal onde a HUD deve ser renderizada.
         """
+        if self.mode == "training":
+            self._draw_training_hud(surface)
+            return
+
         panel_rect = pygame.Rect(18, 12, WIDTH - 36, 74)
         panel = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
         local_rect = panel.get_rect()
@@ -176,14 +191,21 @@ class GameplayScene(BaseScene):
         if self.mode == "2p":
             return Player(self.game.assets, "top", CONTROLS_P2, "Player 2")
 
+        if self.mode == "training":
+            return PracticeBot(self.game.assets)
+
         return Player(self.game.assets, "top", CONTROLS_P2, "Jogador 2")
 
+    def _build_score_manager(self) -> ScoreManager | None:
+        if self.mode == "training":
+            return None
+
+        return ScoreManager(self.player1.name, self.player2.name)
+
     def _update_second_player(self, dt: float) -> None:
-        if isinstance(self.player2, AIPlayer):
-            hit_result = self.player2.update(dt, self.ball)
+        hit_result = self.player2.update(dt, self.ball)
+        if isinstance(hit_result, str):
             self._register_hit_result(hit_result, self.player2)
-        else:
-            self.player2.update(dt, self.ball)
 
     def _handle_player_collision(self, player: Player) -> None:
         if not player_hits_ball(player, self.ball, self.last_hit_time):
@@ -200,6 +222,11 @@ class GameplayScene(BaseScene):
         self.ball.last_hit_quality = hit_result
         self.ball.last_hitter = player.side
         self._play_sound("hit")
+        if self.mode == "training":
+            if player is self.player1:
+                self.rally_count += 1
+            return
+
         if self._score_side_for_player_side(player.side) != self.ball.server_side:
             self.ball.was_served = False
 
@@ -249,6 +276,12 @@ class GameplayScene(BaseScene):
         self.player2.timing_bars.reset()
         self.last_hit_time = pygame.time.get_ticks()
 
+    def _reset_training_rally(self) -> None:
+        self.rally_count = 0
+        self._serve_training_ball()
+        self.player1.timing_bars.reset()
+        self.last_hit_time = pygame.time.get_ticks()
+
     def _serve_ball(self) -> None:
         server_side = self.score_manager.server()
         player_side = self._player_side_for_score_side(server_side)
@@ -260,10 +293,21 @@ class GameplayScene(BaseScene):
         self.ball.last_hit_quality = "normal"
         self.ball.bounce_count = 0
 
+    def _serve_training_ball(self) -> None:
+        self.ball.pos.update(WIDTH / 2, HEIGHT / 2)
+        self.ball.rect.center = (round(self.ball.pos.x), round(self.ball.pos.y))
+        self.ball.velocity.update(0, BALL_BASE_SPEED)
+        self.ball.server_side = "training"
+        self.ball.was_served = False
+        self.ball.last_hitter = None
+        self.ball.last_hit_quality = "normal"
+        self.ball.bounce_count = 0
+
     def _freeze_match(self) -> None:
         self.ball.velocity.update(0, 0)
         self.player1.timing_bars.reset()
-        self.player2.timing_bars.reset()
+        if hasattr(self.player2, "timing_bars"):
+            self.player2.timing_bars.reset()
 
     def _build_stats_scene(self):
         try:
@@ -411,3 +455,16 @@ class GameplayScene(BaseScene):
         )
         text = self._small_font.render("TIE-BREAK", True, BLACK)
         surface.blit(text, text.get_rect(center=badge_rect.center))
+
+    def _draw_training_hud(self, surface: pygame.Surface) -> None:
+        panel_rect = pygame.Rect(18, 12, WIDTH - 36, 64)
+        panel = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
+        local_rect = panel.get_rect()
+        pygame.draw.rect(panel, HUD_BG, local_rect, border_radius=14)
+        pygame.draw.rect(panel, LINE_OUTLINE, local_rect, width=4, border_radius=14)
+        surface.blit(panel, panel_rect)
+
+        label = self._hud_font.render("MODO TREINO", True, WHITE)
+        rally = self._score_font.render(f"RALLY: {self.rally_count}", True, WHITE)
+        surface.blit(label, (panel_rect.left + 34, panel_rect.top + 22))
+        surface.blit(rally, rally.get_rect(center=panel_rect.center))

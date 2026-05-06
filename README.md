@@ -349,3 +349,11 @@ conforme orientação do curso.
   barras de timing e HUD por nomes configuraveis; o menu agora abre
   `GameplayScene(mode="2p")` e a tela final trata 2P como partida local com
   vencedor registrado).
+
+## src/entities/practice_bot.py, src/scenes/gameplay_scene.py e src/scenes/menu_scene.py
+- Sub-tarefa: L.2
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foi criado o `PracticeBot`, que persegue a bola e
+  rebate automaticamente no modo treino; `GameplayScene(mode="training")`
+  desativa o placar oficial, usa `rally_count`, mostra HUD de rally e o menu
+  passa a abrir o Modo Treino).
