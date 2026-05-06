@@ -203,7 +203,7 @@ class GameplayScene(BaseScene):
         point_type = self._point_type_for(winner_side)
         self.score_manager.add_point(winner_side, point_type)
         self._register_point_stat(winner_side, point_type)
-        self._play_sound("score")
+        self._play_sound("ace" if point_type == "ace" else "score")
 
         if self.score_manager.is_match_over():
             self._freeze_match()

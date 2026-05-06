@@ -51,9 +51,12 @@ class MenuScene(BaseScene):
                 self.game.running = False
             elif event.key == pygame.K_UP:
                 self.selected_index = (self.selected_index - 1) % len(self.OPTIONS)
+                self._play_sound("menu_click")
             elif event.key == pygame.K_DOWN:
                 self.selected_index = (self.selected_index + 1) % len(self.OPTIONS)
+                self._play_sound("menu_click")
             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                self._play_sound("menu_click")
                 self._activate_selected_option()
 
     def update(self, dt: float) -> None:
@@ -104,6 +107,11 @@ class MenuScene(BaseScene):
 
         scene_class = getattr(module, class_name)
         return scene_class(self.game)
+
+    def _play_sound(self, sound_name: str) -> None:
+        sound_manager = getattr(self.game, "sound_manager", None)
+        if sound_manager is not None:
+            sound_manager.play(sound_name)
 
     def _draw_background_details(self, surface: pygame.Surface) -> None:
         court_rect = pygame.Rect(110, 120, WIDTH - 220, HEIGHT - 170)

@@ -325,3 +325,10 @@ conforme orientação do curso.
   `bounce` via `numpy` + `pygame.sndarray.make_sound`, integracao em `Game`,
   chamadas de `hit`/`bounce` na gameplay e inclusao de `numpy>=1.20` nas
   dependencias).
+
+## src/utils/sound_manager.py, src/scenes/gameplay_scene.py e src/scenes/menu_scene.py
+- Sub-tarefa: K.2
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foram adicionados os sons sinteticos `score`,
+  `ace` e `menu_click`, com sequencias tonais para pontuacao/ace, ruido branco
+  curto filtrado por media movel para o menu, e chamadas na gameplay e no menu).
