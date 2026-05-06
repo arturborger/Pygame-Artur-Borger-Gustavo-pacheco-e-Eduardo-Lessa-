@@ -340,3 +340,12 @@ conforme orientação do curso.
   por cenario em `play_music`, parar a trilha com `stop_music`, iniciar a
   musica ambiente na `GameplayScene` e interrompe-la ao fim da partida, ao
   voltar ao menu pela pausa e ao encerrar o jogo).
+
+## src/scenes/gameplay_scene.py, src/scenes/menu_scene.py e src/scenes/game_over_scene.py
+- Sub-tarefa: L.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (o modo `2p` passou a criar `Player 1` e
+  `Player 2` humanos com controles independentes no mesmo teclado, reutilizando
+  barras de timing e HUD por nomes configuraveis; o menu agora abre
+  `GameplayScene(mode="2p")` e a tela final trata 2P como partida local com
+  vencedor registrado).

@@ -64,7 +64,8 @@ class GameplayScene(BaseScene):
             ("court", self.scenery),
             lambda: make_court(self.scenery),
         )
-        self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, "Voce")
+        player1_name = "Player 1" if mode == "2p" else "Voce"
+        self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, player1_name)
         self.player2 = self._build_second_player()
         self.players = pygame.sprite.Group(self.player1, self.player2)
         self.score_manager = ScoreManager(self.player1.name, self.player2.name)
@@ -171,6 +172,9 @@ class GameplayScene(BaseScene):
     def _build_second_player(self):
         if self.mode == "1p":
             return AIPlayer(self.game.assets, "top", self.opponent_config)
+
+        if self.mode == "2p":
+            return Player(self.game.assets, "top", CONTROLS_P2, "Player 2")
 
         return Player(self.game.assets, "top", CONTROLS_P2, "Jogador 2")
 

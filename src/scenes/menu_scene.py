@@ -96,6 +96,8 @@ class MenuScene(BaseScene):
             self._next_scene = self._build_scene("instructions_scene", "InstructionsScene")
         elif selected_option == "Torneio (1P vs CPU)":
             self._next_scene = self._build_scene("tournament_scene", "TournamentScene")
+        elif selected_option == "2 Jogadores Local":
+            self._next_scene = self._build_gameplay_scene("2p")
         else:
             self._next_scene = None
 
@@ -107,6 +109,15 @@ class MenuScene(BaseScene):
 
         scene_class = getattr(module, class_name)
         return scene_class(self.game)
+
+    def _build_gameplay_scene(self, mode: str):
+        try:
+            module = __import__("src.scenes.gameplay_scene", fromlist=["GameplayScene"])
+        except ModuleNotFoundError:
+            return None
+
+        scene_class = getattr(module, "GameplayScene")
+        return scene_class(self.game, mode=mode)
 
     def _play_sound(self, sound_name: str) -> None:
         sound_manager = getattr(self.game, "sound_manager", None)

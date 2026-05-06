@@ -38,7 +38,7 @@ class GameOverScene(BaseScene):
         super().__init__(game)
         self.winner_name = winner_name
         self.mode = mode
-        self.player_won = winner_name in ("Voce", "Você")
+        self.player_won = mode == "2p" or winner_name in ("Voce", "Você")
         self.opponents_beaten = self._resolve_opponents_beaten(opponents_beaten)
         self._next_scene = None
         self._title_font = pygame.font.Font(None, 82)
@@ -75,7 +75,10 @@ class GameOverScene(BaseScene):
         """
         surface.fill(ORANGE if self.player_won else BLUE)
         self._draw_background(surface)
-        title = "VITÓRIA!" if self.player_won else "DERROTA"
+        if self.mode == "2p":
+            title = "FIM DE JOGO"
+        else:
+            title = "VITÓRIA!" if self.player_won else "DERROTA"
         self._draw_outlined_text(surface, title, self._title_font, (WIDTH // 2, 98))
         self._draw_result_details(surface)
         if self.mode == "1p" and self.player_won:
