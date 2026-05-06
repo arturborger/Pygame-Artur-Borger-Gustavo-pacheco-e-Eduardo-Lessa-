@@ -41,9 +41,10 @@ python main.py
 As partidas usam a quadra na horizontal: o P1 joga pela esquerda e o P2/CPU
 joga pela direita.
 
-1. Quando a bola se aproxima, a **BARRA DE ÂNGULO** oscila — pressione ESPAÇO para travar.
-2. Depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%) — pressione ESPAÇO de novo.
-3. Acertar no sweet spot evita erros de mira e marca um winner.
+1. Quando a bola bate no jogador humano, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
+2. Pressione ESPAÇO para travar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
+3. Pressione ESPAÇO de novo para travar a força e soltar a bola a partir do jogador.
+4. Acertar no sweet spot evita erros de mira e marca um winner.
 
 ## Pontuação
 
@@ -376,3 +377,11 @@ conforme orientação do curso.
   da tela final, a física da bola, os lados dos jogadores, a IA e o modo treino
   foram convertidos para orientação horizontal, com P1 à esquerda e P2/CPU à
   direita.
+
+## src/entities/ball.py, src/entities/player.py e src/scenes/gameplay_scene.py
+- Sub-tarefa: Ajuste de rebatida com bola parada no jogador
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: a bola passou a zerar a velocidade e ficar presa ao jogador
+  humano quando colide com ele; as barras sequenciais agora são ativadas nesse
+  contato, travam ângulo e força em ordem e liberam a bola imediatamente após a
+  seleção da força.

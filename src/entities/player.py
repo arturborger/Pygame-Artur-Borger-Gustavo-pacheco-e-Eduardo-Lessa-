@@ -7,7 +7,6 @@ from pygame.math import Vector2
 
 from src.assets_generator import make_player_sprite
 from src.settings import (
-    BARS_ACTIVATION_DISTANCE,
     BLUE,
     COURT_MARGIN,
     HEIGHT,
@@ -102,19 +101,43 @@ class Player(pygame.sprite.Sprite):
             self._clamp_to_own_court()
             self.rect.center = (round(self.pos.x), round(self.pos.y))
 
-    def handle_event(self, event: pygame.event.Event, ball) -> None:
+    def handle_event(self, event: pygame.event.Event, ball) -> str:
         """Processa eventos pontuais do jogador.
 
         Args:
             event: Evento recebido da fila do Pygame.
             ball: Bola atual da partida, mantida na assinatura para integracao
                 com a cena de gameplay.
+
+        Returns:
+            Resultado da rebatida quando o segundo travamento solta a bola, ou
+            ``"no_hit"`` nos demais eventos.
         """
         if event.type != pygame.KEYDOWN:
-            return
+            return "no_hit"
 
         if event.key == self.controls.get("lock", pygame.K_SPACE):
-            self.timing_bars.handle_lock_press()
+            changed_state = self.timing_bars.handle_lock_press()
+            if changed_state and self.timing_bars.is_locked():
+                return self.try_hit(ball)
+
+        return "no_hit"
+
+    def capture_ball(self, ball) -> bool:
+        """Para a bola no jogador e habilita as barras sequenciais.
+
+        Args:
+            ball: Bola que acabou de colidir com o jogador.
+
+        Returns:
+            ``True`` quando a bola foi presa e as barras foram ativadas.
+        """
+        if ball.is_held() or not self._ball_is_approaching(ball):
+            return False
+
+        ball.capture_by_player(self)
+        self.timing_bars.activate()
+        return True
 
     def can_hit(self, ball) -> bool:
         """Verifica se a bola esta dentro do raio de rebatida.
@@ -148,7 +171,11 @@ class Player(pygame.sprite.Sprite):
         if locked_values is None:
             return "no_hit"
 
-        if self.can_hit(ball):
+        held_by_side = getattr(ball, "held_by_side", None)
+        if held_by_side is not None and held_by_side != self.side:
+            return "no_hit"
+
+        if held_by_side == self.side or self.can_hit(ball):
             angle, power = locked_values
             is_sweet = self.timing_bars.is_sweet_spot()
             ball.apply_shot(angle, power, self.side, is_sweet)
@@ -164,17 +191,21 @@ class Player(pygame.sprite.Sprite):
         return "no_hit"
 
     def update(self, dt: float, ball=None) -> None:
-        """Atualiza movimento, barras e ativacao automatica da mira.
+        """Atualiza movimento, barras e bola presa ao jogador.
 
         Args:
             dt: Tempo decorrido desde o ultimo quadro, em segundos.
-            ball: Bola usada para ativar as barras quando se aproxima.
+            ball: Bola usada para acompanhar o jogador durante a mira.
         """
         keys = pygame.key.get_pressed()
         self.handle_input(keys, dt)
         if ball is not None:
-            self._activate_bars_if_needed(ball)
+            self._follow_held_ball(ball)
         self.timing_bars.update(dt)
+
+    def _follow_held_ball(self, ball) -> None:
+        if getattr(ball, "held_by_side", None) == self.side:
+            ball.follow_captured_player(self)
 
     def _clamp_to_own_court(self) -> None:
         half_width = PLAYER_WIDTH / 2
@@ -191,18 +222,6 @@ class Player(pygame.sprite.Sprite):
 
         self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(min_y, min(max_y, self.pos.y))
-
-    def _activate_bars_if_needed(self, ball) -> None:
-        if self.timing_bars.is_active():
-            return
-
-        if not self._ball_is_approaching(ball):
-            return
-
-        player_center = Vector2(self.rect.center)
-        ball_center = Vector2(ball.rect.center)
-        if player_center.distance_to(ball_center) <= BARS_ACTIVATION_DISTANCE:
-            self.timing_bars.activate()
 
     def _ball_is_approaching(self, ball) -> bool:
         if self.side == "left":

@@ -36,6 +36,7 @@ class Ball(pygame.sprite.Sprite):
         was_served: Indica se o ponto ainda está no saque inicial.
         server_side: Lado do placar que sacou o ponto atual.
         last_hit_quality: Qualidade da última rebatida registrada.
+        held_by_side: Lado do jogador humano que segurou a bola para mirar.
     """
 
     def __init__(
@@ -60,6 +61,7 @@ class Ball(pygame.sprite.Sprite):
         self.was_served = False
         self.server_side = "p1"
         self.last_hit_quality = "normal"
+        self.held_by_side: str | None = None
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
     def update(self, dt: float) -> None:
@@ -68,8 +70,50 @@ class Ball(pygame.sprite.Sprite):
         Args:
             dt: Tempo decorrido desde o último quadro, em segundos.
         """
-        self.pos += self.velocity * dt
+        if not self.is_held():
+            self.pos += self.velocity * dt
         self.rect.center = (round(self.pos.x), round(self.pos.y))
+
+    def capture_by_player(self, player) -> None:
+        """Prende a bola ao jogador para a seleção de ângulo e força.
+
+        Args:
+            player: Jogador com atributos ``side`` e ``rect`` que segurará a
+                bola até a rebatida.
+        """
+        self.held_by_side = player.side
+        self.velocity.update(0, 0)
+        self.follow_captured_player(player)
+
+    def follow_captured_player(self, player) -> None:
+        """Mantém a bola posicionada ao lado do jogador que a segurou.
+
+        Args:
+            player: Jogador que está controlando a mira da próxima rebatida.
+        """
+        if self.held_by_side != player.side:
+            return
+
+        ball_half_width = self.rect.width / 2
+        if player.side == "left":
+            x = player.rect.right + ball_half_width
+        else:
+            x = player.rect.left - ball_half_width
+
+        self.pos.update(x, player.rect.centery)
+        self.rect.center = (round(self.pos.x), round(self.pos.y))
+
+    def release(self) -> None:
+        """Libera a bola do jogador que estava mirando a rebatida."""
+        self.held_by_side = None
+
+    def is_held(self) -> bool:
+        """Indica se a bola está presa a algum jogador humano.
+
+        Returns:
+            ``True`` quando a bola está aguardando seleção de ângulo e força.
+        """
+        return self.held_by_side is not None
 
     def apply_shot(
         self,
@@ -109,6 +153,7 @@ class Ball(pygame.sprite.Sprite):
             cos(radians(final_angle)) * final_speed * direction_x,
             sin(radians(final_angle)) * final_speed,
         )
+        self.release()
         return True
 
     def reset(self, server_side: str) -> None:
@@ -131,4 +176,5 @@ class Ball(pygame.sprite.Sprite):
         self.was_served = False
         self.server_side = server_side
         self.last_hit_quality = "normal"
+        self.held_by_side = None
         self.rect.center = (round(self.pos.x), round(self.pos.y))

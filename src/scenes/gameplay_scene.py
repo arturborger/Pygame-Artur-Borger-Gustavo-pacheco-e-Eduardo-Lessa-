@@ -113,9 +113,11 @@ class GameplayScene(BaseScene):
                 self._next_scene = self._build_pause_scene()
                 return
 
-            self.player1.handle_event(event, self.ball)
+            hit_result = self.player1.handle_event(event, self.ball)
+            self._register_hit_result(hit_result, self.player1)
             if self.mode == "2p":
-                self.player2.handle_event(event, self.ball)
+                hit_result = self.player2.handle_event(event, self.ball)
+                self._register_hit_result(hit_result, self.player2)
 
     def update(self, dt: float) -> None:
         """Atualiza jogadores, bola, colisões e física básica.
@@ -129,6 +131,9 @@ class GameplayScene(BaseScene):
         self.player1.update(dt, self.ball)
         self._update_second_player(dt)
         self.ball.update(dt)
+        if self.ball.is_held():
+            return
+
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
             self._play_sound("bounce")
@@ -235,11 +240,14 @@ class GameplayScene(BaseScene):
             self._register_hit_result(hit_result, self.player2)
 
     def _handle_player_collision(self, player: Player) -> None:
+        if self.ball.is_held():
+            return
+
         if not player_hits_ball(player, self.ball, self.last_hit_time):
             return
 
-        hit_result = player.try_hit(self.ball)
-        self._register_hit_result(hit_result, player)
+        if player.capture_ball(self.ball):
+            self.last_hit_time = pygame.time.get_ticks()
 
     def _register_hit_result(self, hit_result: str, player: Player) -> None:
         if hit_result not in ("normal", "winner"):
@@ -351,6 +359,7 @@ class GameplayScene(BaseScene):
         player_side = self._player_side_for_score_side(server_side)
         direction_x = 1 if server_side == "p1" else -1
         self.ball.velocity.update(BALL_BASE_SPEED * direction_x, 0)
+        self.ball.release()
         self.ball.server_side = server_side
         self.ball.was_served = True
         self.ball.last_hitter = player_side
@@ -361,6 +370,7 @@ class GameplayScene(BaseScene):
         self.ball.pos.update(WIDTH / 2, HEIGHT / 2)
         self.ball.rect.center = (round(self.ball.pos.x), round(self.ball.pos.y))
         self.ball.velocity.update(BALL_BASE_SPEED, 0)
+        self.ball.release()
         self.ball.server_side = "training"
         self.ball.was_served = False
         self.ball.last_hitter = None
