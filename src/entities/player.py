@@ -211,8 +211,11 @@ class Player(pygame.sprite.Sprite):
             dt: Tempo decorrido desde o ultimo quadro, em segundos.
             ball: Bola usada para acompanhar o jogador durante a mira.
         """
-        keys = pygame.key.get_pressed()
-        self.handle_input(keys, dt)
+        is_holding_ball = getattr(ball, "held_by_side", None) == self.side
+        if not is_holding_ball:
+            keys = pygame.key.get_pressed()
+            self.handle_input(keys, dt)
+
         if ball is not None:
             self._follow_held_ball(ball)
         self.timing_bars.update(dt)
