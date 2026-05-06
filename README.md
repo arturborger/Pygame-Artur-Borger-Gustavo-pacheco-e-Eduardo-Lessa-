@@ -292,3 +292,11 @@ conforme orientação do curso.
 - Ajustes manuais: foi adicionado `draw_hud`, com painel semi-transparente,
   nomes dos jogadores, placar 15-30-40/AD, games do set, bolinhas de sets
   vencidos, indicador visual de saque e selo de tie-break.
+
+## src/scenes/pause_scene.py e src/scenes/gameplay_scene.py
+- Sub-tarefa: J.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foi criada a `PauseScene` como overlay, desenhando a
+  gameplay congelada por tras, painel central com `CONTINUAR` e
+  `MENU PRINCIPAL`, navegacao por setas/ENTER e retorno por ESC/P; a
+  `GameplayScene` passou a abrir a pausa com ESC ou P.

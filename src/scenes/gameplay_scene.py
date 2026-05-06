@@ -87,6 +87,13 @@ class GameplayScene(BaseScene):
             events: Lista de eventos capturados no quadro atual.
         """
         for event in events:
+            if event.type == pygame.KEYDOWN and event.key in (
+                pygame.K_ESCAPE,
+                pygame.K_p,
+            ):
+                self._next_scene = self._build_pause_scene()
+                return
+
             self.player1.handle_event(event, self.ball)
             if self.mode == "2p":
                 self.player2.handle_event(event, self.ball)
@@ -258,6 +265,11 @@ class GameplayScene(BaseScene):
 
         scene_class = getattr(module, "StatsScene")
         return scene_class(self.game, self.score_manager, self.stats_tracker)
+
+    def _build_pause_scene(self):
+        module = __import__("src.scenes.pause_scene", fromlist=["PauseScene"])
+        scene_class = getattr(module, "PauseScene")
+        return scene_class(self.game, self)
 
     def _play_sound(self, sound_name: str) -> None:
         sound_manager = getattr(self.game, "sound_manager", None)
