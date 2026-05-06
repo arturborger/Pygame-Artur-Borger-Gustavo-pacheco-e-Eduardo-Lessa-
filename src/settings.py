@@ -1,5 +1,7 @@
 """Constantes globais do jogo de tênis cartoon."""
 
+import pygame
+
 # Janela
 WIDTH, HEIGHT = 960, 600
 FPS = 60
@@ -36,6 +38,20 @@ PLAYER_WIDTH = 60
 PLAYER_HEIGHT = 60
 PLAYER_SPEED = 320
 HIT_RADIUS = 70
+CONTROLS_P1 = {
+    "up": pygame.K_UP,
+    "down": pygame.K_DOWN,
+    "left": pygame.K_LEFT,
+    "right": pygame.K_RIGHT,
+    "lock": pygame.K_SPACE,
+}
+CONTROLS_P2 = {
+    "up": pygame.K_w,
+    "down": pygame.K_s,
+    "left": pygame.K_a,
+    "right": pygame.K_d,
+    "lock": pygame.K_RSHIFT,
+}
 
 # Bola
 BALL_RADIUS = 10

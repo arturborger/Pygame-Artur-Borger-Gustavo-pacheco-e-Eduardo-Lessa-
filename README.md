@@ -267,3 +267,11 @@ conforme orientação do curso.
   do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
   trofeu ao completar as tres fases e tentativa preparada de abrir
   `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
+
+## src/scenes/gameplay_scene.py e src/settings.py
+- Sub-tarefa: I.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foram centralizados `CONTROLS_P1` e `CONTROLS_P2` em
+  `src/settings.py`; a `GameplayScene` foi criada integrando quadra, jogador,
+  IA, bola, `ScoreManager`, `StatsTracker`, atualização básica, colisão com
+  cooldown e desenho das entidades e barras de timing.
