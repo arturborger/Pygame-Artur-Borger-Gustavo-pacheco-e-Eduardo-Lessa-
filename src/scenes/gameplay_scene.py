@@ -158,6 +158,9 @@ class GameplayScene(BaseScene):
         surface.blit(self.player1.image, self.player1.rect)
         if self.player2 is not None:
             surface.blit(self.player2.image, self.player2.rect)
+        self.player1.draw_aim_arrow(surface, self.ball)
+        if self.player2 is not None and hasattr(self.player2, "draw_aim_arrow"):
+            self.player2.draw_aim_arrow(surface, self.ball)
         surface.blit(self.ball.image, self.ball.rect)
         self.player1.timing_bars.draw(surface)
         if self.player2 is not None and hasattr(self.player2, "timing_bars"):

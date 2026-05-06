@@ -173,6 +173,36 @@ class TimingBars:
 
         return self.locked_angle, self.locked_power
 
+    def get_preview_values(self) -> tuple[float, float] | None:
+        """Retorna os valores atuais usados por indicadores de mira.
+
+        Returns:
+            Tupla ``(angle, power)`` quando a mira está ativa, ou ``None``
+            quando as barras estão em repouso.
+        """
+        if self.state == self.STATE_IDLE:
+            return None
+
+        if self.state == self.STATE_AIMING:
+            return self.aim_value, POWER_MIN
+
+        if self.state == self.STATE_POWERING:
+            angle = self.locked_angle
+            if angle is None:
+                angle = self.aim_value
+            return angle, self.power_value
+
+        if self.state == self.STATE_LOCKED:
+            angle = self.locked_angle
+            power = self.locked_power
+            if angle is None:
+                angle = self.aim_value
+            if power is None:
+                power = self.power_value
+            return angle, power
+
+        return None
+
     def is_sweet_spot(self) -> bool:
         """Indica se a força travada está na zona ideal.
 

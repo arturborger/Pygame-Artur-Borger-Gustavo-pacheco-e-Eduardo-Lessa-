@@ -40,7 +40,8 @@ python main.py
 
 1. Quando a bola se aproxima, a **BARRA DE ÂNGULO** oscila — pressione ESPAÇO para travar.
 2. Depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%) — pressione ESPAÇO de novo.
-3. Acertar no sweet spot evita erros de mira e marca um winner.
+3. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
+4. Acertar no sweet spot evita erros de mira e marca um winner.
 
 ## Pontuação
 
@@ -261,12 +262,20 @@ conforme orientação do curso.
 
 ## src/scenes/tournament_scene.py
 - Sub-tarefa: H.3
-- Dev integrador: Artur borger
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi criada a `TournamentScene`, lendo
   `game.tournament_progress`, desenhando tres cards horizontais dos adversarios
   do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
   trofeu ao completar as tres fases e tentativa preparada de abrir
   `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
+
+## src/entities/player.py, src/systems/timing_bars.py, src/settings.py e src/scenes/gameplay_scene.py
+- Sub-tarefa: Polimento de mira
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi adicionada uma flecha de trajetoria durante a selecao
+  de angulo e forca; ela usa o mesmo vetor da rebatida, nasce perto da bola,
+  aumenta e diminui junto com a forca atual e respeita os modos 1P, 2P e
+  treino da `GameplayScene`.
 
 ## src/scenes/gameplay_scene.py e src/settings.py
 - Sub-tarefa: I.1
