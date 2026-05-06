@@ -83,8 +83,8 @@ class Ball(pygame.sprite.Sprite):
         Args:
             angle_deg: Ângulo travado pela barra de mira, em graus.
             power: Força travada pela barra de força, entre 0 e 1.
-            side_origin: Lado de origem da rebatida. Use ``"bottom"`` para a
-                metade inferior da quadra.
+            side_origin: Lado de origem da rebatida. Use ``"left"`` para a
+                metade esquerda da quadra.
             is_sweet_spot: Indica se a rebatida já foi classificada como sweet
                 spot pelo sistema de barras.
 
@@ -103,11 +103,11 @@ class Ball(pygame.sprite.Sprite):
 
         final_angle = angle_locked + angle_jitter
         final_speed = BALL_BASE_SPEED + power_locked * (BALL_MAX_SPEED - BALL_BASE_SPEED)
-        direction_y = -1 if side_origin == "bottom" else +1
+        direction_x = 1 if side_origin == "left" else -1
 
         self.velocity = Vector2(
+            cos(radians(final_angle)) * final_speed * direction_x,
             sin(radians(final_angle)) * final_speed,
-            cos(radians(final_angle)) * final_speed * direction_y,
         )
         return True
 
@@ -115,14 +115,14 @@ class Ball(pygame.sprite.Sprite):
         """Reposiciona a bola para o lado de quem sacará o próximo ponto.
 
         Args:
-            server_side: Lado sacador. Usa ``"p1"`` para a metade inferior da
-                quadra e qualquer outro valor para a metade superior.
+            server_side: Lado sacador. Usa ``"p1"`` para a metade esquerda da
+                quadra e qualquer outro valor para a metade direita.
         """
-        x = WIDTH / 2
+        y = HEIGHT / 2
         if server_side == "p1":
-            y = HEIGHT - COURT_MARGIN
+            x = COURT_MARGIN
         else:
-            y = COURT_MARGIN
+            x = WIDTH - COURT_MARGIN
 
         self.pos.update(x, y)
         self.velocity.update(0, 0)

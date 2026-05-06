@@ -9,8 +9,8 @@ from src.settings import (
     BLACK,
     COURT_MARGIN,
     HEIGHT,
-    NET_HEIGHT,
-    NET_Y,
+    NET_WIDTH,
+    NET_X,
     PLAYER_HEIGHT,
     PLAYER_WIDTH,
     SCENERY_COLORS,
@@ -110,9 +110,9 @@ def make_court(scenery_id: str) -> pygame.Surface:
     right = court_rect.right - OUTLINE_WIDTH
     top = court_rect.top + OUTLINE_WIDTH
     bottom = court_rect.bottom - OUTLINE_WIDTH
-    center_x = court_rect.centerx
-    top_service_y = (top + NET_Y) // 2
-    bottom_service_y = (NET_Y + bottom) // 2
+    center_y = court_rect.centery
+    left_service_x = (left + NET_X) // 2
+    right_service_x = (NET_X + right) // 2
 
     _shadowed_line(surface, line_color, (left, top), (right, top), COURT_LINE_WIDTH)
     _shadowed_line(surface, line_color, (left, bottom), (right, bottom), COURT_LINE_WIDTH)
@@ -121,27 +121,27 @@ def make_court(scenery_id: str) -> pygame.Surface:
     _shadowed_line(
         surface,
         line_color,
-        (left, top_service_y),
-        (right, top_service_y),
+        (left_service_x, top),
+        (left_service_x, bottom),
         COURT_LINE_WIDTH,
     )
     _shadowed_line(
         surface,
         line_color,
-        (left, bottom_service_y),
-        (right, bottom_service_y),
+        (right_service_x, top),
+        (right_service_x, bottom),
         COURT_LINE_WIDTH,
     )
     _shadowed_line(
         surface,
         line_color,
-        (center_x, top_service_y),
-        (center_x, bottom_service_y),
+        (left_service_x, center_y),
+        (right_service_x, center_y),
         COURT_LINE_WIDTH,
     )
 
-    net_rect = pygame.Rect(left, NET_Y - NET_HEIGHT // 2, right - left, NET_HEIGHT)
-    _shadowed_rect(surface, net_rect, line_color, border_radius=NET_HEIGHT // 2)
+    net_rect = pygame.Rect(NET_X - NET_WIDTH // 2, top, NET_WIDTH, bottom - top)
+    _shadowed_rect(surface, net_rect, line_color, border_radius=NET_WIDTH // 2)
 
     return surface
 

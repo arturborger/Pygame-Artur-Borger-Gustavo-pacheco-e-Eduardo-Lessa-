@@ -136,8 +136,8 @@ class GameOverScene(BaseScene):
         pygame.draw.line(
             surface,
             WHITE,
-            (court_rect.left, court_rect.centery),
-            (court_rect.right, court_rect.centery),
+            (court_rect.centerx, court_rect.top),
+            (court_rect.centerx, court_rect.bottom),
             5,
         )
         pygame.draw.circle(surface, WHITE, (84, HEIGHT - 76), 28)

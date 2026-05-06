@@ -42,6 +42,6 @@ def check_ball_out_of_bounds(ball) -> str | None:
         ball: Bola com atributo ``rect`` usado pela funcao de fisica.
 
     Returns:
-        ``"top"``, ``"bottom"`` ou ``None``, conforme ``is_out_of_bounds``.
+        ``"left"``, ``"right"`` ou ``None``, conforme ``is_out_of_bounds``.
     """
     return is_out_of_bounds(ball)

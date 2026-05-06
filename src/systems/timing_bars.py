@@ -34,7 +34,7 @@ class TimingBars:
     """Controla o estado das barras de timing de um jogador.
 
     Args:
-        owner_side: Lado do dono das barras, ``"bottom"`` ou ``"top"``.
+        owner_side: Lado do dono das barras, ``"left"`` ou ``"right"``.
         lock_key: Código da tecla usada para travar as barras.
 
     Attributes:
@@ -57,7 +57,7 @@ class TimingBars:
         """Inicializa as barras em repouso.
 
         Args:
-            owner_side: Lado do dono das barras, ``"bottom"`` ou ``"top"``.
+            owner_side: Lado do dono das barras, ``"left"`` ou ``"right"``.
             lock_key: Código Pygame da tecla usada para travar a barra atual.
         """
         self.owner_side = owner_side
@@ -204,12 +204,14 @@ class TimingBars:
 
     def _bar_rects(self, surface: pygame.Surface) -> tuple[pygame.Rect, pygame.Rect]:
         total_height = BAR_HEIGHT * 2 + BAR_SPACING
-        x = (surface.get_width() - BAR_WIDTH) // 2
+        y = surface.get_height() - COURT_MARGIN // 2 - total_height
 
-        if self.owner_side == "top":
-            y = COURT_MARGIN // 2
+        if self.owner_side == "right":
+            x = surface.get_width() - COURT_MARGIN // 2 - BAR_WIDTH
+        elif self.owner_side == "left":
+            x = COURT_MARGIN // 2
         else:
-            y = surface.get_height() - COURT_MARGIN // 2 - total_height
+            x = (surface.get_width() - BAR_WIDTH) // 2
 
         angle_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
         power_rect = angle_rect.move(0, BAR_HEIGHT + BAR_SPACING)

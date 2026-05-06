@@ -11,9 +11,9 @@ from src.entities.player import Player
 from src.settings import (
     AIM_MAX_ANGLE,
     AIM_MIN_ANGLE,
+    HEIGHT,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
-    WIDTH,
 )
 from src.utils.asset_cache import AssetCache
 
@@ -29,7 +29,7 @@ class AIPlayer(Player):
     Attributes:
         opponent_config: Dados de dificuldade, nome e visual do adversario.
         reaction_timer: Tempo restante ate a proxima decisao de alvo.
-        target_x: Posicao horizontal perseguida pela IA.
+        target_y: Posicao vertical perseguida pela IA.
     """
 
     def __init__(
@@ -42,7 +42,7 @@ class AIPlayer(Player):
         super().__init__(asset_cache, side, controls={}, name=opponent_config["name"])
         self.opponent_config = opponent_config
         self.reaction_timer = 0.0
-        self.target_x = self.pos.x
+        self.target_y = self.pos.y
 
         opponent_id = opponent_config["id"]
         center = self.rect.center
@@ -76,7 +76,7 @@ class AIPlayer(Player):
         self.reaction_timer -= dt
         if self.reaction_timer <= 0:
             aim_error = self.opponent_config["aim_error"]
-            self.target_x = ball.pos.x + random.uniform(-aim_error, aim_error)
+            self.target_y = ball.pos.y + random.uniform(-aim_error, aim_error)
             self.reaction_timer = self.opponent_config["reaction"]
 
         self._move_toward_target(dt)
@@ -106,12 +106,12 @@ class AIPlayer(Player):
 
     def _move_toward_target(self, dt: float) -> None:
         max_step = self.opponent_config["max_speed"] * dt
-        distance = self.target_x - self.pos.x
+        distance = self.target_y - self.pos.y
 
         if abs(distance) <= max_step:
-            self.pos.x = self.target_x
+            self.pos.y = self.target_y
         else:
-            self.pos.x += max_step if distance > 0 else -max_step
+            self.pos.y += max_step if distance > 0 else -max_step
 
         self._clamp_to_own_court()
         self.rect.center = (round(self.pos.x), round(self.pos.y))
@@ -119,7 +119,7 @@ class AIPlayer(Player):
     def _choose_shot_angle(self, ball) -> float:
         base_angle = random.uniform(AIM_MIN_ANGLE, AIM_MAX_ANGLE)
 
-        if ball.pos.x < WIDTH / 2:
+        if ball.pos.y < HEIGHT / 2:
             return abs(base_angle)
 
         return -abs(base_angle)

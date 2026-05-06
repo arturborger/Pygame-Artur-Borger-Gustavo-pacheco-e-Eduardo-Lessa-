@@ -2,49 +2,49 @@
 
 from __future__ import annotations
 
-from src.settings import HEIGHT, NET_HEIGHT, NET_Y, WIDTH
+from src.settings import HEIGHT, NET_WIDTH, NET_X, WIDTH
 
 
 def bounce_off_walls(ball) -> bool:
-    """Reflete a bola ao tocar nas bordas laterais da janela.
+    """Reflete a bola ao tocar nas bordas superior ou inferior da janela.
 
     Args:
         ball: Bola com atributos ``rect``, ``pos`` e ``velocity``.
 
     Returns:
-        ``True`` se a bola tocou em uma parede lateral; caso contrário,
+        ``True`` se a bola tocou em uma parede horizontal; caso contrário,
         ``False``.
     """
-    if ball.rect.left <= 0:
-        ball.rect.left = 0
-        ball.pos.x = ball.rect.centerx
-        ball.velocity.x = abs(ball.velocity.x)
+    if ball.rect.top <= 0:
+        ball.rect.top = 0
+        ball.pos.y = ball.rect.centery
+        ball.velocity.y = abs(ball.velocity.y)
         return True
 
-    if ball.rect.right >= WIDTH:
-        ball.rect.right = WIDTH
-        ball.pos.x = ball.rect.centerx
-        ball.velocity.x = -abs(ball.velocity.x)
+    if ball.rect.bottom >= HEIGHT:
+        ball.rect.bottom = HEIGHT
+        ball.pos.y = ball.rect.centery
+        ball.velocity.y = -abs(ball.velocity.y)
         return True
 
     return False
 
 
 def is_out_of_bounds(ball) -> str | None:
-    """Verifica se a bola saiu pelos limites superior ou inferior.
+    """Verifica se a bola saiu pelos limites esquerdo ou direito.
 
     Args:
         ball: Bola com atributo ``rect`` usado para verificar a posição.
 
     Returns:
-        ``"top"`` se saiu pelo topo, ``"bottom"`` se saiu por baixo ou
-        ``None`` se ainda está dentro dos limites verticais.
+        ``"left"`` se saiu pela esquerda, ``"right"`` se saiu pela direita ou
+        ``None`` se ainda está dentro dos limites horizontais.
     """
-    if ball.rect.bottom < 0:
-        return "top"
+    if ball.rect.right < 0:
+        return "left"
 
-    if ball.rect.top > HEIGHT:
-        return "bottom"
+    if ball.rect.left > WIDTH:
+        return "right"
 
     return None
 
@@ -56,7 +56,7 @@ def hit_net(ball) -> bool:
         ball: Bola com atributo ``rect`` usado para verificar a posição.
 
     Returns:
-        ``True`` se a bola cruza a linha da rede dentro da tolerância de altura
-        da rede; caso contrário, ``False``.
+        ``True`` se a bola cruza a linha vertical da rede dentro da tolerância
+        de largura da rede; caso contrário, ``False``.
     """
-    return ball.rect.top <= NET_Y + NET_HEIGHT and ball.rect.bottom >= NET_Y - NET_HEIGHT
+    return ball.rect.left <= NET_X + NET_WIDTH and ball.rect.right >= NET_X - NET_WIDTH

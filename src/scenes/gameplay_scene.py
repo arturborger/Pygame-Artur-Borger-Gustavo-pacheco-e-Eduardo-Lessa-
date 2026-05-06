@@ -16,6 +16,7 @@ from src.settings import (
     BLACK,
     CONTROLS_P1,
     CONTROLS_P2,
+    COURT_MARGIN,
     GREEN_LOCKED,
     HEIGHT,
     HUD_BG,
@@ -42,8 +43,8 @@ class GameplayScene(BaseScene):
 
     Attributes:
         scenery: Identificador visual do cenário atual.
-        player1: Jogador da metade inferior da quadra.
-        player2: Jogador ou IA da metade superior da quadra.
+        player1: Jogador da metade esquerda da quadra.
+        player2: Jogador ou IA da metade direita da quadra.
         ball: Bola ativa da partida.
         score_manager: Placar oficial da partida.
         stats_tracker: Fachada de estatísticas simples para a UI.
@@ -66,7 +67,7 @@ class GameplayScene(BaseScene):
             lambda: make_court(self.scenery),
         )
         player1_name = "Player 1" if mode == "2p" else "Voce"
-        self.player1 = Player(self.game.assets, "bottom", CONTROLS_P1, player1_name)
+        self.player1 = Player(self.game.assets, "left", CONTROLS_P1, player1_name)
         self.training_submode = "bot" if mode == "training" else None
         self.rally_count = 0
         self.saved_training_record = self._training_record()
@@ -200,10 +201,10 @@ class GameplayScene(BaseScene):
 
     def _build_second_player(self):
         if self.mode == "1p":
-            return AIPlayer(self.game.assets, "top", self.opponent_config)
+            return AIPlayer(self.game.assets, "right", self.opponent_config)
 
         if self.mode == "2p":
-            return Player(self.game.assets, "top", CONTROLS_P2, "Player 2")
+            return Player(self.game.assets, "right", CONTROLS_P2, "Player 2")
 
         if self.mode == "training" and self.training_submode == "bot":
             return PracticeBot(self.game.assets)
@@ -211,7 +212,7 @@ class GameplayScene(BaseScene):
         if self.mode == "training":
             return None
 
-        return Player(self.game.assets, "top", CONTROLS_P2, "Jogador 2")
+        return Player(self.game.assets, "right", CONTROLS_P2, "Jogador 2")
 
     def _build_players_group(self) -> pygame.sprite.Group:
         sprites = [self.player1]
@@ -258,7 +259,7 @@ class GameplayScene(BaseScene):
             self.ball.was_served = False
 
     def _award_point(self, out_side: str) -> None:
-        winner_side = "p1" if out_side == "top" else "p2"
+        winner_side = "p1" if out_side == "right" else "p2"
         point_type = self._point_type_for(winner_side)
         self.score_manager.add_point(winner_side, point_type)
         self._register_point_stat(winner_side, point_type)
@@ -326,12 +327,12 @@ class GameplayScene(BaseScene):
         if self.mode != "training" or self.training_submode != "wall":
             return False
 
-        if self.ball.rect.top > COURT_MARGIN or self.ball.velocity.y >= 0:
+        if self.ball.rect.right < WIDTH - COURT_MARGIN or self.ball.velocity.x <= 0:
             return False
 
-        self.ball.rect.top = COURT_MARGIN
-        self.ball.pos.y = self.ball.rect.centery
-        self.ball.velocity.y = abs(self.ball.velocity.y)
+        self.ball.rect.right = WIDTH - COURT_MARGIN
+        self.ball.pos.x = self.ball.rect.centerx
+        self.ball.velocity.x = -abs(self.ball.velocity.x)
         return True
 
     def _save_training_record_if_needed(self) -> None:
@@ -348,8 +349,8 @@ class GameplayScene(BaseScene):
     def _serve_ball(self) -> None:
         server_side = self.score_manager.server()
         player_side = self._player_side_for_score_side(server_side)
-        direction_y = -1 if server_side == "p1" else 1
-        self.ball.velocity.update(0, BALL_BASE_SPEED * direction_y)
+        direction_x = 1 if server_side == "p1" else -1
+        self.ball.velocity.update(BALL_BASE_SPEED * direction_x, 0)
         self.ball.server_side = server_side
         self.ball.was_served = True
         self.ball.last_hitter = player_side
@@ -359,7 +360,7 @@ class GameplayScene(BaseScene):
     def _serve_training_ball(self) -> None:
         self.ball.pos.update(WIDTH / 2, HEIGHT / 2)
         self.ball.rect.center = (round(self.ball.pos.x), round(self.ball.pos.y))
-        self.ball.velocity.update(0, BALL_BASE_SPEED)
+        self.ball.velocity.update(BALL_BASE_SPEED, 0)
         self.ball.server_side = "training"
         self.ball.was_served = False
         self.ball.last_hitter = None
@@ -429,10 +430,10 @@ class GameplayScene(BaseScene):
         return TOURNAMENT_OPPONENTS[0]
 
     def _player_side_for_score_side(self, score_side: str) -> str:
-        return "bottom" if score_side == "p1" else "top"
+        return "left" if score_side == "p1" else "right"
 
     def _score_side_for_player_side(self, player_side: str) -> str:
-        return "p1" if player_side == "bottom" else "p2"
+        return "p1" if player_side == "left" else "p2"
 
     def _training_record(self) -> int:
         highscore_manager = getattr(self.game, "highscore_manager", None)

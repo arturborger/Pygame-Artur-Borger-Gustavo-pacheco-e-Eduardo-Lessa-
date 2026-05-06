@@ -12,8 +12,8 @@ from src.settings import (
     COURT_MARGIN,
     HEIGHT,
     HIT_RADIUS,
-    NET_HEIGHT,
-    NET_Y,
+    NET_WIDTH,
+    NET_X,
     PLAYER_HEIGHT,
     PLAYER_SPEED,
     PLAYER_WIDTH,
@@ -29,7 +29,7 @@ class Player(pygame.sprite.Sprite):
 
     Args:
         asset_cache: Cache compartilhado para reutilizar superficies geradas.
-        side: Lado da quadra ocupado pelo jogador, ``"bottom"`` ou ``"top"``.
+        side: Lado da quadra ocupado pelo jogador, ``"left"`` ou ``"right"``.
         controls: Mapeamento das acoes para teclas Pygame.
         name: Nome exibido para o jogador.
 
@@ -59,7 +59,7 @@ class Player(pygame.sprite.Sprite):
         self.name = name
         self.aim_state = "IDLE"
 
-        color = BLUE if side == "bottom" else RED
+        color = BLUE if side == "left" else RED
         self.image = asset_cache.get(
             ("player_sprite", side, color),
             lambda: make_player_sprite(color),
@@ -67,12 +67,12 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
-        start_y = (
-            HEIGHT - COURT_MARGIN - PLAYER_HEIGHT // 2
-            if side == "bottom"
-            else COURT_MARGIN + PLAYER_HEIGHT // 2
+        start_x = (
+            COURT_MARGIN + PLAYER_WIDTH // 2
+            if side == "left"
+            else WIDTH - COURT_MARGIN - PLAYER_WIDTH // 2
         )
-        self.pos = Vector2(WIDTH / 2, start_y)
+        self.pos = Vector2(start_x, HEIGHT / 2)
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
         lock_key = controls.get("lock", pygame.K_SPACE)
@@ -179,15 +179,15 @@ class Player(pygame.sprite.Sprite):
     def _clamp_to_own_court(self) -> None:
         half_width = PLAYER_WIDTH / 2
         half_height = PLAYER_HEIGHT / 2
-        min_x = COURT_MARGIN + half_width
-        max_x = WIDTH - COURT_MARGIN - half_width
+        min_y = COURT_MARGIN + half_height
+        max_y = HEIGHT - COURT_MARGIN - half_height
 
-        if self.side == "bottom":
-            min_y = NET_Y + NET_HEIGHT / 2 + half_height
-            max_y = HEIGHT - COURT_MARGIN - half_height
+        if self.side == "left":
+            min_x = COURT_MARGIN + half_width
+            max_x = NET_X - NET_WIDTH / 2 - half_width
         else:
-            min_y = COURT_MARGIN + half_height
-            max_y = NET_Y - NET_HEIGHT / 2 - half_height
+            min_x = NET_X + NET_WIDTH / 2 + half_width
+            max_x = WIDTH - COURT_MARGIN - half_width
 
         self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(min_y, min(max_y, self.pos.y))
@@ -205,13 +205,13 @@ class Player(pygame.sprite.Sprite):
             self.timing_bars.activate()
 
     def _ball_is_approaching(self, ball) -> bool:
-        if self.side == "bottom":
-            return ball.velocity.y > 0
+        if self.side == "left":
+            return ball.velocity.x < 0
 
-        return ball.velocity.y < 0
+        return ball.velocity.x > 0
 
     def _ball_has_passed(self, ball) -> bool:
-        if self.side == "bottom":
-            return ball.rect.centery > self.rect.centery + HIT_RADIUS
+        if self.side == "left":
+            return ball.rect.centerx < self.rect.centerx - HIT_RADIUS
 
-        return ball.rect.centery < self.rect.centery - HIT_RADIUS
+        return ball.rect.centerx > self.rect.centerx + HIT_RADIUS

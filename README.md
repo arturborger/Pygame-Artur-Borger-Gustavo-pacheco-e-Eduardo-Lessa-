@@ -38,6 +38,9 @@ python main.py
 
 ## Como funciona a mecânica
 
+As partidas usam a quadra na horizontal: o P1 joga pela esquerda e o P2/CPU
+joga pela direita.
+
 1. Quando a bola se aproxima, a **BARRA DE ÂNGULO** oscila — pressione ESPAÇO para travar.
 2. Depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%) — pressione ESPAÇO de novo.
 3. Acertar no sweet spot evita erros de mira e marca um winner.
@@ -139,7 +142,7 @@ conforme orientação do curso.
 - Sub-tarefa: C.2
 - Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi adicionado o método `apply_shot`, que calcula
-  `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
+  `final_angle`, `final_speed`, `direction_x` e o novo vetor `velocity` com
   `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
   retornando `True` quando a rebatida é aplicada).
 
@@ -147,8 +150,9 @@ conforme orientação do curso.
 - Sub-tarefa: C.3
 - Dev integrador: Gustavo Pacheco
 - Ajustes manuais: nenhum (foram criadas funções puras para refletir a bola nas
-  bordas laterais com `bounce_off_walls`, detectar saída pelo topo ou fundo com
-  `is_out_of_bounds` e identificar contato com a rede usando `hit_net`).
+  bordas horizontais com `bounce_off_walls`, detectar saída pela esquerda ou
+  direita com `is_out_of_bounds` e identificar contato com a rede usando
+  `hit_net`).
 
 ## src/systems/timing_bars.py
 - Sub-tarefa: D.1
@@ -195,7 +199,7 @@ conforme orientação do curso.
 - Sub-tarefa: E.3
 - Dev integrador: Eduardo Lessa
 - Ajustes manuais: nenhum (foi criada a classe `AIPlayer` herdando de `Player`,
-  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
+  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_y`,
   movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
   direta com angulo e forca sorteados).
 
@@ -279,8 +283,8 @@ conforme orientação do curso.
 ## src/scenes/gameplay_scene.py e src/entities/ball.py
 - Sub-tarefa: I.2
 - Dev integrador: Gustavo pacheco
-- Ajustes manuais: a cena passou a detectar bola fora pelo topo/fundo,
-  converter lados `bottom/top` para `p1/p2`, registrar pontos no
+- Ajustes manuais: a cena passou a detectar bola fora pela esquerda/direita,
+  converter lados `left/right` para `p1/p2`, registrar pontos no
   `ScoreManager`, atualizar `StatsTracker` para aces e winners, reiniciar o
   ponto a partir do sacador atual e preparar a transicao para `StatsScene` ao
   fim da partida; `Ball` recebeu estado explicito de saque e qualidade da
@@ -362,6 +366,13 @@ conforme orientação do curso.
 - Sub-tarefa: L.3
 - Dev integrador: Eduardo Lessa
 - Ajustes manuais: nenhum (o modo treino passou a alternar com TAB entre bot
-  e parede; no submodo parede a borda superior reflete a bola, `player2` fica
+  e parede; no submodo parede a borda direita reflete a bola, `player2` fica
   ausente, o maior rally e salvo em highscore quando a bola sai e a HUD mostra
   `RECORDE: N`).
+
+## Ajuste posterior de orientação horizontal
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: as quadras geradas por `make_court`, os previews do menu e
+  da tela final, a física da bola, os lados dos jogadores, a IA e o modo treino
+  foram convertidos para orientação horizontal, com P1 à esquerda e P2/CPU à
+  direita.
