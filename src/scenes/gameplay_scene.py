@@ -112,6 +112,7 @@ class GameplayScene(BaseScene):
         self.ball.update(dt)
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
+            self._play_sound("bounce")
 
         out_side = physics.is_out_of_bounds(self.ball)
         if out_side is not None:
@@ -193,6 +194,7 @@ class GameplayScene(BaseScene):
         self.last_hit_time = pygame.time.get_ticks()
         self.ball.last_hit_quality = hit_result
         self.ball.last_hitter = player.side
+        self._play_sound("hit")
         if self._score_side_for_player_side(player.side) != self.ball.server_side:
             self.ball.was_served = False
 

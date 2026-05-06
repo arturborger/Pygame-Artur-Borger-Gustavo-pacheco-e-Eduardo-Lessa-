@@ -8,6 +8,7 @@ from src.scenes.menu_scene import MenuScene
 from src.settings import FPS, HEIGHT, TITLE, WIDTH
 from src.systems.highscore import HighscoreManager
 from src.utils.asset_cache import AssetCache
+from src.utils.sound_manager import SoundManager
 
 
 class Game:
@@ -30,7 +31,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.assets = AssetCache()
-        self.sound_manager = None
+        self.sound_manager = SoundManager()
         self.highscore_manager = HighscoreManager()
         self.tournament_progress = 0
         self.scene = MenuScene(self)

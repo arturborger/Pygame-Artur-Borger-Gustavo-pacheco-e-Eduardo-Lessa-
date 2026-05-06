@@ -315,3 +315,13 @@ conforme orientação do curso.
   trofeu animado quando o jogador vence no torneio, retorno ao torneio ou menu
   por ENTER, incremento de `game.tournament_progress` e salvamento de recordes
   via `HighscoreManager`, agora instanciado em `Game`.
+
+## src/utils/sound_manager.py, src/game.py, src/scenes/gameplay_scene.py e requirements.txt
+- Sub-tarefa: K.1
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: nenhum (foi criada a classe `SoundManager`, com
+  inicializacao resiliente do `pygame.mixer`, fallback silencioso quando audio
+  ou numpy nao estiverem disponiveis, geracao runtime dos sons `hit` e
+  `bounce` via `numpy` + `pygame.sndarray.make_sound`, integracao em `Game`,
+  chamadas de `hit`/`bounce` na gameplay e inclusao de `numpy>=1.20` nas
+  dependencias).
