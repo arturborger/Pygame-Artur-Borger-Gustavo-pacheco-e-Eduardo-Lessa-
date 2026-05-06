@@ -103,7 +103,7 @@ TOURNAMENT_OPPONENTS = [
     },
     {
         "id": "forest",
-        "name": "Flor Floresta",
+        "name": "Roger Federer",
         "reaction": 0.25,
         "aim_error": 8.0,
         "max_speed": 320,

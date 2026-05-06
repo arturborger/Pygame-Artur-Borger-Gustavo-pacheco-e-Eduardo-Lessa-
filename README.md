@@ -6,7 +6,7 @@ timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial 
 
 ## Desenvolvedor
 
-- Gustavo Pacheco
+- Artur Borger
 
 ## Modos de Jogo
 
@@ -65,8 +65,9 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 ## Assets
 
 **A maior parte dos gráficos é gerada em código Python via `pygame.draw`** (formas
-geométricas cartoon coloridas). A exceção é o sprite do Rafael Nadal, carregado
-de `assets/sprites/Nadal.png` para o primeiro adversário do torneio. Veja
+geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal e do
+Roger Federer, carregados de `assets/sprites/Nadal.png` e
+`assets/sprites/Federer.png` para adversários específicos do torneio. Veja
 `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
@@ -400,4 +401,11 @@ conforme orientação do curso.
 - Dev integrador: Gustavo Pacheco
 - Ajustes manuais: o adversário da praia passou a ser Rafael Nadal, usando o
   PNG em `assets/sprites/Nadal.png` no lugar do sprite gerado por
+  `pygame.draw`.
+
+## src/assets_generator.py, src/settings.py e assets/sprites/Federer.png
+- Sub-tarefa: Ajuste de adversário da floresta
+- Dev integrador: Artur Borger
+- Ajustes manuais: o adversário da floresta passou a ser Roger Federer, usando
+  o PNG em `assets/sprites/Federer.png` no lugar do sprite gerado por
   `pygame.draw`.

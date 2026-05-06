@@ -29,6 +29,7 @@ COURT_LINE_WIDTH = 4
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SPRITES_DIR = PROJECT_ROOT / "assets" / "sprites"
 NADAL_SPRITE_PATH = SPRITES_DIR / "Nadal.png"
+FEDERER_SPRITE_PATH = SPRITES_DIR / "Federer.png"
 
 
 def _shadowed_rect(
@@ -251,11 +252,14 @@ def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
     Returns:
         Superficie transparente com o sprite do adversario.
     """
-    if opponent_id == "beach" or (
-        isinstance(opponent_id, int)
-        and TOURNAMENT_OPPONENTS[opponent_id]["id"] == "beach"
-    ):
+    if isinstance(opponent_id, int):
+        opponent_id = TOURNAMENT_OPPONENTS[opponent_id]["id"]
+
+    if opponent_id == "beach":
         return _load_sprite(NADAL_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+    if opponent_id == "forest":
+        return _load_sprite(FEDERER_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
 
     return make_player_sprite(_get_opponent_color(opponent_id))
 
