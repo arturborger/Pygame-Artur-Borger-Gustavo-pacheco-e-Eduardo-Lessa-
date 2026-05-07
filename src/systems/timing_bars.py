@@ -70,17 +70,67 @@ class TimingBars:
         self.locked_angle: float | None = None
         self.locked_power: float | None = None
         self.frozen_until = 0
+        self.aim_min = AIM_MIN_ANGLE
+        self.aim_max = AIM_MAX_ANGLE
+        self.aim_speed = AIM_OSC_SPEED
+        self.aim_sweet_range: tuple[float, float] | None = None
 
-    def activate(self) -> None:
+    def activate(
+        self,
+        aim_min: float | None = None,
+        aim_max: float | None = None,
+        initial_angle: float | None = None,
+        aim_speed: float | None = None,
+        aim_sweet_range: tuple[float, float] | None = None,
+    ) -> None:
         """Ativa a barra de ângulo e inicia a oscilação."""
+        self.aim_min = AIM_MIN_ANGLE if aim_min is None else aim_min
+        self.aim_max = AIM_MAX_ANGLE if aim_max is None else aim_max
+        self.aim_speed = AIM_OSC_SPEED if aim_speed is None else aim_speed
+        self.aim_sweet_range = aim_sweet_range
+        if self.aim_min > self.aim_max:
+            self.aim_min, self.aim_max = self.aim_max, self.aim_min
+
         self.state = self.STATE_AIMING
-        self.aim_value = 0.0
+        if initial_angle is None:
+            initial_angle = 0.0
+        self.aim_value = self._clamped(initial_angle, self.aim_min, self.aim_max)
         self.aim_direction = 1
         self.power_value = POWER_MIN
         self.power_direction = 1
         self.locked_angle = None
         self.locked_power = None
         self.frozen_until = 0
+
+    def lock_values(
+        self,
+        angle: float,
+        power: float,
+        aim_min: float | None = None,
+        aim_max: float | None = None,
+        aim_sweet_range: tuple[float, float] | None = None,
+    ) -> None:
+        """Trava ângulo e força de forma programática.
+
+        Args:
+            angle: Ângulo escolhido.
+            power: Força escolhida.
+            aim_min: Limite mínimo da barra usado apenas para renderização.
+            aim_max: Limite máximo da barra usado apenas para renderização.
+            aim_sweet_range: Faixa verde opcional da barra de ângulo.
+        """
+        self.aim_min = AIM_MIN_ANGLE if aim_min is None else aim_min
+        self.aim_max = AIM_MAX_ANGLE if aim_max is None else aim_max
+        self.aim_sweet_range = aim_sweet_range
+        if self.aim_min > self.aim_max:
+            self.aim_min, self.aim_max = self.aim_max, self.aim_min
+
+        self.state = self.STATE_LOCKED
+        self.aim_value = angle
+        self.power_value = self._clamped(power, POWER_MIN, POWER_MAX)
+        self.locked_angle = angle
+        self.locked_power = self.power_value
+        self.frozen_until = pygame.time.get_ticks() + int(SHOW_FROZEN_TIME * 1000)
 
     def update(self, dt: float) -> None:
         """Atualiza a oscilação da barra ativa.
@@ -89,13 +139,13 @@ class TimingBars:
             dt: Tempo decorrido desde o último quadro, em segundos.
         """
         if self.state == self.STATE_AIMING:
-            self.aim_value += self.aim_direction * AIM_OSC_SPEED * dt
+            self.aim_value += self.aim_direction * self.aim_speed * dt
 
-            if self.aim_value >= AIM_MAX_ANGLE:
-                self.aim_value = AIM_MAX_ANGLE
+            if self.aim_value >= self.aim_max:
+                self.aim_value = self.aim_max
                 self.aim_direction = -1
-            elif self.aim_value <= AIM_MIN_ANGLE:
-                self.aim_value = AIM_MIN_ANGLE
+            elif self.aim_value <= self.aim_min:
+                self.aim_value = self.aim_min
                 self.aim_direction = 1
 
         if self.state == self.STATE_POWERING:
@@ -118,6 +168,10 @@ class TimingBars:
         self.locked_angle = None
         self.locked_power = None
         self.frozen_until = 0
+        self.aim_min = AIM_MIN_ANGLE
+        self.aim_max = AIM_MAX_ANGLE
+        self.aim_speed = AIM_OSC_SPEED
+        self.aim_sweet_range = None
 
     def is_locked(self) -> bool:
         """Indica se as barras já foram travadas.
@@ -226,6 +280,7 @@ class TimingBars:
         angle_rect, power_rect = self._bar_rects(surface)
 
         self._draw_bar_background(surface, angle_rect)
+        self._draw_angle_sweet_spot(surface, angle_rect)
         self._draw_angle_cursor(surface, angle_rect)
 
         self._draw_bar_background(surface, power_rect)
@@ -281,8 +336,8 @@ class TimingBars:
             surface,
             rect,
             self.aim_value,
-            AIM_MIN_ANGLE,
-            AIM_MAX_ANGLE,
+            self.aim_min,
+            self.aim_max,
             color,
         )
 
@@ -299,18 +354,65 @@ class TimingBars:
             surface,
             rect,
             self.locked_angle,
-            AIM_MIN_ANGLE,
-            AIM_MAX_ANGLE,
+            self.aim_min,
+            self.aim_max,
             GREEN_LOCKED,
             marker_width,
         )
 
+    def _draw_angle_sweet_spot(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+    ) -> None:
+        if self.aim_sweet_range is None:
+            return
+
+        sweet_min, sweet_max = self.aim_sweet_range
+        if sweet_min > sweet_max:
+            sweet_min, sweet_max = sweet_max, sweet_min
+
+        self._draw_value_range(
+            surface,
+            rect,
+            sweet_min,
+            sweet_max,
+            self.aim_min,
+            self.aim_max,
+        )
+
     def _draw_sweet_spot(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
+        self._draw_value_range(
+            surface,
+            rect,
+            SWEET_SPOT_LOW,
+            SWEET_SPOT_HIGH,
+            POWER_MIN,
+            POWER_MAX,
+        )
+
+    def _draw_value_range(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+        range_start: float,
+        range_end: float,
+        minimum: float,
+        maximum: float,
+    ) -> None:
         track_rect = rect.inflate(-BAR_OUTLINE_WIDTH * 2, -BAR_OUTLINE_WIDTH * 2)
-        start_ratio = self._normalized_ratio(SWEET_SPOT_LOW, POWER_MIN, POWER_MAX)
-        end_ratio = self._normalized_ratio(SWEET_SPOT_HIGH, POWER_MIN, POWER_MAX)
+        range_start = self._clamped(range_start, minimum, maximum)
+        range_end = self._clamped(range_end, minimum, maximum)
+        if range_start > range_end:
+            range_start, range_end = range_end, range_start
+
+        start_ratio = self._normalized_ratio(range_start, minimum, maximum)
+        end_ratio = self._normalized_ratio(range_end, minimum, maximum)
         sweet_left = track_rect.left + round(start_ratio * track_rect.width)
         sweet_right = track_rect.left + round(end_ratio * track_rect.width)
+        if sweet_right <= sweet_left:
+            return
+
         sweet_rect = pygame.Rect(
             sweet_left,
             track_rect.top,
@@ -375,5 +477,11 @@ class TimingBars:
         )
 
     def _normalized_ratio(self, value: float, minimum: float, maximum: float) -> float:
+        if maximum == minimum:
+            return 0.0
+
         ratio = (value - minimum) / (maximum - minimum)
         return max(0.0, min(1.0, ratio))
+
+    def _clamped(self, value: float, minimum: float, maximum: float) -> float:
+        return max(minimum, min(maximum, value))

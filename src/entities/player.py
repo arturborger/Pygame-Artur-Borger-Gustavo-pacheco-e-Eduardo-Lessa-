@@ -153,6 +153,32 @@ class Player(pygame.sprite.Sprite):
         self.timing_bars.activate()
         return True
 
+    def prepare_serve(
+        self,
+        ball,
+        aim_range: tuple[float, float],
+        initial_angle: float,
+        aim_speed: float,
+        aim_sweet_range: tuple[float, float] | None = None,
+    ) -> None:
+        """Prende a bola ao jogador e inicia a mira especifica do saque.
+
+        Args:
+            ball: Bola que ficara posicionada a frente do sacador.
+            aim_range: Faixa de angulos permitida para mirar o saque.
+            initial_angle: Angulo inicial mostrado na barra de mira.
+            aim_speed: Velocidade de oscilacao do angulo durante o saque.
+            aim_sweet_range: Faixa verde que representa o saque dentro.
+        """
+        ball.capture_by_player(self)
+        self.timing_bars.activate(
+            aim_range[0],
+            aim_range[1],
+            initial_angle,
+            aim_speed,
+            aim_sweet_range,
+        )
+
     def can_hit(self, ball) -> bool:
         """Verifica se a bola esta dentro do raio de rebatida.
 

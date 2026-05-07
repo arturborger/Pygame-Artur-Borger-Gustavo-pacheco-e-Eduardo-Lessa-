@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import random
+from math import atan2, degrees
+
 import pygame
 from pygame.math import Vector2
 
@@ -14,6 +17,8 @@ from src.scenes.base_scene import BaseScene
 from src.settings import (
     BALL_BASE_SPEED,
     BLACK,
+    BOT_SERVE_DELAY_RANGE,
+    BOT_SERVE_MISS_CHANCE,
     CONTROLS_P1,
     CONTROLS_P2,
     COURT_MARGIN,
@@ -21,7 +26,21 @@ from src.settings import (
     HEIGHT,
     HUD_BG,
     LINE_OUTLINE,
+    NET_WIDTH,
+    NET_X,
     ORANGE,
+    OUT_MESSAGE_TIME,
+    PLAYER_SPEED,
+    RED,
+    SERVE_AIM_OSC_SPEED,
+    SERVE_AIM_PADDING,
+    SERVE_IN_FLIGHT,
+    SERVE_MAX_ANGLE,
+    SERVE_MESSAGE,
+    SERVE_PREPARING,
+    SERVE_RALLY,
+    SWEET_SPOT_HIGH,
+    SWEET_SPOT_LOW,
     TOURNAMENT_OPPONENTS,
     WHITE,
     WIDTH,
@@ -77,11 +96,15 @@ class GameplayScene(BaseScene):
         self.score_manager = self._build_score_manager()
         self.stats_tracker = StatsTracker()
         self.ball = Ball(self.game.assets, Vector2(WIDTH / 2, HEIGHT / 2))
-        if self.mode == "training":
-            self._serve_training_ball()
-        else:
-            self._serve_ball()
         self.last_hit_time = 0
+        self.serve_lane = "bottom"
+        self.serve_state = SERVE_RALLY
+        self.serve_target_rect: pygame.Rect | None = None
+        self.serve_auto_timer = 0.0
+        self.serve_auto_values: tuple[float, float] | None = None
+        self.point_message: str | None = None
+        self.point_message_until = 0
+        self.pending_point_winner: str | None = None
         self._next_scene = None
         self._hud_font = pygame.font.Font(None, 26)
         self._hud_font.set_bold(True)
@@ -89,6 +112,12 @@ class GameplayScene(BaseScene):
         self._score_font.set_bold(True)
         self._small_font = pygame.font.Font(None, 21)
         self._small_font.set_bold(True)
+        self._message_font = pygame.font.Font(None, 86)
+        self._message_font.set_bold(True)
+        if self.mode == "training":
+            self._serve_training_ball()
+        else:
+            self._start_serve_preparation()
         self._play_music(self.scenery)
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
@@ -113,6 +142,13 @@ class GameplayScene(BaseScene):
                 self._next_scene = self._build_pause_scene()
                 return
 
+            if self._point_message_active():
+                continue
+
+            if self.serve_state == SERVE_PREPARING:
+                self._handle_serve_event(event)
+                continue
+
             hit_result = self.player1.handle_event(event, self.ball)
             self._register_hit_result(hit_result, self.player1)
             if self.mode == "2p":
@@ -128,10 +164,20 @@ class GameplayScene(BaseScene):
         if self._next_scene is not None:
             return
 
+        if self._update_point_message():
+            return
+
+        if self.serve_state == SERVE_PREPARING:
+            self._update_serve_preparation(dt)
+            return
+
         self.player1.update(dt, self.ball)
         self._update_second_player(dt)
         self.ball.update(dt)
         if self.ball.is_held():
+            return
+
+        if self._update_serve_validation():
             return
 
         if physics.bounce_off_walls(self.ball):
@@ -161,6 +207,7 @@ class GameplayScene(BaseScene):
             surface: Superfície principal onde a cena deve renderizar.
         """
         surface.blit(self.court_surface, (0, 0))
+        self._draw_service_target(surface)
         surface.blit(self.player1.image, self.player1.rect)
         if self.player2 is not None:
             surface.blit(self.player2.image, self.player2.rect)
@@ -172,6 +219,8 @@ class GameplayScene(BaseScene):
         if self.player2 is not None and hasattr(self.player2, "timing_bars"):
             self.player2.timing_bars.draw(surface)
         self.draw_hud(surface)
+        self._draw_serve_status(surface)
+        self._draw_point_message(surface)
 
     def draw_hud(self, surface: pygame.Surface) -> None:
         """Desenha placar, games, sets e sacador no topo da partida.
@@ -242,6 +291,204 @@ class GameplayScene(BaseScene):
         if isinstance(hit_result, str):
             self._register_hit_result(hit_result, self.player2)
 
+    def _handle_serve_event(self, event: pygame.event.Event) -> None:
+        server = self._serving_player()
+        if server is None or isinstance(server, AIPlayer):
+            return
+
+        hit_result = server.handle_event(event, self.ball)
+        if hit_result not in ("normal", "winner"):
+            return
+
+        self._register_hit_result(hit_result, server)
+        self._mark_serve_in_flight()
+
+    def _update_serve_preparation(self, dt: float) -> None:
+        server = self._serving_player()
+        if server is None:
+            return
+
+        receiver = self._receiving_player()
+        self._update_receiver_during_serve(receiver, dt)
+
+        if isinstance(server, AIPlayer):
+            self.serve_auto_timer -= dt
+            if self.serve_auto_timer <= 0:
+                self._release_bot_serve(server)
+            return
+
+        server.update(dt, self.ball)
+
+    def _update_receiver_during_serve(self, receiver, dt: float) -> None:
+        if receiver is None or self.serve_target_rect is None:
+            return
+
+        if isinstance(receiver, AIPlayer):
+            self._move_ai_receiver_in_return_area(receiver, dt)
+        elif isinstance(receiver, Player):
+            keys = pygame.key.get_pressed()
+            receiver.handle_input(keys, dt)
+
+        self._clamp_player_to_return_area(receiver)
+
+    def _move_ai_receiver_in_return_area(self, receiver, dt: float) -> None:
+        if self.serve_target_rect is None or not hasattr(receiver, "pos"):
+            return
+
+        target = self._receiver_ready_position(receiver)
+        movement = target - receiver.pos
+        if movement.length_squared() == 0:
+            return
+
+        max_step = PLAYER_SPEED * 0.55 * dt
+        if movement.length() <= max_step:
+            receiver.pos.update(target)
+        else:
+            receiver.pos += movement.normalize() * max_step
+        receiver.rect.center = (round(receiver.pos.x), round(receiver.pos.y))
+
+    def _clamp_player_to_return_area(self, player) -> None:
+        if self.serve_target_rect is None or not hasattr(player, "pos"):
+            return
+
+        return_area = self._return_area_rect()
+        half_width = player.rect.width / 2
+        half_height = player.rect.height / 2
+        min_x = return_area.left + half_width
+        max_x = return_area.right - half_width
+        min_y = return_area.top + half_height
+        max_y = return_area.bottom - half_height
+
+        if min_x > max_x:
+            min_x = max_x = return_area.centerx
+        if min_y > max_y:
+            min_y = max_y = return_area.centery
+
+        player.pos.x = max(min_x, min(max_x, player.pos.x))
+        player.pos.y = max(min_y, min(max_y, player.pos.y))
+        player.rect.center = (round(player.pos.x), round(player.pos.y))
+        if hasattr(player, "target_y"):
+            player.target_y = player.pos.y
+
+    def _return_area_rect(self) -> pygame.Rect:
+        if self.serve_target_rect is None:
+            return pygame.Rect(COURT_MARGIN, COURT_MARGIN, 0, 0)
+
+        court_top = COURT_MARGIN
+        court_bottom = HEIGHT - COURT_MARGIN
+        if self.score_manager is None:
+            server_side = self.ball.server_side
+        else:
+            server_side = self.score_manager.server()
+
+        if server_side == "p1":
+            x = self.serve_target_rect.right
+            width = WIDTH - COURT_MARGIN - x
+        else:
+            x = COURT_MARGIN
+            width = self.serve_target_rect.left - x
+
+        return pygame.Rect(x, court_top, width, court_bottom - court_top)
+
+    def _receiver_ready_position(self, receiver) -> Vector2:
+        if self.serve_target_rect is None:
+            return Vector2(receiver.pos)
+
+        half_width = receiver.rect.width / 2
+        if receiver.side == "left":
+            x = COURT_MARGIN + half_width
+        else:
+            x = WIDTH - COURT_MARGIN - half_width
+
+        return Vector2(x, self.serve_target_rect.centery)
+
+    def _release_bot_serve(self, server: AIPlayer) -> None:
+        if self.serve_auto_values is None:
+            return
+
+        angle, power = self.serve_auto_values
+        is_sweet = SWEET_SPOT_LOW <= power <= SWEET_SPOT_HIGH
+        self.ball.apply_shot(angle, power, server.side, is_sweet)
+        server.timing_bars.reset()
+        self._register_hit_result("winner" if is_sweet else "normal", server)
+        self._mark_serve_in_flight()
+
+    def _mark_serve_in_flight(self) -> None:
+        server_side = self.score_manager.server()
+        self.serve_state = SERVE_IN_FLIGHT
+        self.ball.was_served = True
+        self.ball.server_side = server_side
+        self.ball.last_hitter = self._player_side_for_score_side(server_side)
+        self.ball.bounce_count = 0
+        self.serve_auto_values = None
+
+    def _update_serve_validation(self) -> bool:
+        if self.serve_state != SERVE_IN_FLIGHT:
+            return False
+
+        if self._serve_touched_vertical_bounds():
+            self._handle_invalid_serve()
+            return True
+
+        if self._serve_hit_target_box():
+            self.serve_state = SERVE_RALLY
+            self.serve_target_rect = None
+            return False
+
+        if self._serve_passed_target_box():
+            self._handle_invalid_serve()
+            return True
+
+        return False
+
+    def _serve_hit_target_box(self) -> bool:
+        if self.serve_target_rect is None:
+            return False
+
+        return self.serve_target_rect.collidepoint(self.ball.rect.center)
+
+    def _serve_passed_target_box(self) -> bool:
+        if self.serve_target_rect is None:
+            return False
+
+        if self.ball.server_side == "p1":
+            return self.ball.rect.centerx > self.serve_target_rect.right
+
+        return self.ball.rect.centerx < self.serve_target_rect.left
+
+    def _serve_touched_vertical_bounds(self) -> bool:
+        return self.ball.rect.top <= 0 or self.ball.rect.bottom >= HEIGHT
+
+    def _handle_invalid_serve(self) -> None:
+        receiver_side = self._other_score_side(self.ball.server_side)
+        self.ball.velocity.update(0, 0)
+        self.ball.release()
+        self._reset_all_timing_bars()
+        self.serve_state = SERVE_MESSAGE
+        self.point_message = "OUT"
+        self.pending_point_winner = receiver_side
+        self.point_message_until = (
+            pygame.time.get_ticks() + int(OUT_MESSAGE_TIME * 1000)
+        )
+
+    def _point_message_active(self) -> bool:
+        return self.point_message is not None
+
+    def _update_point_message(self) -> bool:
+        if self.point_message is None:
+            return False
+
+        if pygame.time.get_ticks() < self.point_message_until:
+            return True
+
+        winner_side = self.pending_point_winner
+        self.point_message = None
+        self.pending_point_winner = None
+        self.serve_state = SERVE_RALLY
+        if winner_side is not None:
+            self._award_point_to(winner_side)
+        return True
+
     def _handle_player_collision(self, player: Player) -> None:
         if self.ball.is_held():
             return
@@ -271,6 +518,9 @@ class GameplayScene(BaseScene):
 
     def _award_point(self, out_side: str) -> None:
         winner_side = "p1" if out_side == "right" else "p2"
+        self._award_point_to(winner_side)
+
+    def _award_point_to(self, winner_side: str) -> None:
         point_type = self._point_type_for(winner_side)
         self.score_manager.add_point(winner_side, point_type)
         self._register_point_stat(winner_side, point_type)
@@ -309,11 +559,193 @@ class GameplayScene(BaseScene):
             self.stats_tracker.register_winner(winner_side)
 
     def _reset_point(self) -> None:
-        self.ball.reset(self.score_manager.server())
-        self._serve_ball()
-        self.player1.timing_bars.reset()
-        self.player2.timing_bars.reset()
+        self._advance_serve_lane()
+        self._start_serve_preparation()
         self.last_hit_time = pygame.time.get_ticks()
+
+    def _start_serve_preparation(self) -> None:
+        server_side = self.score_manager.server()
+        server = self._serving_player()
+        receiver = self._receiving_player()
+        if server is None:
+            return
+
+        self._reset_all_timing_bars()
+        self.serve_state = SERVE_PREPARING
+        self.serve_target_rect = self._service_target_rect(server_side)
+        self.serve_auto_values = None
+        self.serve_auto_timer = 0.0
+        self.point_message = None
+        self.point_message_until = 0
+        self.pending_point_winner = None
+
+        self._position_players_for_serve(server, receiver)
+        self.ball.reset(server_side)
+        self.ball.capture_by_player(server)
+        self.ball.server_side = server_side
+        self.ball.last_hitter = self._player_side_for_score_side(server_side)
+        self.ball.last_hit_quality = "normal"
+        self.ball.bounce_count = 0
+        self.ball.was_served = False
+
+        aim_min, aim_max, aim_center, aim_sweet_range = self._serve_angle_window()
+        if isinstance(server, AIPlayer):
+            angle, power = self._choose_bot_serve_values()
+            server.timing_bars.lock_values(
+                angle,
+                power,
+                aim_min,
+                aim_max,
+                aim_sweet_range,
+            )
+            self.serve_auto_values = (angle, power)
+            self.serve_auto_timer = random.uniform(*BOT_SERVE_DELAY_RANGE)
+        else:
+            server.prepare_serve(
+                self.ball,
+                (aim_min, aim_max),
+                aim_center,
+                SERVE_AIM_OSC_SPEED,
+                aim_sweet_range,
+            )
+        self.last_hit_time = pygame.time.get_ticks()
+
+    def _position_players_for_serve(self, server, receiver) -> None:
+        server_y = self._serve_lane_center_y(self.serve_lane)
+
+        self._place_player_for_serve(server, server.side, server_y)
+        if receiver is not None:
+            ready_position = self._receiver_ready_position(receiver)
+            receiver.pos.update(ready_position)
+            receiver.rect.center = (round(receiver.pos.x), round(receiver.pos.y))
+            self._clamp_player_to_return_area(receiver)
+
+    def _place_player_for_serve(self, player, side: str, y: float) -> None:
+        if not hasattr(player, "pos"):
+            return
+
+        half_width = player.rect.width / 2
+        if side == "left":
+            x = COURT_MARGIN + half_width
+        else:
+            x = WIDTH - COURT_MARGIN - half_width
+
+        player.pos.update(x, y)
+        player.rect.center = (round(player.pos.x), round(player.pos.y))
+
+    def _service_target_rect(self, server_side: str) -> pygame.Rect:
+        court_left = COURT_MARGIN
+        court_right = WIDTH - COURT_MARGIN
+        court_top = COURT_MARGIN
+        court_bottom = HEIGHT - COURT_MARGIN
+        center_y = HEIGHT // 2
+        left_service_x = (court_left + NET_X) // 2
+        right_service_x = (NET_X + court_right) // 2
+        target_lane = self._opposite_serve_lane(self.serve_lane)
+
+        if target_lane == "top":
+            y = court_top
+            height = center_y - court_top
+        else:
+            y = center_y
+            height = court_bottom - center_y
+
+        if server_side == "p1":
+            x = NET_X + NET_WIDTH // 2
+            width = right_service_x - x
+        else:
+            x = left_service_x
+            width = NET_X - NET_WIDTH // 2 - x
+
+        return pygame.Rect(round(x), round(y), round(width), round(height))
+
+    def _serve_angle_window(
+        self,
+    ) -> tuple[float, float, float, tuple[float, float]]:
+        if self.serve_target_rect is None:
+            return -SERVE_MAX_ANGLE, SERVE_MAX_ANGLE, 0.0, (0.0, 0.0)
+
+        origin = Vector2(self.ball.rect.center)
+        corners = (
+            self.serve_target_rect.topleft,
+            self.serve_target_rect.topright,
+            self.serve_target_rect.bottomleft,
+            self.serve_target_rect.bottomright,
+            self.serve_target_rect.center,
+        )
+        angles = [
+            self._angle_from_ball_to_point(origin, Vector2(point))
+            for point in corners
+        ]
+        sweet_min = min(angles)
+        sweet_max = max(angles)
+        aim_min = max(-SERVE_MAX_ANGLE, sweet_min - SERVE_AIM_PADDING)
+        aim_max = min(SERVE_MAX_ANGLE, sweet_max + SERVE_AIM_PADDING)
+        aim_center = self._angle_from_ball_to_point(
+            origin,
+            Vector2(self.serve_target_rect.center),
+        )
+        aim_center = max(aim_min, min(aim_max, aim_center))
+        return aim_min, aim_max, aim_center, (sweet_min, sweet_max)
+
+    def _angle_from_ball_to_point(self, origin: Vector2, target: Vector2) -> float:
+        direction_x = 1 if self.ball.server_side == "p1" else -1
+        dx = (target.x - origin.x) * direction_x
+        dy = target.y - origin.y
+        return degrees(atan2(dy, max(1.0, dx)))
+
+    def _choose_bot_serve_values(self) -> tuple[float, float]:
+        if self.serve_target_rect is None:
+            return 0.0, 0.75
+
+        target = self.serve_target_rect.inflate(-56, -56)
+        if target.width <= 0 or target.height <= 0:
+            target = self.serve_target_rect
+
+        if random.random() < BOT_SERVE_MISS_CHANCE:
+            target_point = self._random_missed_serve_target()
+        else:
+            target_point = Vector2(
+                random.uniform(target.left, target.right),
+                random.uniform(target.top, target.bottom),
+            )
+
+        origin = Vector2(self.ball.rect.center)
+        angle = self._angle_from_ball_to_point(origin, target_point)
+        power = random.uniform(0.72, 0.88)
+        return angle, power
+
+    def _random_missed_serve_target(self) -> Vector2:
+        if self.serve_target_rect is None:
+            return Vector2(WIDTH / 2, HEIGHT / 2)
+
+        wrong_lane = self.serve_lane
+        wrong_y = self._serve_lane_center_y(wrong_lane)
+        wrong_y += random.uniform(-45, 45)
+        if self.ball.server_side == "p1":
+            x = random.uniform(NET_X + 20, WIDTH - COURT_MARGIN)
+        else:
+            x = random.uniform(COURT_MARGIN, NET_X - 20)
+
+        return Vector2(x, wrong_y)
+
+    def _serve_lane_center_y(self, lane: str) -> float:
+        center_y = HEIGHT / 2
+        if lane == "top":
+            return (COURT_MARGIN + center_y) / 2
+
+        return (center_y + HEIGHT - COURT_MARGIN) / 2
+
+    def _opposite_serve_lane(self, lane: str) -> str:
+        return "bottom" if lane == "top" else "top"
+
+    def _advance_serve_lane(self) -> None:
+        self.serve_lane = self._opposite_serve_lane(self.serve_lane)
+
+    def _reset_all_timing_bars(self) -> None:
+        self.player1.timing_bars.reset()
+        if self.player2 is not None and hasattr(self.player2, "timing_bars"):
+            self.player2.timing_bars.reset()
 
     def _reset_training_rally(self) -> None:
         self._save_training_record_if_needed()
@@ -356,18 +788,6 @@ class GameplayScene(BaseScene):
 
         highscore_manager.add_training_record(self.player1.name, self.max_rally)
         self.saved_training_record = self.max_rally
-
-    def _serve_ball(self) -> None:
-        server_side = self.score_manager.server()
-        player_side = self._player_side_for_score_side(server_side)
-        direction_x = 1 if server_side == "p1" else -1
-        self.ball.velocity.update(BALL_BASE_SPEED * direction_x, 0)
-        self.ball.release()
-        self.ball.server_side = server_side
-        self.ball.was_served = True
-        self.ball.last_hitter = player_side
-        self.ball.last_hit_quality = "normal"
-        self.ball.bounce_count = 0
 
     def _serve_training_ball(self) -> None:
         self.ball.pos.update(WIDTH / 2, HEIGHT / 2)
@@ -448,6 +868,21 @@ class GameplayScene(BaseScene):
     def _score_side_for_player_side(self, player_side: str) -> str:
         return "p1" if player_side == "left" else "p2"
 
+    def _serving_player(self):
+        if self.score_manager is None:
+            return None
+
+        return self.player1 if self.score_manager.server() == "p1" else self.player2
+
+    def _receiving_player(self):
+        if self.score_manager is None:
+            return None
+
+        return self.player2 if self.score_manager.server() == "p1" else self.player1
+
+    def _other_score_side(self, score_side: str) -> str:
+        return "p2" if score_side == "p1" else "p1"
+
     def _training_record(self) -> int:
         highscore_manager = getattr(self.game, "highscore_manager", None)
         if highscore_manager is None:
@@ -456,6 +891,81 @@ class GameplayScene(BaseScene):
         records = highscore_manager.get_top("training")
         values = [record.get("maior_rally", 0) for record in records]
         return max((int(value) for value in values if str(value).isdigit()), default=0)
+
+    def _draw_service_target(self, surface: pygame.Surface) -> None:
+        if self.serve_target_rect is None:
+            return
+
+        if self.serve_state not in (SERVE_PREPARING, SERVE_IN_FLIGHT):
+            return
+
+        rect = self.serve_target_rect
+        overlay = pygame.Surface(rect.size, pygame.SRCALPHA)
+        overlay.fill((255, 220, 60, 54))
+        surface.blit(overlay, rect)
+        pygame.draw.rect(surface, LINE_OUTLINE, rect, width=5, border_radius=5)
+        pygame.draw.rect(
+            surface,
+            YELLOW,
+            rect.inflate(-4, -4),
+            width=3,
+            border_radius=4,
+        )
+
+    def _draw_serve_status(self, surface: pygame.Surface) -> None:
+        if self.serve_state != SERVE_PREPARING:
+            return
+
+        server = self._serving_player()
+        if server is None:
+            return
+
+        if isinstance(server, AIPlayer):
+            text = "SAQUE DO BOT"
+        else:
+            bars = getattr(server, "timing_bars", None)
+            if bars is not None and bars.state == bars.STATE_POWERING:
+                text = "SAQUE: FORCA"
+            else:
+                text = "SAQUE: ANGULO"
+
+        self._draw_text_with_outline(
+            surface,
+            text,
+            self._hud_font,
+            (WIDTH // 2, 108),
+            WHITE,
+            LINE_OUTLINE,
+        )
+
+    def _draw_point_message(self, surface: pygame.Surface) -> None:
+        if self.point_message is None:
+            return
+
+        self._draw_text_with_outline(
+            surface,
+            self.point_message,
+            self._message_font,
+            (WIDTH // 2, HEIGHT // 2),
+            RED,
+            LINE_OUTLINE,
+        )
+
+    def _draw_text_with_outline(
+        self,
+        surface: pygame.Surface,
+        text: str,
+        font: pygame.font.Font,
+        center: tuple[int, int],
+        color: tuple[int, int, int],
+        outline_color: tuple[int, int, int],
+    ) -> None:
+        outline = font.render(text, True, outline_color)
+        fill = font.render(text, True, color)
+        outline_rect = outline.get_rect(center=center)
+        for dx, dy in ((-3, 0), (3, 0), (0, -3), (0, 3)):
+            surface.blit(outline, outline_rect.move(dx, dy))
+        surface.blit(fill, fill.get_rect(center=center))
 
     def _draw_player_names(
         self,

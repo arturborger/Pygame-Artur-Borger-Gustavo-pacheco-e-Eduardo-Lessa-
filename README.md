@@ -39,11 +39,23 @@ python main.py
 As partidas usam a quadra na horizontal: o P1 joga pela esquerda e o P2/CPU
 joga pela direita.
 
-1. Quando a bola bate no jogador humano, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
-2. Pressione ESPAÇO para travar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
-3. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
-4. Pressione ESPAÇO de novo para travar a força e soltar a bola a partir do jogador.
-5. Acertar no sweet spot evita erros de mira e marca um winner.
+1. No início de cada ponto, o sacador fica parado com a bola à frente dele.
+2. No saque humano, trave primeiro o ângulo e depois a força com a tecla de trava.
+3. A barra de ângulo do saque mostra uma faixa verde para os ângulos que miram no quadrado correto.
+4. O devolvedor começa no fundo da quadra, pode se mover, mas não entra no quadrado onde o saque conta como dentro.
+5. Se o saque não passar pelo quadrado correto, aparece `OUT` e o sacador perde o ponto.
+6. Quando a bola bate no jogador humano durante o rally, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
+7. Pressione a tecla de trava para fixar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
+8. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
+9. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
+10. Acertar no sweet spot evita erros de mira e marca um winner.
+
+### Saque
+
+- O lado do saque alterna a cada ponto.
+- O bot saca automaticamente com ângulo e força aleatórios, mirando de forma consistente no quadrado correto.
+- A área amarela na quadra indica o quadrado que valida o saque.
+- A faixa verde da barra de ângulo indica o intervalo que tende a colocar o saque dentro.
 
 ## Pontuação
 
@@ -416,3 +428,15 @@ conforme orientação do curso.
 - Ajustes manuais: o adversário do estádio passou a ser Novak Djokovic, usando
   o PNG em `assets/sprites/Djokovic.png` no lugar do sprite gerado por
   `pygame.draw`.
+
+## src/scenes/gameplay_scene.py, src/entities/player.py, src/systems/timing_bars.py, src/settings.py e README.md
+- Sub-tarefa: Mecânica de saque
+- Dev integrador: Gustavo Pacheco
+- Ajustes manuais: foi implementada preparação de saque no início de cada ponto,
+  com bola presa à frente do sacador, escolha sequencial de ângulo e força para
+  humanos, saque automático do bot, validação do quadrado correto, mensagem
+  `OUT`, perda do ponto por saque inválido e alternância automática do lado do
+  saque. A implementação reaproveita `TimingBars` para a interface visual,
+  adiciona faixa verde de ângulo para o saque dentro, mantém constantes novas em
+  `src/settings.py` conforme o plano e restringe o devolvedor ao fundo da quadra
+  sem entrar no quadrado válido do saque.
