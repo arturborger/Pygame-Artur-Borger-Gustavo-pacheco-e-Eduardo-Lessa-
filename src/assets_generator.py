@@ -7,6 +7,8 @@ from pathlib import Path
 import pygame
 
 from src.settings import (
+    AI_SPRITE_HEIGHT,
+    AI_SPRITE_WIDTH,
     BALL_RADIUS,
     BLACK,
     COURT_HEIGHT,
@@ -260,13 +262,13 @@ def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
         opponent_id = TOURNAMENT_OPPONENTS[opponent_id]["id"]
 
     if opponent_id == "beach":
-        return _load_sprite(NADAL_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        return _load_sprite(NADAL_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
 
     if opponent_id == "forest":
-        return _load_sprite(FEDERER_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        return _load_sprite(FEDERER_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
 
     if opponent_id == "stadium":
-        return _load_sprite(DJOKOVIC_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        return _load_sprite(DJOKOVIC_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
 
     return make_player_sprite(_get_opponent_color(opponent_id))
 

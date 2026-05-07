@@ -41,6 +41,10 @@ PLAYER_WIDTH = 75
 PLAYER_HEIGHT = 75
 PLAYER_SPEED = 320
 HIT_RADIUS = 100
+
+# Sprites dos adversários do torneio (mesmo tamanho do jogador)
+AI_SPRITE_WIDTH = PLAYER_WIDTH
+AI_SPRITE_HEIGHT = PLAYER_HEIGHT
 CONTROLS_P1 = {
     "up": pygame.K_UP,
     "down": pygame.K_DOWN,

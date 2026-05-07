@@ -4,14 +4,11 @@ Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-gam
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
 (15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
 
-A janela usa resolução 1440×900 para ocupar melhor a tela do Mac, mantendo a
-quadra no tamanho original de 840×480 e aumentando apenas os recuos ao redor dela.
+## Integrantes
 
-## Desenvolvedores
-
-- Artur Borger
-- Gustavo Pacheco
+- Arthur Borger
 - Eduardo Lessa
+- Gustavo Pacheco
 
 ## Modos de Jogo
 
@@ -41,35 +38,9 @@ python main.py
 
 ## Como funciona a mecânica
 
-As partidas usam a quadra na horizontal: o P1 joga pela esquerda e o P2/CPU
-joga pela direita.
-
-1. No início de cada ponto, o sacador fica parado com a bola à frente dele.
-2. No saque humano, trave primeiro o ângulo e depois a força com a tecla de trava.
-3. A barra de ângulo do saque mostra uma faixa verde para os ângulos que miram no quadrado correto.
-4. O devolvedor começa no fundo da quadra, pode se mover, mas não entra no quadrado onde o saque conta como dentro.
-5. Se o saque não passar pelo quadrado correto, aparece `OUT` e o sacador perde o ponto.
-6. Quando a bola bate no jogador humano durante o rally, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
-7. Pressione a tecla de trava para fixar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
-8. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
-9. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
-10. Acertar no sweet spot evita erros de mira e marca um winner.
-11. Para o ponto continuar, a bola precisa cruzar a linha central dentro do trecho da rede. Se ela contornar a rede por fora, aparece `OUT` e o ponto termina.
-12. Se a bola tocar na parede (borda superior ou inferior) ainda no lado de quem a rebateu — ou seja, antes de cruzar a rede — a jogada é `OUT` e o ponto vai para o adversário.
-
-### Saque
-
-- O lado do saque alterna a cada ponto.
-- O bot saca automaticamente com ângulo e força aleatórios, mirando de forma consistente no quadrado correto.
-- A área amarela na quadra indica o quadrado que valida o saque.
-- A faixa verde da barra de ângulo indica o intervalo que tende a colocar o saque dentro.
-- Mesmo no saque, a bola deve passar pelo trecho válido da rede antes de chegar ao quadrado correto.
-
-### Regra da rede
-
-- A quadra usa P1 à esquerda e P2/CPU à direita; por isso a rede é a linha vertical central.
-- A bola só continua em jogo quando cruza essa linha dentro da altura da quadra, entre os dois postes da rede.
-- Se a trajetória cruza para o outro lado por fora desse trecho, a jogada é `OUT` e o ponto vai para o adversário de quem rebateu.
+1. Quando a bola se aproxima, a **BARRA DE ÂNGULO** oscila — pressione ESPAÇO para travar.
+2. Depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%) — pressione ESPAÇO de novo.
+3. Acertar no sweet spot evita erros de mira e marca um winner.
 
 ## Pontuação
 
@@ -90,11 +61,8 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 
 ## Assets
 
-**A maior parte dos gráficos é gerada em código Python via `pygame.draw`** (formas
-geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal, do
-Roger Federer e do Novak Djokovic, carregados de `assets/sprites/Nadal.png`,
-`assets/sprites/Federer.png` e `assets/sprites/Djokovic.png` para adversários
-específicos do torneio. Veja `src/assets_generator.py`.
+**Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
+cartoon coloridas) — nenhum sprite externo foi usado. Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -171,17 +139,16 @@ conforme orientação do curso.
 - Sub-tarefa: C.2
 - Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foi adicionado o método `apply_shot`, que calcula
-  `final_angle`, `final_speed`, `direction_x` e o novo vetor `velocity` com
+  `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
   `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
   retornando `True` quando a rebatida é aplicada).
 
 ## src/systems/physics.py
 - Sub-tarefa: C.3
-- Dev integrador: Gustavo Pacheco
+- Dev integrador: Artur Borger
 - Ajustes manuais: nenhum (foram criadas funções puras para refletir a bola nas
-  bordas horizontais com `bounce_off_walls`, detectar saída pela esquerda ou
-  direita com `is_out_of_bounds` e identificar contato com a rede usando
-  `hit_net`).
+  bordas laterais com `bounce_off_walls`, detectar saída pelo topo ou fundo com
+  `is_out_of_bounds` e identificar contato com a rede usando `hit_net`).
 
 ## src/systems/timing_bars.py
 - Sub-tarefa: D.1
@@ -228,7 +195,7 @@ conforme orientação do curso.
 - Sub-tarefa: E.3
 - Dev integrador: Eduardo Lessa
 - Ajustes manuais: nenhum (foi criada a classe `AIPlayer` herdando de `Player`,
-  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_y`,
+  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
   movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
   direta com angulo e forca sorteados).
 
@@ -301,192 +268,13 @@ conforme orientação do curso.
   trofeu ao completar as tres fases e tentativa preparada de abrir
   `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
 
-## src/entities/player.py, src/systems/timing_bars.py, src/settings.py e src/scenes/gameplay_scene.py
-- Sub-tarefa: Polimento de mira
-- Dev integrador: Artur Borger
-- Ajustes manuais: foi adicionada uma flecha de trajetoria durante a selecao
-  de angulo e forca; ela usa o mesmo vetor da rebatida, nasce perto da bola,
-  aumenta e diminui junto com a forca atual e respeita os modos 1P, 2P e
-  treino da `GameplayScene`.
-
-## src/scenes/gameplay_scene.py e src/settings.py
-- Sub-tarefa: I.1
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foram centralizados `CONTROLS_P1` e `CONTROLS_P2` em
-  `src/settings.py`; a `GameplayScene` foi criada integrando quadra, jogador,
-  IA, bola, `ScoreManager`, `StatsTracker`, atualização básica, colisão com
-  cooldown e desenho das entidades e barras de timing.
-
-## src/scenes/gameplay_scene.py e src/entities/ball.py
-- Sub-tarefa: I.2
-- Dev integrador: Gustavo pacheco
-- Ajustes manuais: a cena passou a detectar bola fora pela esquerda/direita,
-  converter lados `left/right` para `p1/p2`, registrar pontos no
-  `ScoreManager`, atualizar `StatsTracker` para aces e winners, reiniciar o
-  ponto a partir do sacador atual e preparar a transicao para `StatsScene` ao
-  fim da partida; `Ball` recebeu estado explicito de saque e qualidade da
-  ultima rebatida para classificar o ponto.
-
-## src/scenes/gameplay_scene.py
-- Sub-tarefa: I.3
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foi adicionado `draw_hud`, com painel semi-transparente,
-  nomes dos jogadores, placar 15-30-40/AD, games do set, bolinhas de sets
-  vencidos, indicador visual de saque e selo de tie-break.
-
-## src/scenes/pause_scene.py e src/scenes/gameplay_scene.py
-- Sub-tarefa: J.1
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foi criada a `PauseScene` como overlay, desenhando a
-  gameplay congelada por tras, painel central com `CONTINUAR` e
-  `MENU PRINCIPAL`, navegacao por setas/ENTER e retorno por ESC/P; a
-  `GameplayScene` passou a abrir a pausa com ESC ou P.
-
-## src/scenes/stats_scene.py e src/scenes/gameplay_scene.py
-- Sub-tarefa: J.2
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foi criada a `StatsScene`, exibindo estatisticas finais em
-  duas colunas com nome, sets vencidos, aces, winners e historico de sets; a
-  `GameplayScene` passou a repassar o modo de jogo para a tela de estatisticas.
-
-## src/scenes/game_over_scene.py e src/game.py
-- Sub-tarefa: J.3
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foi criada a `GameOverScene`, com texto de vitoria/derrota,
-  trofeu animado quando o jogador vence no torneio, retorno ao torneio ou menu
-  por ENTER, incremento de `game.tournament_progress` e salvamento de recordes
-  via `HighscoreManager`, agora instanciado em `Game`.
-
-## src/utils/sound_manager.py, src/game.py, src/scenes/gameplay_scene.py e requirements.txt
-- Sub-tarefa: K.1
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foi criada a classe `SoundManager`, com
-  inicializacao resiliente do `pygame.mixer`, fallback silencioso quando audio
-  ou numpy nao estiverem disponiveis, geracao runtime dos sons `hit` e
-  `bounce` via `numpy` + `pygame.sndarray.make_sound`, integracao em `Game`,
-  chamadas de `hit`/`bounce` na gameplay e inclusao de `numpy>=1.20` nas
-  dependencias).
-
-## src/utils/sound_manager.py, src/scenes/gameplay_scene.py e src/scenes/menu_scene.py
-- Sub-tarefa: K.2
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foram adicionados os sons sinteticos `score`,
-  `ace` e `menu_click`, com sequencias tonais para pontuacao/ace, ruido branco
-  curto filtrado por media movel para o menu, e chamadas na gameplay e no menu).
-
-## src/utils/sound_manager.py, src/scenes/gameplay_scene.py, src/scenes/pause_scene.py e src/game.py
-- Sub-tarefa: K.3
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (o `SoundManager` passou a gerar loops sinteticos
-  por cenario em `play_music`, parar a trilha com `stop_music`, iniciar a
-  musica ambiente na `GameplayScene` e interrompe-la ao fim da partida, ao
-  voltar ao menu pela pausa e ao encerrar o jogo).
-
-## src/scenes/gameplay_scene.py, src/scenes/menu_scene.py e src/scenes/game_over_scene.py
-- Sub-tarefa: L.1
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (o modo `2p` passou a criar `Player 1` e
-  `Player 2` humanos com controles independentes no mesmo teclado, reutilizando
-  barras de timing e HUD por nomes configuraveis; o menu agora abre
-  `GameplayScene(mode="2p")` e a tela final trata 2P como partida local com
-  vencedor registrado).
-
-## src/entities/practice_bot.py, src/scenes/gameplay_scene.py e src/scenes/menu_scene.py
-- Sub-tarefa: L.2
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foi criado o `PracticeBot`, que persegue a bola e
-  rebate automaticamente no modo treino; `GameplayScene(mode="training")`
-  desativa o placar oficial, usa `rally_count`, mostra HUD de rally e o menu
-  passa a abrir o Modo Treino).
-
-## src/scenes/gameplay_scene.py
-- Sub-tarefa: L.3
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (o modo treino passou a alternar com TAB entre bot
-  e parede; no submodo parede a borda direita reflete a bola, `player2` fica
-  ausente, o maior rally e salvo em highscore quando a bola sai e a HUD mostra
-  `RECORDE: N`).
-
 ## src/settings.py e src/assets_generator.py
-- Sub-tarefa: Aumento de tamanho dos personagens e área de recepção
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: `PLAYER_WIDTH` e `PLAYER_HEIGHT` passaram de 60 para 75 px
-  para que os sprites dos jogadores e adversários fiquem ligeiramente maiores em
-  tela; `HIT_RADIUS` passou de 70 para 100 px para ampliar a área de recepção da
-  bola e facilitar a jogabilidade; as proporções internas de `make_player_sprite`
-  (raio da cabeça, margens do corpo e border-radius) foram ajustadas de forma
-  proporcional ao novo tamanho.
-
-## Ajuste posterior de orientação horizontal
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: as quadras geradas por `make_court`, os previews do menu e
-  da tela final, a física da bola, os lados dos jogadores, a IA e o modo treino
-  foram convertidos para orientação horizontal, com P1 à esquerda e P2/CPU à
-  direita.
-
-## src/entities/ball.py, src/entities/player.py e src/scenes/gameplay_scene.py
-- Sub-tarefa: Ajuste de rebatida com bola parada no jogador
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: a bola passou a zerar a velocidade e ficar presa ao jogador
-  humano quando colide com ele; as barras sequenciais agora são ativadas nesse
-  contato, travam ângulo e força em ordem e liberam a bola imediatamente após a
-  seleção da força.
-
-## src/assets_generator.py, src/settings.py e assets/sprites/Nadal.png
-- Sub-tarefa: Ajuste de adversário do torneio
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: o adversário da praia passou a ser Rafael Nadal, usando o
-  PNG em `assets/sprites/Nadal.png` no lugar do sprite gerado por
-  `pygame.draw`.
-
-## src/assets_generator.py, src/settings.py e assets/sprites/Federer.png
-- Sub-tarefa: Ajuste de adversário da floresta
+- Sub-tarefa: Igualdade de tamanho dos sprites dos adversários ao jogador
 - Dev integrador: Artur Borger
-- Ajustes manuais: o adversário da floresta passou a ser Roger Federer, usando
-  o PNG em `assets/sprites/Federer.png` no lugar do sprite gerado por
-  `pygame.draw`.
-
-## src/assets_generator.py, src/settings.py e assets/sprites/Djokovic.png
-- Sub-tarefa: Ajuste de adversário do estádio
-- Dev integrador: Artur Borger
-- Ajustes manuais: o adversário do estádio passou a ser Novak Djokovic, usando
-  o PNG em `assets/sprites/Djokovic.png` no lugar do sprite gerado por
-  `pygame.draw`.
-
-## src/scenes/gameplay_scene.py, src/entities/player.py, src/systems/timing_bars.py, src/settings.py e README.md
-- Sub-tarefa: Mecânica de saque
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: foi implementada preparação de saque no início de cada ponto,
-  com bola presa à frente do sacador, escolha sequencial de ângulo e força para
-  humanos, saque automático do bot, validação do quadrado correto, mensagem
-  `OUT`, perda do ponto por saque inválido e alternância automática do lado do
-  saque. A implementação reaproveita `TimingBars` para a interface visual,
-  adiciona faixa verde de ângulo para o saque dentro, mantém constantes novas em
-  `src/settings.py` conforme o plano e restringe o devolvedor ao fundo da quadra
-  sem entrar no quadrado válido do saque.
-
-## src/settings.py, src/assets_generator.py, src/entities/player.py, src/entities/ball.py, src/entities/practice_bot.py, src/scenes/gameplay_scene.py, src/systems/timing_bars.py e README.md
-- Sub-tarefa: Ajuste de recuos para tela do Mac
-- Dev integrador: Artur Borger
-- Ajustes manuais: a janela passou para 1440×900 e a quadra manteve o tamanho
-  original de 840×480; os recuos horizontal e vertical foram separados em
-  constantes próprias (`COURT_MARGIN_X` e `COURT_MARGIN_Y`) para centralizar a
-  quadra e aumentar apenas o espaço ao redor dela.
-
-## src/entities/ball.py, src/systems/physics.py, src/scenes/gameplay_scene.py e README.md
-- Sub-tarefa: Validação obrigatória de passagem pela rede
-- Dev integrador: Artur Borger
-- Ajustes manuais: a bola passou a guardar a posição do quadro anterior para
-  detectar quando cruza a linha central; `physics.crossed_net_outside` valida
-  se a trajetória passou pelo trecho da rede dentro da quadra; a
-  `GameplayScene` encerra saque ou rally com mensagem `OUT` quando a bola
-  contorna a rede por fora, dando o ponto ao adversário de quem rebateu.
-
-## src/systems/physics.py, src/scenes/gameplay_scene.py e README.md
-- Sub-tarefa: Regra de parede antes da rede
-- Dev integrador: Artur Borger
-- Ajustes manuais: foi adicionada a função `physics.wall_hit_before_net` que
-  detecta quando a bola atinge a borda horizontal ainda no campo de quem a
-  rebateu (antes de cruzar a rede); a `GameplayScene` passa a encerrar o ponto
-  com mensagem `OUT` nessa situação, dando o ponto ao adversário, sem alterar
-  o comportamento do Modo Treino.
+- Ajustes manuais: adicionadas as constantes `AI_SPRITE_WIDTH = PLAYER_WIDTH` e
+  `AI_SPRITE_HEIGHT = PLAYER_HEIGHT` em `src/settings.py` para tornar explícita a
+  relação de tamanho entre os sprites dos adversários e o jogador; `make_ai_sprite`
+  em `src/assets_generator.py` foi atualizada para carregar os PNGs de Rafael Nadal,
+  Roger Federer e Novak Djokovic usando essas constantes, garantindo que os três
+  personagens do torneio sejam exibidos no mesmo tamanho de `75 × 75 px` que o
+  sprite do jogador humano.
