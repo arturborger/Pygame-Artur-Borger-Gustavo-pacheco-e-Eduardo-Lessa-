@@ -12,7 +12,7 @@ from src.assets_generator import make_ball
 from src.settings import (
     BALL_BASE_SPEED,
     BALL_MAX_SPEED,
-    COURT_MARGIN,
+    COURT_MARGIN_X,
     HEIGHT,
     MISS_JITTER,
     SWEET_SPOT_HIGH,
@@ -165,9 +165,9 @@ class Ball(pygame.sprite.Sprite):
         """
         y = HEIGHT / 2
         if server_side == "p1":
-            x = COURT_MARGIN
+            x = COURT_MARGIN_X
         else:
-            x = WIDTH - COURT_MARGIN
+            x = WIDTH - COURT_MARGIN_X
 
         self.pos.update(x, y)
         self.velocity.update(0, 0)

@@ -9,7 +9,10 @@ import pygame
 from src.settings import (
     BALL_RADIUS,
     BLACK,
-    COURT_MARGIN,
+    COURT_HEIGHT,
+    COURT_MARGIN_X,
+    COURT_MARGIN_Y,
+    COURT_WIDTH,
     HEIGHT,
     NET_WIDTH,
     NET_X,
@@ -105,10 +108,10 @@ def make_court(scenery_id: str) -> pygame.Surface:
     surface.fill(palette["bg"])
 
     court_rect = pygame.Rect(
-        COURT_MARGIN,
-        COURT_MARGIN,
-        WIDTH - COURT_MARGIN * 2,
-        HEIGHT - COURT_MARGIN * 2,
+        COURT_MARGIN_X,
+        COURT_MARGIN_Y,
+        COURT_WIDTH,
+        COURT_HEIGHT,
     )
     _shadowed_rect(surface, court_rect, palette["court"])
 

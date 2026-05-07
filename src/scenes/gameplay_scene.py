@@ -21,7 +21,8 @@ from src.settings import (
     BOT_SERVE_MISS_CHANCE,
     CONTROLS_P1,
     CONTROLS_P2,
-    COURT_MARGIN,
+    COURT_MARGIN_X,
+    COURT_MARGIN_Y,
     GREEN_LOCKED,
     HEIGHT,
     HUD_BG,
@@ -372,10 +373,10 @@ class GameplayScene(BaseScene):
 
     def _return_area_rect(self) -> pygame.Rect:
         if self.serve_target_rect is None:
-            return pygame.Rect(COURT_MARGIN, COURT_MARGIN, 0, 0)
+            return pygame.Rect(COURT_MARGIN_X, COURT_MARGIN_Y, 0, 0)
 
-        court_top = COURT_MARGIN
-        court_bottom = HEIGHT - COURT_MARGIN
+        court_top = COURT_MARGIN_Y
+        court_bottom = HEIGHT - COURT_MARGIN_Y
         if self.score_manager is None:
             server_side = self.ball.server_side
         else:
@@ -383,9 +384,9 @@ class GameplayScene(BaseScene):
 
         if server_side == "p1":
             x = self.serve_target_rect.right
-            width = WIDTH - COURT_MARGIN - x
+            width = WIDTH - COURT_MARGIN_X - x
         else:
-            x = COURT_MARGIN
+            x = COURT_MARGIN_X
             width = self.serve_target_rect.left - x
 
         return pygame.Rect(x, court_top, width, court_bottom - court_top)
@@ -396,9 +397,9 @@ class GameplayScene(BaseScene):
 
         half_width = receiver.rect.width / 2
         if receiver.side == "left":
-            x = COURT_MARGIN + half_width
+            x = COURT_MARGIN_X + half_width
         else:
-            x = WIDTH - COURT_MARGIN - half_width
+            x = WIDTH - COURT_MARGIN_X - half_width
 
         return Vector2(x, self.serve_target_rect.centery)
 
@@ -626,18 +627,18 @@ class GameplayScene(BaseScene):
 
         half_width = player.rect.width / 2
         if side == "left":
-            x = COURT_MARGIN + half_width
+            x = COURT_MARGIN_X + half_width
         else:
-            x = WIDTH - COURT_MARGIN - half_width
+            x = WIDTH - COURT_MARGIN_X - half_width
 
         player.pos.update(x, y)
         player.rect.center = (round(player.pos.x), round(player.pos.y))
 
     def _service_target_rect(self, server_side: str) -> pygame.Rect:
-        court_left = COURT_MARGIN
-        court_right = WIDTH - COURT_MARGIN
-        court_top = COURT_MARGIN
-        court_bottom = HEIGHT - COURT_MARGIN
+        court_left = COURT_MARGIN_X
+        court_right = WIDTH - COURT_MARGIN_X
+        court_top = COURT_MARGIN_Y
+        court_bottom = HEIGHT - COURT_MARGIN_Y
         center_y = HEIGHT // 2
         left_service_x = (court_left + NET_X) // 2
         right_service_x = (NET_X + court_right) // 2
@@ -723,18 +724,18 @@ class GameplayScene(BaseScene):
         wrong_y = self._serve_lane_center_y(wrong_lane)
         wrong_y += random.uniform(-45, 45)
         if self.ball.server_side == "p1":
-            x = random.uniform(NET_X + 20, WIDTH - COURT_MARGIN)
+            x = random.uniform(NET_X + 20, WIDTH - COURT_MARGIN_X)
         else:
-            x = random.uniform(COURT_MARGIN, NET_X - 20)
+            x = random.uniform(COURT_MARGIN_X, NET_X - 20)
 
         return Vector2(x, wrong_y)
 
     def _serve_lane_center_y(self, lane: str) -> float:
         center_y = HEIGHT / 2
         if lane == "top":
-            return (COURT_MARGIN + center_y) / 2
+            return (COURT_MARGIN_Y + center_y) / 2
 
-        return (center_y + HEIGHT - COURT_MARGIN) / 2
+        return (center_y + HEIGHT - COURT_MARGIN_Y) / 2
 
     def _opposite_serve_lane(self, lane: str) -> str:
         return "bottom" if lane == "top" else "top"
@@ -770,10 +771,10 @@ class GameplayScene(BaseScene):
         if self.mode != "training" or self.training_submode != "wall":
             return False
 
-        if self.ball.rect.right < WIDTH - COURT_MARGIN or self.ball.velocity.x <= 0:
+        if self.ball.rect.right < WIDTH - COURT_MARGIN_X or self.ball.velocity.x <= 0:
             return False
 
-        self.ball.rect.right = WIDTH - COURT_MARGIN
+        self.ball.rect.right = WIDTH - COURT_MARGIN_X
         self.ball.pos.x = self.ball.rect.centerx
         self.ball.velocity.x = -abs(self.ball.velocity.x)
         return True

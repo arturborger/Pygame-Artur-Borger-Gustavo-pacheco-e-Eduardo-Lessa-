@@ -4,6 +4,9 @@ Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-gam
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
 (15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
 
+A janela usa resolução 1440×900 para ocupar melhor a tela do Mac, mantendo a
+quadra no tamanho original de 840×480 e aumentando apenas os recuos ao redor dela.
+
 ## Desenvolvedor
 
 - Artur Borger
@@ -440,3 +443,11 @@ conforme orientação do curso.
   adiciona faixa verde de ângulo para o saque dentro, mantém constantes novas em
   `src/settings.py` conforme o plano e restringe o devolvedor ao fundo da quadra
   sem entrar no quadrado válido do saque.
+
+## src/settings.py, src/assets_generator.py, src/entities/player.py, src/entities/ball.py, src/entities/practice_bot.py, src/scenes/gameplay_scene.py, src/systems/timing_bars.py e README.md
+- Sub-tarefa: Ajuste de recuos para tela do Mac
+- Dev integrador: Artur Borger
+- Ajustes manuais: a janela passou para 1440×900 e a quadra manteve o tamanho
+  original de 840×480; os recuos horizontal e vertical foram separados em
+  constantes próprias (`COURT_MARGIN_X` e `COURT_MARGIN_Y`) para centralizar a
+  quadra e aumentar apenas o espaço ao redor dela.

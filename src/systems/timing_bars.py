@@ -14,7 +14,8 @@ from src.settings import (
     BAR_OUTLINE_WIDTH,
     BAR_SPACING,
     BAR_WIDTH,
-    COURT_MARGIN,
+    COURT_MARGIN_X,
+    COURT_MARGIN_Y,
     GRAY_INACTIVE,
     GRAY_LIGHT,
     GREEN_LOCKED,
@@ -289,12 +290,12 @@ class TimingBars:
 
     def _bar_rects(self, surface: pygame.Surface) -> tuple[pygame.Rect, pygame.Rect]:
         total_height = BAR_HEIGHT * 2 + BAR_SPACING
-        y = surface.get_height() - COURT_MARGIN // 2 - total_height
+        y = surface.get_height() - COURT_MARGIN_Y // 2 - total_height
 
         if self.owner_side == "right":
-            x = surface.get_width() - COURT_MARGIN // 2 - BAR_WIDTH
+            x = surface.get_width() - COURT_MARGIN_X // 2 - BAR_WIDTH
         elif self.owner_side == "left":
-            x = COURT_MARGIN // 2
+            x = COURT_MARGIN_X // 2
         else:
             x = (surface.get_width() - BAR_WIDTH) // 2
 

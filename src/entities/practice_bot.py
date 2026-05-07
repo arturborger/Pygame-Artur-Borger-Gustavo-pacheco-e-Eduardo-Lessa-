@@ -8,7 +8,14 @@ import pygame
 from pygame.math import Vector2
 
 from src.assets_generator import make_ai_sprite
-from src.settings import COURT_MARGIN, HEIGHT, HIT_RADIUS, PLAYER_WIDTH, WIDTH
+from src.settings import (
+    COURT_MARGIN_X,
+    COURT_MARGIN_Y,
+    HEIGHT,
+    HIT_RADIUS,
+    PLAYER_WIDTH,
+    WIDTH,
+)
 from src.utils.asset_cache import AssetCache
 
 
@@ -27,7 +34,7 @@ class PracticeBot(pygame.sprite.Sprite):
         )
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.pos = Vector2(WIDTH - COURT_MARGIN - PLAYER_WIDTH // 2, HEIGHT / 2)
+        self.pos = Vector2(WIDTH - COURT_MARGIN_X - PLAYER_WIDTH // 2, HEIGHT / 2)
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
     def update(self, dt: float, ball) -> str:
@@ -54,10 +61,10 @@ class PracticeBot(pygame.sprite.Sprite):
 
         half_height = self.rect.height / 2
         self.pos.y = max(
-            COURT_MARGIN + half_height,
-            min(HEIGHT - COURT_MARGIN - half_height, self.pos.y),
+            COURT_MARGIN_Y + half_height,
+            min(HEIGHT - COURT_MARGIN_Y - half_height, self.pos.y),
         )
-        self.pos.x = WIDTH - COURT_MARGIN - PLAYER_WIDTH // 2
+        self.pos.x = WIDTH - COURT_MARGIN_X - PLAYER_WIDTH // 2
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
     def _can_hit(self, ball) -> bool:
