@@ -7,9 +7,11 @@ timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial 
 A janela usa resolução 1440×900 para ocupar melhor a tela do Mac, mantendo a
 quadra no tamanho original de 840×480 e aumentando apenas os recuos ao redor dela.
 
-## Desenvolvedor
+## Desenvolvedores
 
 - Artur Borger
+- Gustavo Pacheco
+- Eduardo Lessa
 
 ## Modos de Jogo
 
@@ -404,6 +406,16 @@ conforme orientação do curso.
   e parede; no submodo parede a borda direita reflete a bola, `player2` fica
   ausente, o maior rally e salvo em highscore quando a bola sai e a HUD mostra
   `RECORDE: N`).
+
+## src/settings.py e src/assets_generator.py
+- Sub-tarefa: Aumento de tamanho dos personagens e área de recepção
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: `PLAYER_WIDTH` e `PLAYER_HEIGHT` passaram de 60 para 75 px
+  para que os sprites dos jogadores e adversários fiquem ligeiramente maiores em
+  tela; `HIT_RADIUS` passou de 70 para 100 px para ampliar a área de recepção da
+  bola e facilitar a jogabilidade; as proporções internas de `make_player_sprite`
+  (raio da cabeça, margens do corpo e border-radius) foram ajustadas de forma
+  proporcional ao novo tamanho.
 
 ## Ajuste posterior de orientação horizontal
 - Dev integrador: Gustavo Pacheco

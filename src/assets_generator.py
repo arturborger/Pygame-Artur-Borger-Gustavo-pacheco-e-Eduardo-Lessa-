@@ -167,16 +167,16 @@ def make_player_sprite(color: tuple[int, int, int]) -> pygame.Surface:
     """
     surface = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT), pygame.SRCALPHA)
 
-    head_radius = 15
+    head_radius = 19
     head_center = (PLAYER_WIDTH // 2, head_radius + OUTLINE_WIDTH)
     body_rect = pygame.Rect(
-        12,
+        15,
         head_center[1] + head_radius - OUTLINE_WIDTH,
-        PLAYER_WIDTH - 24,
+        PLAYER_WIDTH - 30,
         PLAYER_HEIGHT - head_center[1] - head_radius,
     )
 
-    _shadowed_rect(surface, body_rect, color, border_radius=12)
+    _shadowed_rect(surface, body_rect, color, border_radius=15)
     _shadowed_circle(surface, head_center, head_radius, color)
 
     return surface
