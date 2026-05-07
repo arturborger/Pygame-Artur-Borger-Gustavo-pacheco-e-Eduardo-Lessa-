@@ -65,6 +65,35 @@ def hit_net(ball) -> bool:
     )
 
 
+def wall_hit_before_net(ball) -> bool:
+    """Detecta se a bola toca na parede ainda no lado do rebatedor, antes de cruzar a rede.
+
+    Quando a bola atinge a borda horizontal da janela enquanto ainda está no
+    campo de quem a rebateu por último, a jogada é inválida (bola fora).
+
+    Args:
+        ball: Bola com atributos ``rect`` e ``last_hitter``.
+
+    Returns:
+        ``True`` se a bola toca na parede antes de cruzar a rede para o campo
+        adversário; caso contrário ``False``.
+    """
+    if ball.rect.top > 0 and ball.rect.bottom < HEIGHT:
+        return False
+
+    last_hitter = getattr(ball, "last_hitter", None)
+    if last_hitter is None:
+        return False
+
+    if last_hitter == "left":
+        return ball.rect.centerx < NET_X
+
+    if last_hitter == "right":
+        return ball.rect.centerx > NET_X
+
+    return False
+
+
 def crossed_net_outside(ball) -> str | None:
     """Detecta se a bola cruzou a linha da rede por fora do trecho valido.
 

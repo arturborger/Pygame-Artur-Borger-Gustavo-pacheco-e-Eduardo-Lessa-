@@ -184,6 +184,12 @@ class GameplayScene(BaseScene):
         if self._update_net_crossing_out():
             return
 
+        if self.mode != "training" and physics.wall_hit_before_net(self.ball):
+            loser_side = self._score_side_for_player_side(self.ball.last_hitter)
+            winner_side = self._other_score_side(loser_side)
+            self._show_out_message(winner_side)
+            return
+
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
             self._play_sound("bounce")

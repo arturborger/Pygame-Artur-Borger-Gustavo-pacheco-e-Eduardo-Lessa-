@@ -53,6 +53,7 @@ joga pela direita.
 9. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
 10. Acertar no sweet spot evita erros de mira e marca um winner.
 11. Para o ponto continuar, a bola precisa cruzar a linha central dentro do trecho da rede. Se ela contornar a rede por fora, aparece `OUT` e o ponto termina.
+12. Se a bola tocar na parede (borda superior ou inferior) ainda no lado de quem a rebateu — ou seja, antes de cruzar a rede — a jogada é `OUT` e o ponto vai para o adversário.
 
 ### Saque
 
@@ -468,3 +469,12 @@ conforme orientação do curso.
   se a trajetória passou pelo trecho da rede dentro da quadra; a
   `GameplayScene` encerra saque ou rally com mensagem `OUT` quando a bola
   contorna a rede por fora, dando o ponto ao adversário de quem rebateu.
+
+## src/systems/physics.py, src/scenes/gameplay_scene.py e README.md
+- Sub-tarefa: Regra de parede antes da rede
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi adicionada a função `physics.wall_hit_before_net` que
+  detecta quando a bola atinge a borda horizontal ainda no campo de quem a
+  rebateu (antes de cruzar a rede); a `GameplayScene` passa a encerrar o ponto
+  com mensagem `OUT` nessa situação, dando o ponto ao adversário, sem alterar
+  o comportamento do Modo Treino.
