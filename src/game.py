@@ -26,7 +26,12 @@ class Game:
     def __init__(self) -> None:
         """Inicializa o Pygame, a janela, o relógio e a cena inicial."""
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        info = pygame.display.Info()
+        scale = min(info.current_w / WIDTH, info.current_h / HEIGHT, 1.0)
+        self._win_w = int(WIDTH * scale)
+        self._win_h = int(HEIGHT * scale)
+        self._window = pygame.display.set_mode((self._win_w, self._win_h))
+        self.screen = pygame.Surface((WIDTH, HEIGHT))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True
@@ -61,6 +66,8 @@ class Game:
                 self.change_scene(next_scene)
 
             self.scene.draw(self.screen)
+            scaled = pygame.transform.scale(self.screen, (self._win_w, self._win_h))
+            self._window.blit(scaled, (0, 0))
             pygame.display.flip()
 
         self.sound_manager.stop_music()
