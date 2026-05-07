@@ -52,6 +52,7 @@ joga pela direita.
 8. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
 9. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
 10. Acertar no sweet spot evita erros de mira e marca um winner.
+11. Para o ponto continuar, a bola precisa cruzar a linha central dentro do trecho da rede. Se ela contornar a rede por fora, aparece `OUT` e o ponto termina.
 
 ### Saque
 
@@ -59,6 +60,13 @@ joga pela direita.
 - O bot saca automaticamente com ângulo e força aleatórios, mirando de forma consistente no quadrado correto.
 - A área amarela na quadra indica o quadrado que valida o saque.
 - A faixa verde da barra de ângulo indica o intervalo que tende a colocar o saque dentro.
+- Mesmo no saque, a bola deve passar pelo trecho válido da rede antes de chegar ao quadrado correto.
+
+### Regra da rede
+
+- A quadra usa P1 à esquerda e P2/CPU à direita; por isso a rede é a linha vertical central.
+- A bola só continua em jogo quando cruza essa linha dentro da altura da quadra, entre os dois postes da rede.
+- Se a trajetória cruza para o outro lado por fora desse trecho, a jogada é `OUT` e o ponto vai para o adversário de quem rebateu.
 
 ## Pontuação
 
@@ -451,3 +459,12 @@ conforme orientação do curso.
   original de 840×480; os recuos horizontal e vertical foram separados em
   constantes próprias (`COURT_MARGIN_X` e `COURT_MARGIN_Y`) para centralizar a
   quadra e aumentar apenas o espaço ao redor dela.
+
+## src/entities/ball.py, src/systems/physics.py, src/scenes/gameplay_scene.py e README.md
+- Sub-tarefa: Validação obrigatória de passagem pela rede
+- Dev integrador: Artur Borger
+- Ajustes manuais: a bola passou a guardar a posição do quadro anterior para
+  detectar quando cruza a linha central; `physics.crossed_net_outside` valida
+  se a trajetória passou pelo trecho da rede dentro da quadra; a
+  `GameplayScene` encerra saque ou rally com mensagem `OUT` quando a bola
+  contorna a rede por fora, dando o ponto ao adversário de quem rebateu.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.settings import HEIGHT, NET_WIDTH, NET_X, WIDTH
+from src.settings import COURT_MARGIN_Y, HEIGHT, NET_WIDTH, NET_X, WIDTH
 
 
 def bounce_off_walls(ball) -> bool:
@@ -59,4 +59,43 @@ def hit_net(ball) -> bool:
         ``True`` se a bola cruza a linha vertical da rede dentro da tolerância
         de largura da rede; caso contrário, ``False``.
     """
-    return ball.rect.left <= NET_X + NET_WIDTH and ball.rect.right >= NET_X - NET_WIDTH
+    return (
+        ball.rect.left <= NET_X + NET_WIDTH
+        and ball.rect.right >= NET_X - NET_WIDTH
+    )
+
+
+def crossed_net_outside(ball) -> str | None:
+    """Detecta se a bola cruzou a linha da rede por fora do trecho valido.
+
+    Args:
+        ball: Bola com atributos ``previous_pos`` e ``pos`` em ``Vector2``.
+
+    Returns:
+        ``"left"`` se a bola cruzou para a esquerda por fora da rede,
+        ``"right"`` se cruzou para a direita por fora da rede ou ``None`` se
+        nao houve cruzamento irregular.
+    """
+    previous_pos = getattr(ball, "previous_pos", None)
+    current_pos = getattr(ball, "pos", None)
+    if previous_pos is None or current_pos is None:
+        return None
+
+    previous_x = previous_pos.x
+    current_x = current_pos.x
+    if previous_x == current_x:
+        return None
+
+    if previous_x < NET_X <= current_x:
+        crossed_to_side = "right"
+    elif previous_x > NET_X >= current_x:
+        crossed_to_side = "left"
+    else:
+        return None
+
+    progress = (NET_X - previous_x) / (current_x - previous_x)
+    crossing_y = previous_pos.y + (current_pos.y - previous_pos.y) * progress
+    if COURT_MARGIN_Y <= crossing_y <= HEIGHT - COURT_MARGIN_Y:
+        return None
+
+    return crossed_to_side

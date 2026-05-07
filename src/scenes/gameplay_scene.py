@@ -181,6 +181,9 @@ class GameplayScene(BaseScene):
         if self._update_serve_validation():
             return
 
+        if self._update_net_crossing_out():
+            return
+
         if physics.bounce_off_walls(self.ball):
             self.ball.bounce_count += 1
             self._play_sound("bounce")
@@ -431,6 +434,10 @@ class GameplayScene(BaseScene):
             self._handle_invalid_serve()
             return True
 
+        if physics.crossed_net_outside(self.ball):
+            self._handle_invalid_serve()
+            return True
+
         if self._serve_hit_target_box():
             self.serve_state = SERVE_RALLY
             self.serve_target_rect = None
@@ -462,12 +469,35 @@ class GameplayScene(BaseScene):
 
     def _handle_invalid_serve(self) -> None:
         receiver_side = self._other_score_side(self.ball.server_side)
+        self._show_out_message(receiver_side)
+
+    def _update_net_crossing_out(self) -> bool:
+        crossed_to_side = physics.crossed_net_outside(self.ball)
+        if crossed_to_side is None:
+            return False
+
+        if self.mode == "training":
+            self._reset_training_rally()
+            return True
+
+        self._show_out_message(self._net_out_winner(crossed_to_side))
+        return True
+
+    def _net_out_winner(self, crossed_to_side: str) -> str:
+        loser_player_side = self.ball.last_hitter
+        if loser_player_side in ("left", "right"):
+            loser_score_side = self._score_side_for_player_side(loser_player_side)
+            return self._other_score_side(loser_score_side)
+
+        return "p2" if crossed_to_side == "right" else "p1"
+
+    def _show_out_message(self, winner_side: str) -> None:
         self.ball.velocity.update(0, 0)
         self.ball.release()
         self._reset_all_timing_bars()
         self.serve_state = SERVE_MESSAGE
         self.point_message = "OUT"
-        self.pending_point_winner = receiver_side
+        self.pending_point_winner = winner_side
         self.point_message_until = (
             pygame.time.get_ticks() + int(OUT_MESSAGE_TIME * 1000)
         )
@@ -792,6 +822,7 @@ class GameplayScene(BaseScene):
 
     def _serve_training_ball(self) -> None:
         self.ball.pos.update(WIDTH / 2, HEIGHT / 2)
+        self.ball.previous_pos.update(self.ball.pos)
         self.ball.rect.center = (round(self.ball.pos.x), round(self.ball.pos.y))
         self.ball.velocity.update(BALL_BASE_SPEED, 0)
         self.ball.release()

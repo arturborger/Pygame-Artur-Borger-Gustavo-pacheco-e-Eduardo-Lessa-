@@ -30,6 +30,7 @@ class Ball(pygame.sprite.Sprite):
         rect: Retângulo usado para posicionamento e colisões amplas.
         mask: Máscara da superfície usada para colisões precisas.
         pos: Posição central da bola em coordenadas de ponto flutuante.
+        previous_pos: Posição central no quadro anterior.
         velocity: Velocidade atual da bola em pixels por segundo.
         last_hitter: Identificador do último lado que rebateu a bola.
         bounce_count: Quantidade de quicadas desde a última rebatida.
@@ -55,6 +56,7 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.pos = pygame.math.Vector2(start_pos)
+        self.previous_pos = pygame.math.Vector2(start_pos)
         self.velocity = pygame.math.Vector2()
         self.last_hitter: str | None = None
         self.bounce_count = 0
@@ -70,6 +72,7 @@ class Ball(pygame.sprite.Sprite):
         Args:
             dt: Tempo decorrido desde o último quadro, em segundos.
         """
+        self.previous_pos.update(self.pos)
         if not self.is_held():
             self.pos += self.velocity * dt
         self.rect.center = (round(self.pos.x), round(self.pos.y))
@@ -84,6 +87,7 @@ class Ball(pygame.sprite.Sprite):
         self.held_by_side = player.side
         self.velocity.update(0, 0)
         self.follow_captured_player(player)
+        self.previous_pos.update(self.pos)
 
     def follow_captured_player(self, player) -> None:
         """Mantém a bola posicionada ao lado do jogador que a segurou.
@@ -170,6 +174,7 @@ class Ball(pygame.sprite.Sprite):
             x = WIDTH - COURT_MARGIN_X
 
         self.pos.update(x, y)
+        self.previous_pos.update(self.pos)
         self.velocity.update(0, 0)
         self.last_hitter = None
         self.bounce_count = 0
