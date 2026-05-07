@@ -65,10 +65,10 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 ## Assets
 
 **A maior parte dos gráficos é gerada em código Python via `pygame.draw`** (formas
-geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal e do
-Roger Federer, carregados de `assets/sprites/Nadal.png` e
-`assets/sprites/Federer.png` para adversários específicos do torneio. Veja
-`src/assets_generator.py`.
+geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal, do
+Roger Federer e do Novak Djokovic, carregados de `assets/sprites/Nadal.png`,
+`assets/sprites/Federer.png` e `assets/sprites/Djokovic.png` para adversários
+específicos do torneio. Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -408,4 +408,11 @@ conforme orientação do curso.
 - Dev integrador: Artur Borger
 - Ajustes manuais: o adversário da floresta passou a ser Roger Federer, usando
   o PNG em `assets/sprites/Federer.png` no lugar do sprite gerado por
+  `pygame.draw`.
+
+## src/assets_generator.py, src/settings.py e assets/sprites/Djokovic.png
+- Sub-tarefa: Ajuste de adversário do estádio
+- Dev integrador: Artur Borger
+- Ajustes manuais: o adversário do estádio passou a ser Novak Djokovic, usando
+  o PNG em `assets/sprites/Djokovic.png` no lugar do sprite gerado por
   `pygame.draw`.

@@ -30,6 +30,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SPRITES_DIR = PROJECT_ROOT / "assets" / "sprites"
 NADAL_SPRITE_PATH = SPRITES_DIR / "Nadal.png"
 FEDERER_SPRITE_PATH = SPRITES_DIR / "Federer.png"
+DJOKOVIC_SPRITE_PATH = SPRITES_DIR / "Djokovic.png"
 
 
 def _shadowed_rect(
@@ -260,6 +261,9 @@ def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
 
     if opponent_id == "forest":
         return _load_sprite(FEDERER_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
+
+    if opponent_id == "stadium":
+        return _load_sprite(DJOKOVIC_SPRITE_PATH, (PLAYER_WIDTH, PLAYER_HEIGHT))
 
     return make_player_sprite(_get_opponent_color(opponent_id))
 

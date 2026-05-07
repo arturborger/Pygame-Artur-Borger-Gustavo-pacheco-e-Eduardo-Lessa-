@@ -14,8 +14,8 @@ a **barra de ângulo** com ESPAÇO, depois a **barra de força** também com ESP
 
 Pontuação no **sistema oficial do tênis** (15-30-40-game-set), modo principal em
 **torneio progressivo** com 3 fases, e **assets gerados via código Python** (formas
-geométricas com `pygame.draw`), com exceção dos sprites do Rafael Nadal e do
-Roger Federer em PNG.
+geométricas com `pygame.draw`), com exceção dos sprites do Rafael Nadal, do
+Roger Federer e do Novak Djokovic em PNG.
 
 **Stack:** Python 3.10+, PyGame, Git/GitHub.
 **Equipe:** 3 desenvolvedores (cada componente é dividido em 3 micro-tarefas).
@@ -32,9 +32,9 @@ Roger Federer em PNG.
 | Movimento | Setas movem o jogador, restrito ao próprio campo |
 | Modos | **M1 = 1P vs CPU (Torneio)** · **M2 = 2P local** · **M3 = Modo Treino** |
 | Pontuação | **Tênis oficial**: 0-15-30-40-game · 6 games = set (com 2 de vantagem) · tie-break a 7 no 6-6 · melhor de 3 sets |
-| Modo principal (M1) | **Torneio**: 🏖️ Rafael Nadal → 🌲 Roger Federer → 🏟️ Estela Estádio |
+| Modo principal (M1) | **Torneio**: 🏖️ Rafael Nadal → 🌲 Roger Federer → 🏟️ Novak Djokovic |
 | Recursos avançados | **High-score persistente** + **estatísticas simples** (aces e winners, contagem direta) |
-| Assets | **Gerados via código Python** (`assets_generator.py`) com `pygame.draw`, exceto `assets/sprites/Nadal.png` e `assets/sprites/Federer.png` |
+| Assets | **Gerados via código Python** (`assets_generator.py`) com `pygame.draw`, exceto `assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e `assets/sprites/Djokovic.png` |
 | Resolução | 960×600, 60 FPS |
 
 ### Controles 1P
@@ -177,7 +177,8 @@ projeto_tenis/
 ├── assets/
 │   └── sprites/
 │       ├── Nadal.png           # sprite externo do Rafael Nadal
-│       └── Federer.png         # sprite externo do Roger Federer
+│       ├── Federer.png         # sprite externo do Roger Federer
+│       └── Djokovic.png        # sprite externo do Novak Djokovic
 └── src/
     ├── __init__.py
     ├── settings.py
@@ -216,14 +217,15 @@ projeto_tenis/
 
 ### Sobre `assets_generator.py`
 Quase todos os "sprites" são gerados em runtime via `pygame.draw` e cacheados. As exceções
-são Rafael Nadal e Roger Federer, carregados de `assets/sprites/Nadal.png` e
-`assets/sprites/Federer.png`. Estilo cartoon = formas
-chapadas com **contorno preto grosso**.
+são Rafael Nadal, Roger Federer e Novak Djokovic, carregados de
+`assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e
+`assets/sprites/Djokovic.png`. Estilo cartoon = formas chapadas com
+**contorno preto grosso**.
 
 Funções esperadas neste módulo:
 - `make_court(scenery_id) -> pygame.Surface`
 - `make_player_sprite(color) -> pygame.Surface`
-- `make_ai_sprite(opponent_id) -> pygame.Surface` (carrega Nadal para `beach`, Federer para `forest`; gera cores diferentes nos demais adversários)
+- `make_ai_sprite(opponent_id) -> pygame.Surface` (carrega Nadal para `beach`, Federer para `forest`, Djokovic para `stadium`; gera cores diferentes nos demais adversários)
 - `make_ball() -> pygame.Surface`
 - `make_trophy() -> pygame.Surface`
 - `make_swing_animation_frames(color) -> list[pygame.Surface]` (3-5 frames)
@@ -231,7 +233,7 @@ Funções esperadas neste módulo:
 
 Sons também são sintéticos via `pygame.sndarray` ou `pygame.mixer.Sound` com waveforms simples.
 **Justificativa para o README:** "Optamos por gerar a maior parte dos assets visuais
-em código Python, mantendo os sprites do Rafael Nadal e do Roger Federer organizados em `assets/sprites/`."
+em código Python, mantendo os sprites do Rafael Nadal, do Roger Federer e do Novak Djokovic organizados em `assets/sprites/`."
 
 ### Regras invioláveis de arquitetura
 1. Toda entidade interativa herda de `pygame.sprite.Sprite`.
@@ -318,7 +320,7 @@ SETS_TO_WIN_MATCH = 2
 TOURNAMENT_OPPONENTS = [
     {"id": "beach",   "name": "Rafael Nadal",   "reaction": 0.40, "aim_error": 14.0, "max_speed": 260, "color": (220, 110, 80)},
     {"id": "forest",  "name": "Roger Federer",  "reaction": 0.25, "aim_error":  8.0, "max_speed": 320, "color": (140, 80, 200)},
-    {"id": "stadium", "name": "Estela Estádio", "reaction": 0.12, "aim_error":  3.5, "max_speed": 400, "color": (60, 60, 60)},
+    {"id": "stadium", "name": "Novak Djokovic", "reaction": 0.12, "aim_error":  3.5, "max_speed": 400, "color": (60, 60, 60)},
 ]
 
 # Caminhos
@@ -397,7 +399,8 @@ preto com alpha 60). make_court desenha a quadra (court_color), as linhas branca
 quadras de tênis simples (limites + linha de saque + linha central) e a rede no centro.
 make_player_sprite desenha um círculo (cabeça) sobre um retângulo arredondado (corpo) com
 a cor recebida. make_ai_sprite carrega `assets/sprites/Nadal.png` para o adversário
-`beach`, `assets/sprites/Federer.png` para o adversário `forest` e usa a cor do
+`beach`, `assets/sprites/Federer.png` para o adversário `forest`,
+`assets/sprites/Djokovic.png` para o adversário `stadium` e usa a cor do
 TOURNAMENT_OPPONENTS[opponent_id]["color"] nos demais.
 Cada função retorna um pygame.Surface com tamanho apropriado e SRCALPHA. Inclua docstrings
 Google em português.
@@ -1097,8 +1100,9 @@ Ao fim de cada partida você vê: aces e winners de cada jogador.
 
 ## Assets
 **A maior parte dos gráficos foi gerada em código Python via `pygame.draw`** (formas
-geométricas cartoon coloridas). Os sprites do Rafael Nadal e do Roger Federer ficam em
-`assets/sprites/Nadal.png` e `assets/sprites/Federer.png`. Veja `src/assets_generator.py`.
+geométricas cartoon coloridas). Os sprites do Rafael Nadal, do Roger Federer e do
+Novak Djokovic ficam em `assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e
+`assets/sprites/Djokovic.png`. Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências

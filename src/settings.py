@@ -111,7 +111,7 @@ TOURNAMENT_OPPONENTS = [
     },
     {
         "id": "stadium",
-        "name": "Estela Estádio",
+        "name": "Novak Djokovic",
         "reaction": 0.12,
         "aim_error": 3.5,
         "max_speed": 400,
