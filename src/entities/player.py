@@ -17,6 +17,7 @@ from src.settings import (
     AIM_ARROW_OUTLINE_WIDTH,
     AIM_ARROW_WIDTH,
     BLUE,
+    COURT_MARGIN_X,
     GREEN_LOCKED,
     HEIGHT,
     HIT_RADIUS,

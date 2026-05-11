@@ -276,3 +276,12 @@ conforme orientação do curso.
   Roger Federer e Novak Djokovic usando essas constantes, garantindo que os três
   personagens do torneio sejam exibidos no mesmo tamanho de `75 × 75 px` que o
   sprite do jogador humano.
+
+## src/entities/player.py
+- Sub-tarefa: Movimento livre pela tela inteira + correção de crash ao abrir partida
+- Dev integrador: Artur Borger
+- Ajustes manuais: `_clamp_to_own_court` foi alterado para restringir apenas às
+  bordas da tela (`0` a `WIDTH` e `0` a `HEIGHT`), removendo a barreira da linha
+  central; a importação de `COURT_MARGIN_X` foi reintegrada pois ainda é usada
+  no posicionamento inicial do jogador — a remoção inadvertida desta importação
+  causava `NameError` ao abrir qualquer partida.
