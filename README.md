@@ -4,11 +4,9 @@ Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-gam
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
 (15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
 
-## Integrantes
+## Desenvolvedor
 
-- Arthur Borger
-- Eduardo Lessa
-- Gustavo Pacheco
+- Artur Borger
 
 ## Modos de Jogo
 
