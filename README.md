@@ -59,8 +59,11 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 
 ## Assets
 
-**Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
-cartoon coloridas) — nenhum sprite externo foi usado. Veja `src/assets_generator.py`.
+**A maior parte dos gráficos foi gerada em código Python via `pygame.draw`** (formas
+geométricas cartoon coloridas). Os sprites do Rafael Nadal, do Roger Federer e do
+Novak Djokovic ficam em `assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e
+`assets/sprites/Djokovic.png`, carregados e escalados em runtime para `96 × 96 px`
+(ligeiramente maiores que o jogador humano de `75 × 75 px`). Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -285,3 +288,12 @@ conforme orientação do curso.
   central; a importação de `COURT_MARGIN_X` foi reintegrada pois ainda é usada
   no posicionamento inicial do jogador — a remoção inadvertida desta importação
   causava `NameError` ao abrir qualquer partida.
+
+## src/entities/ai_player.py, src/settings.py e src/assets_generator.py
+- Sub-tarefa: Aumento do tamanho dos sprites de Nadal, Federer e Djokovic para melhor jogabilidade
+- Dev integrador: Artur Borger
+- Ajustes manuais: `AI_SPRITE_WIDTH` e `AI_SPRITE_HEIGHT` desvinculados de `PLAYER_WIDTH`/
+  `PLAYER_HEIGHT` e definidos como `96 × 96 px` (vs. `75 × 75 px` do jogador humano), tornando
+  os adversários do torneio visivelmente maiores e mais fáceis de acertar; `AIPlayer` passou a
+  sobrescrever `_clamp_to_own_court` com as dimensões corretas do sprite da IA, evitando que
+  os personagens saiam parcialmente pela borda da tela.

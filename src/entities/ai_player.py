@@ -9,11 +9,14 @@ import pygame
 from src.assets_generator import make_ai_sprite
 from src.entities.player import Player
 from src.settings import (
+    AI_SPRITE_HEIGHT,
+    AI_SPRITE_WIDTH,
     AIM_MAX_ANGLE,
     AIM_MIN_ANGLE,
     HEIGHT,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
+    WIDTH,
 )
 from src.utils.asset_cache import AssetCache
 
@@ -115,6 +118,18 @@ class AIPlayer(Player):
 
         self._clamp_to_own_court()
         self.rect.center = (round(self.pos.x), round(self.pos.y))
+
+    def _clamp_to_own_court(self) -> None:
+        """Restringe a IA às bordas da tela usando as dimensões do sprite da IA.
+
+        Sobrescreve o metodo do pai para usar `AI_SPRITE_WIDTH`/`AI_SPRITE_HEIGHT`
+        em vez de `PLAYER_WIDTH`/`PLAYER_HEIGHT`, ja que os sprites dos adversarios
+        podem ter tamanho diferente do jogador humano.
+        """
+        half_w = AI_SPRITE_WIDTH / 2
+        half_h = AI_SPRITE_HEIGHT / 2
+        self.pos.x = max(half_w, min(WIDTH - half_w, self.pos.x))
+        self.pos.y = max(half_h, min(HEIGHT - half_h, self.pos.y))
 
     def _choose_shot_angle(self, ball) -> float:
         base_angle = random.uniform(AIM_MIN_ANGLE, AIM_MAX_ANGLE)
