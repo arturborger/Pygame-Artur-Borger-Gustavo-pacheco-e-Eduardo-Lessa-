@@ -151,9 +151,17 @@ class GameplayScene(BaseScene):
                 continue
 
             hit_result = self.player1.handle_event(event, self.ball)
+            if hit_result == "out_hit":
+                loser_side = self._score_side_for_player_side(self.player1.side)
+                self._show_out_message(self._other_score_side(loser_side))
+                continue
             self._register_hit_result(hit_result, self.player1)
             if self.mode == "2p":
                 hit_result = self.player2.handle_event(event, self.ball)
+                if hit_result == "out_hit":
+                    loser_side = self._score_side_for_player_side(self.player2.side)
+                    self._show_out_message(self._other_score_side(loser_side))
+                    continue
                 self._register_hit_result(hit_result, self.player2)
 
     def update(self, dt: float) -> None:

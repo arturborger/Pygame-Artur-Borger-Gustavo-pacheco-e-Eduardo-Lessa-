@@ -22,9 +22,11 @@ from src.settings import (
     GREEN_SWEET,
     LINE_OUTLINE,
     ORANGE,
+    POWER_DANGER_LOW,
     POWER_MAX,
     POWER_MIN,
     POWER_OSC_SPEED,
+    RED,
     SHOW_FROZEN_TIME,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
@@ -269,6 +271,17 @@ class TimingBars:
 
         return SWEET_SPOT_LOW <= self.locked_power <= SWEET_SPOT_HIGH
 
+    def is_danger_zone(self) -> bool:
+        """Indica se a força travada está na zona de perigo (último 1/5 da barra).
+
+        Returns:
+            ``True`` quando a força travada está acima de ``POWER_DANGER_LOW``.
+        """
+        if self.locked_power is None:
+            return False
+
+        return self.locked_power >= POWER_DANGER_LOW
+
     def draw(self, surface: pygame.Surface) -> None:
         """Desenha as barras na superfície informada.
 
@@ -286,6 +299,7 @@ class TimingBars:
 
         self._draw_bar_background(surface, power_rect)
         self._draw_sweet_spot(surface, power_rect)
+        self._draw_power_danger_zone(surface, power_rect)
         self._draw_power_cursor(surface, power_rect)
 
     def _bar_rects(self, surface: pygame.Surface) -> tuple[pygame.Rect, pygame.Rect]:
@@ -425,6 +439,27 @@ class TimingBars:
             surface,
             GREEN_SWEET,
             sweet_rect,
+            border_radius=max(0, BAR_BORDER_RADIUS - BAR_OUTLINE_WIDTH),
+        )
+
+    def _draw_power_danger_zone(
+        self,
+        surface: pygame.Surface,
+        rect: pygame.Rect,
+    ) -> None:
+        track_rect = rect.inflate(-BAR_OUTLINE_WIDTH * 2, -BAR_OUTLINE_WIDTH * 2)
+        start_ratio = self._normalized_ratio(POWER_DANGER_LOW, POWER_MIN, POWER_MAX)
+        danger_left = track_rect.left + round(start_ratio * track_rect.width)
+        danger_rect = pygame.Rect(
+            danger_left,
+            track_rect.top,
+            track_rect.right - danger_left,
+            track_rect.height,
+        )
+        pygame.draw.rect(
+            surface,
+            RED,
+            danger_rect,
             border_radius=max(0, BAR_BORDER_RADIUS - BAR_OUTLINE_WIDTH),
         )
 

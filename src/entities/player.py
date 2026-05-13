@@ -134,6 +134,8 @@ class Player(pygame.sprite.Sprite):
         if event.key == self.controls.get("lock", pygame.K_SPACE):
             changed_state = self.timing_bars.handle_lock_press()
             if changed_state and self.timing_bars.is_locked():
+                if self.timing_bars.is_danger_zone():
+                    return "out_hit"
                 return self.try_hit(ball)
 
         return "no_hit"
