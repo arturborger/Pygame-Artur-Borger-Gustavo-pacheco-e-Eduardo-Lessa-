@@ -184,11 +184,59 @@ def make_player_sprite(color: tuple[int, int, int]) -> pygame.Surface:
     return surface
 
 
+def _remove_near_white_background(image: pygame.Surface, threshold: int = 20) -> pygame.Surface:
+    """Remove fundo quase-branco de uma imagem tornando pixels claros transparentes.
+
+    Usado para PNGs de 24 bits sem canal alpha que possuem fundo branco
+    (como Federer.png e Djokovic.png). Cria uma nova superficie SRCALPHA e
+    zera o alpha de todos os pixels cujos tres canais RGB estejam a menos de
+    `threshold` unidades de 255.
+
+    Args:
+        image: Superficie pygame original (sem canal alpha proprio).
+        threshold: Distancia maxima de cada canal RGB em relacao a 255 para
+            considerar um pixel como fundo branco.
+
+    Returns:
+        Nova superficie SRCALPHA com o fundo removido.
+    """
+    result = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+    result.blit(image, (0, 0))
+
+    try:
+        import numpy as np  # noqa: PLC0415
+
+        rgb = pygame.surfarray.pixels3d(result)
+        alpha = pygame.surfarray.pixels_alpha(result)
+        white_mask = (
+            (rgb[:, :, 0] >= 255 - threshold)
+            & (rgb[:, :, 1] >= 255 - threshold)
+            & (rgb[:, :, 2] >= 255 - threshold)
+        )
+        alpha[white_mask] = 0
+        del rgb, alpha
+    except ImportError:
+        result.set_colorkey(WHITE)
+
+    return result
+
+
 def _load_sprite(path: Path, size: tuple[int, int]) -> pygame.Surface:
-    """Carrega um sprite PNG externo e ajusta para o tamanho do jogo."""
+    """Carrega um sprite PNG externo e ajusta para o tamanho do jogo.
+
+    PNGs com canal alpha proprio (como Nadal.png) sao convertidos para o
+    formato do display via convert_alpha. PNGs sem canal alpha (24 bits,
+    como Federer.png e Djokovic.png) passam por remocao de fundo branco
+    antes do redimensionamento.
+    """
     image = pygame.image.load(str(path))
-    if pygame.display.get_init() and pygame.display.get_surface() is not None:
-        image = image.convert_alpha()
+    has_alpha = image.get_masks()[3] != 0
+
+    if has_alpha:
+        if pygame.display.get_init() and pygame.display.get_surface() is not None:
+            image = image.convert_alpha()
+    else:
+        image = _remove_near_white_background(image)
 
     return pygame.transform.smoothscale(image, size)
 

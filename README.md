@@ -55,6 +55,12 @@ Ao fim de cada partida você vê: aces e winners de cada jogador.
 geométricas cartoon coloridas). Os sprites do Rafael Nadal, do Roger Federer e do
 Novak Djokovic ficam em `assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e
 `assets/sprites/Djokovic.png`. Veja `src/assets_generator.py`.
+
+Os sprites de Federer e Djokovic eram PNGs de 24 bits sem canal alpha (fundo branco).
+O carregador `_load_sprite` detecta automaticamente a ausência de transparência e remove
+o fundo quase-branco via `numpy + pygame.surfarray` antes de escalar a imagem, eliminando
+as caixas brancas visíveis em jogo.
+
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
