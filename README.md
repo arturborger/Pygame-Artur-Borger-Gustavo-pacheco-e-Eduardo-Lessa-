@@ -40,6 +40,8 @@ python main.py
 2. Depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%) — pressione ESPAÇO de novo.
 3. Acertar no sweet spot evita erros de mira e marca um winner.
 
+A posição da barra de força determina diretamente a velocidade da bola: **esquerda** gera uma batida fraca (~180 px/s) e **direita** uma batida potente (~720 px/s). A progressão segue uma curva não-linear que amplifica a diferença nos extremos.
+
 ## Pontuação
 
 Sistema oficial do tênis: 0 → 15 → 30 → 40 → game · 6 games = set (com 2 de vantagem) ·
