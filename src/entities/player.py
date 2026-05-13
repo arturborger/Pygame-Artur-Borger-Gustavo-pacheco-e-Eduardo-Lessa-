@@ -18,13 +18,10 @@ from src.settings import (
     AIM_ARROW_WIDTH,
     BLUE,
     COURT_MARGIN_X,
-    COURT_MARGIN_Y,
     GREEN_LOCKED,
     HEIGHT,
     HIT_RADIUS,
     LINE_OUTLINE,
-    NET_WIDTH,
-    NET_X,
     ORANGE,
     PLAYER_HEIGHT,
     PLAYER_SPEED,
@@ -280,15 +277,10 @@ class Player(pygame.sprite.Sprite):
     def _clamp_to_own_court(self) -> None:
         half_width = PLAYER_WIDTH / 2
         half_height = PLAYER_HEIGHT / 2
-        min_y = COURT_MARGIN_Y + half_height
-        max_y = HEIGHT - COURT_MARGIN_Y - half_height
-
-        if self.side == "left":
-            min_x = COURT_MARGIN_X + half_width
-            max_x = NET_X - NET_WIDTH / 2 - half_width
-        else:
-            min_x = NET_X + NET_WIDTH / 2 + half_width
-            max_x = WIDTH - COURT_MARGIN_X - half_width
+        min_x = half_width
+        max_x = WIDTH - half_width
+        min_y = half_height
+        max_y = HEIGHT - half_height
 
         self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(min_y, min(max_y, self.pos.y))

@@ -42,9 +42,9 @@ PLAYER_HEIGHT = 75
 PLAYER_SPEED = 320
 HIT_RADIUS = 100
 
-# Sprites dos adversários do torneio (mesmo tamanho do jogador)
-AI_SPRITE_WIDTH = PLAYER_WIDTH
-AI_SPRITE_HEIGHT = PLAYER_HEIGHT
+# Sprites dos adversários do torneio (ligeiramente maiores que o jogador)
+AI_SPRITE_WIDTH = 96
+AI_SPRITE_HEIGHT = 96
 CONTROLS_P1 = {
     "up": pygame.K_UP,
     "down": pygame.K_DOWN,
@@ -109,7 +109,7 @@ OUT_MESSAGE_TIME = 0.95
 GAME_TARGET_POINTS = 4
 GAMES_TARGET_SET = 6
 TIEBREAK_TARGET = 7
-SETS_TO_WIN_MATCH = 2
+SETS_TO_WIN_MATCH = 1
 
 # Adversários do torneio
 TOURNAMENT_OPPONENTS = [

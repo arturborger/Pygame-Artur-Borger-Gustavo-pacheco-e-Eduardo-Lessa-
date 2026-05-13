@@ -2,13 +2,11 @@
 
 Jogo de tênis 2D top-down em estilo cartoon, com **mecânica única de mini-game de
 timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial do tênis**
-(15-30-40-deuce-advantage-tiebreak, melhor de 3 sets).
+(15-30-40-deuce-advantage-tiebreak, 1 set por partida).
 
-## Integrantes
+## Desenvolvedor
 
-- Arthur Borger
-- Eduardo Lessa
-- Gustavo Pacheco
+- Artur Borger
 
 ## Modos de Jogo
 
@@ -34,7 +32,7 @@ python main.py
 |------|----|----|
 | Mover | Setas | W A S D |
 | Travar barras (ângulo, depois força) | ESPAÇO | SHIFT direito |
-| Pause | P / ESC | - |
+| Pause | P / ESC | – |
 
 ## Como funciona a mecânica
 
@@ -45,24 +43,24 @@ python main.py
 ## Pontuação
 
 Sistema oficial do tênis: 0 → 15 → 30 → 40 → game · 6 games = set (com 2 de vantagem) ·
-tie-break a 7 quando 6-6 · melhor de 3 sets vence a partida.
+tie-break a 7 quando 6-6 · **1 set vence a partida**.
 
 ## Estatísticas
 
-Ao fim de cada partida você vê: aces e winners de cada jogador. Essas métricas
-ficam disponíveis por uma fachada simples (`StatsTracker`) para a UI consultar
-sem depender da lógica completa do placar.
-
-## Highscores
-
-O jogo salva rankings top 5 em `data/highscores.json` para torneio, 2 jogadores
-local e treino. Se o arquivo não existir ou estiver inválido, o ranking começa
-vazio e é recriado automaticamente ao salvar um novo resultado.
+Ao fim de cada partida você vê: aces e winners de cada jogador.
 
 ## Assets
 
-**Todos os gráficos foram gerados em código Python via `pygame.draw`** (formas geométricas
-cartoon coloridas) — nenhum sprite externo foi usado. Veja `src/assets_generator.py`.
+**A maior parte dos gráficos foi gerada em código Python via `pygame.draw`** (formas
+geométricas cartoon coloridas). Os sprites do Rafael Nadal, do Roger Federer e do
+Novak Djokovic ficam em `assets/sprites/Nadal.png`, `assets/sprites/Federer.png` e
+`assets/sprites/Djokovic.png`. Veja `src/assets_generator.py`.
+
+Os sprites de Federer e Djokovic eram PNGs de 24 bits sem canal alpha (fundo branco).
+O carregador `_load_sprite` detecta automaticamente a ausência de transparência e remove
+o fundo quase-branco via `numpy + pygame.surfarray` antes de escalar a imagem, eliminando
+as caixas brancas visíveis em jogo.
+
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -73,208 +71,10 @@ Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Uso de Inteligência Artificial Generativa
 
-Este projeto foi planejado com auxílio de uma LLM que produziu o documento
+Este projeto foi planejado com auxílio de uma LLM (Claude) que produziu o documento
 `plano_jogo_tenis_codex.md` com a divisão de tarefas, e cada sub-tarefa foi enviada
-como prompt para o Codex (ChatGPT). Esta seção registra, tarefa por tarefa, como a IA
-foi usada no desenvolvimento. O detalhamento por arquivo também pode ser mantido em
-`docs/ai_usage.md`.
-
-### Registro por tarefa
-
-## src/settings.py
-- Sub-tarefa: A.1
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (constantes vieram do plano).
-
-## src/game.py e main.py
-- Sub-tarefa: A.2
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (foi criada a classe `Game` com loop principal,
-  gerenciamento de cenas por `change_scene`, atributos base do jogo e uma cena
-  placeholder; `main.py` apenas instancia `Game` e chama `run()`).
-
-## src/scenes/base_scene.py
-- Sub-tarefa: A.3
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (foi criada a classe abstrata `BaseScene` com
-  construtor recebendo `game`, métodos abstratos para eventos, atualização,
-  desenho e transição de cena, além de docstrings Google em português).
-
-## src/assets_generator.py
-- Sub-tarefa: B.1
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: paleta de cores ajustada para melhor contraste; foram
-  criadas as funcoes `make_court`, `make_player_sprite` e `make_ai_sprite`
-  usando apenas `pygame.draw`, com sombras simples e contornos pretos.
-
-## src/assets_generator.py
-- Sub-tarefa: B.2
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foram criadas as funcoes `make_ball`,
-  `make_trophy` e `make_button`, usando apenas `pygame.draw`, superficies com
-  `SRCALPHA`, contornos pretos e texto centralizado em fonte default negrito).
+como prompt para o Codex (ChatGPT). Detalhamento por arquivo está em `docs/ai_usage.md`.
 
 Toda a equipe revisou criticamente o código gerado, validou seu funcionamento e é
 capaz de explicar cada trecho. Bugs introduzidos pela IA foram corrigidos pela equipe,
 conforme orientação do curso.
-
-## src/assets_generator.py, src/utils/asset_cache.py e src/game.py
-- Sub-tarefa: B.3
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foi criada a funcao
-  `make_swing_animation_frames`, com 4 superficies de animacao de rebatida;
-  tambem foi criada a classe `AssetCache` para reutilizar assets sob demanda,
-  e `Game` passou a instanciar um unico cache em `self.assets`).
-
-## src/entities/ball.py
-- Sub-tarefa: C.1
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a classe `Ball` herdando de
-  `pygame.sprite.Sprite`, com imagem vinda do `AssetCache` via `make_ball`,
-  `rect`, `mask`, posição e velocidade em `Vector2`, controle de último
-  rebatedor, contagem de quicadas, atualização por `dt` e reset para o lado
-  sacador).
-
-## src/entities/ball.py
-- Sub-tarefa: C.2
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi adicionado o método `apply_shot`, que calcula
-  `final_angle`, `final_speed`, `direction_y` e o novo vetor `velocity` com
-  `Vector2`, aplicando jitter quando a força fica fora do sweet spot e
-  retornando `True` quando a rebatida é aplicada).
-
-## src/systems/physics.py
-- Sub-tarefa: C.3
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foram criadas funções puras para refletir a bola nas
-  bordas laterais com `bounce_off_walls`, detectar saída pelo topo ou fundo com
-  `is_out_of_bounds` e identificar contato com a rede usando `hit_net`).
-
-## src/systems/timing_bars.py
-- Sub-tarefa: D.1
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (foi criada a classe `TimingBars` com estados
-  `IDLE`, `AIMING`, `POWERING` e `LOCKED`, ativação da barra de ângulo,
-  oscilação entre `AIM_MIN_ANGLE` e `AIM_MAX_ANGLE`, reset, consulta de estado
-  ativo e stubs documentados para as próximas etapas).
-
-## src/systems/timing_bars.py
-- Sub-tarefa: D.2
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (a classe `TimingBars` passou a oscilar a barra de
-  força em `POWERING`, travar ângulo e força em sequência com
-  `handle_lock_press`, guardar o tempo de congelamento em `frozen_until`,
-  expor `get_locked_values`, identificar `LOCKED` em `is_locked` e detectar o
-  sweet spot pela faixa configurada em `settings.py`).
-
-## src/systems/timing_bars.py e src/settings.py
-- Sub-tarefa: D.3
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (foi implementado `TimingBars.draw` com barras
-  cartoon de ângulo e força, contorno escuro, cantos arredondados, zona verde
-  de sweet spot, cursores por estado e marca fixa do ângulo travado; os
-  parâmetros visuais novos ficaram centralizados em `src/settings.py`).
-
-## src/entities/player.py
-- Sub-tarefa: E.1
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foi criada a classe `Player` herdando de
-  `pygame.sprite.Sprite`, com sprite vindo do `AssetCache`, controles
-  configuraveis, posicao inicial por lado da quadra, movimento por `dt`,
-  restricao ao proprio campo e instancia de `TimingBars`).
-
-## src/entities/player.py
-- Sub-tarefa: E.2
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (a classe `Player` passou a processar a tecla de
-  trava com `handle_event`, ativar `TimingBars` automaticamente quando a bola
-  se aproxima na direcao correta, verificar `can_hit` por distancia ate
-  `HIT_RADIUS` e aplicar rebatidas em `try_hit` usando os valores travados).
-
-## src/entities/ai_player.py
-- Sub-tarefa: E.3
-- Dev integrador: Eduardo Lessa
-- Ajustes manuais: nenhum (foi criada a classe `AIPlayer` herdando de `Player`,
-  sem entrada de teclado, com sprite do adversario, `reaction_timer`, `target_x`,
-  movimento limitado por `max_speed`, erro de mira por dificuldade e rebatida
-  direta com angulo e forca sorteados).
-
-## src/systems/score_manager.py
-- Sub-tarefa: F.1
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (foi criada a classe `ScoreManager` com placar de
-  game no formato 0-15-30-40, regras de deuce e advantage, incremento de games
-  ao fechar pontos com dois de vantagem e estatísticas simples de aces e
-  winners).
-
-## src/systems/score_manager.py
-- Sub-tarefa: F.2
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (o `ScoreManager` passou a fechar sets em 6 games
-  com dois de vantagem, entrar em tie-break no 6-6, pontuar tie-break de forma
-  numérica até 7 com dois de vantagem e registrar o histórico de sets).
-
-## src/systems/score_manager.py
-- Sub-tarefa: F.3
-- Dev integrador: Gustavo Pacheco
-- Ajustes manuais: nenhum (o `ScoreManager` foi finalizado com match melhor
-  de 3 sets, vencedor da partida, interface pública completa e alternância de
-  saque por game e por pontos no tie-break).
-
-## src/systems/collision.py
-- Sub-tarefa: G.1
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a função `player_hits_ball`, usando
-  `pygame.sprite.collide_mask` com cooldown em milissegundos para evitar
-  múltiplas detecções da mesma colisão; `check_ball_out_of_bounds` delega para
-  `physics.is_out_of_bounds`).
-
-## src/systems/stats_tracker.py
-- Sub-tarefa: G.2
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a classe `StatsTracker` com contadores de
-  aces e winners para `p1` e `p2`, métodos `register_ace`,
-  `register_winner`, `get` e `reset`, servindo como fachada simples para a UI).
-
-## src/systems/highscore.py
-- Sub-tarefa: G.3
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a classe `HighscoreManager`, com carga
-  resiliente de JSON, categorias `tournament`, `2p` e `training`, salvamento
-  indentado, data ISO e manutenção automática do top 5 por categoria).
-
-## src/scenes/menu_scene.py e src/game.py
-- Sub-tarefa: H.1
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a `MenuScene` cartoon com seis opcoes,
-  navegacao por setas, ENTER para acionar e ESC para sair; `Game` passou a
-  iniciar pelo menu, manter `tournament_progress` e consultar `next_scene()` a
-  cada quadro para permitir transicoes entre cenas).
-
-## src/scenes/instructions_scene.py
-- Sub-tarefa: H.2
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a `InstructionsScene`, com controles,
-  explicacao da mecanica sequencial de angulo e forca, frase de pontuacao,
-  retorno ao menu por ENTER/ESC e demonstracao visual das duas barras com
-  cursores ilustrativos).
-
-## src/scenes/tournament_scene.py
-- Sub-tarefa: H.3
-- Dev integrador: Artur Borger
-- Ajustes manuais: nenhum (foi criada a `TournamentScene`, lendo
-  `game.tournament_progress`, desenhando tres cards horizontais dos adversarios
-  do torneio, estados vencido/proximo/bloqueado, painel de detalhes por setas,
-  trofeu ao completar as tres fases e tentativa preparada de abrir
-  `GameplayScene(mode="1p", opponent_id=...)` quando ela existir).
-
-## src/settings.py e src/assets_generator.py
-- Sub-tarefa: Igualdade de tamanho dos sprites dos adversários ao jogador
-- Dev integrador: Artur Borger
-- Ajustes manuais: adicionadas as constantes `AI_SPRITE_WIDTH = PLAYER_WIDTH` e
-  `AI_SPRITE_HEIGHT = PLAYER_HEIGHT` em `src/settings.py` para tornar explícita a
-  relação de tamanho entre os sprites dos adversários e o jogador; `make_ai_sprite`
-  em `src/assets_generator.py` foi atualizada para carregar os PNGs de Rafael Nadal,
-  Roger Federer e Novak Djokovic usando essas constantes, garantindo que os três
-  personagens do torneio sejam exibidos no mesmo tamanho de `75 × 75 px` que o
-  sprite do jogador humano.

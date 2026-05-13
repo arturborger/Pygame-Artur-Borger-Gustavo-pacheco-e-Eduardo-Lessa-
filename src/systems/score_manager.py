@@ -137,7 +137,7 @@ class ScoreManager:
         """Indica se a partida ja terminou.
 
         Returns:
-            ``True`` quando algum lado venceu a melhor de tres sets.
+            ``True`` quando algum lado venceu o set unico da partida.
         """
         return self._match_over
 
@@ -330,20 +330,16 @@ if __name__ == "__main__":
     manager.add_point("p1")
     assert manager.server() == "p1"
 
+    # Vitória em 1 set direto (6-0)
     manager = ScoreManager("Voce", "CPU")
-    for _ in range(6):
-        win_regular_game(manager, "p1")
     for _ in range(6):
         win_regular_game(manager, "p1")
     assert manager.is_match_over()
     assert manager.winner() == "p1"
-    assert manager.sets_won() == (2, 0)
+    assert manager.sets_won() == (1, 0)
 
+    # Vitória em 1 set por tie-break (7-6)
     manager = ScoreManager("Voce", "CPU")
-    for _ in range(6):
-        win_regular_game(manager, "p1")
-    for _ in range(6):
-        win_regular_game(manager, "p2")
     for _ in range(6):
         win_regular_game(manager, "p1")
         win_regular_game(manager, "p2")
@@ -354,7 +350,7 @@ if __name__ == "__main__":
     manager.add_point("p1")
     assert manager.is_match_over()
     assert manager.winner() == "p1"
-    assert manager.sets_won() == (2, 1)
+    assert manager.sets_won() == (1, 0)
 
     manager = ScoreManager("Voce", "CPU")
     manager.add_point("p1", "ace")
