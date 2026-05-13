@@ -10,11 +10,13 @@ from pygame.math import Vector2
 
 from src.assets_generator import make_ball
 from src.settings import (
-    BALL_BASE_SPEED,
+    BALL_HIT_MIN_SPEED,
     BALL_MAX_SPEED,
     COURT_MARGIN_X,
     HEIGHT,
     MISS_JITTER,
+    POWER_MAX,
+    POWER_MIN,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
     WIDTH,
@@ -150,7 +152,9 @@ class Ball(pygame.sprite.Sprite):
             is_sweet_spot = False
 
         final_angle = angle_locked + angle_jitter
-        final_speed = BALL_BASE_SPEED + power_locked * (BALL_MAX_SPEED - BALL_BASE_SPEED)
+        t = (power_locked - POWER_MIN) / (POWER_MAX - POWER_MIN)
+        t_curved = max(0.0, min(1.0, t)) ** 1.7
+        final_speed = BALL_HIT_MIN_SPEED + t_curved * (BALL_MAX_SPEED - BALL_HIT_MIN_SPEED)
         direction_x = 1 if side_origin == "left" else -1
 
         self.velocity = Vector2(
