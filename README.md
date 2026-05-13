@@ -80,3 +80,8 @@ como prompt para o Codex (ChatGPT). Detalhamento por arquivo está em `docs/ai_u
 Toda a equipe revisou criticamente o código gerado, validou seu funcionamento e é
 capaz de explicar cada trecho. Bugs introduzidos pela IA foram corrigidos pela equipe,
 conforme orientação do curso.
+
+## src/entities/ball.py, src/settings.py e README.md
+- Sub-tarefa: Amplificação da diferença de potência da barra de força
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foi adicionada a constante `BALL_HIT_MIN_SPEED = 180` em `settings.py` e a fórmula de velocidade em `ball.py` foi corrigida para normalizar o valor de power para o intervalo [0, 1] e aplicar uma curva exponencial (`t^1.7`), tornando a diferença entre batida fraca (barra à esquerda, ~180 px/s) e batida forte (barra à direita, ~720 px/s) claramente perceptível — proporção de 4× contra 1,69× anterior.
