@@ -76,11 +76,38 @@ class SoundManager:
         self._current_music_id = None
 
     def _build_base_sounds(self) -> None:
-        self._sounds["hit"] = self._tone(600, 0.08, 0.55)
-        self._sounds["bounce"] = self._tone(300, 0.06, 0.42)
+        self._sounds["hit"] = self._racket_hit()
+        self._sounds["bounce"] = self._ball_ping()
         self._sounds["score"] = self._sequence((293.66, 392.00), 0.15, 0.45)
         self._sounds["ace"] = self._sequence((523.25, 659.25, 783.99), 0.10, 0.50)
         self._sounds["menu_click"] = self._menu_click()
+
+    def _racket_hit(self) -> pygame.mixer.Sound:
+        np = self._np
+        duration = 0.12
+        n = max(1, int(self.frequency * duration))
+        t = np.linspace(0, duration, n, endpoint=False)
+        tonal = (
+            np.sin(2 * np.pi * 880 * t)
+            + 0.5 * np.sin(2 * np.pi * 1320 * t)
+            + 0.25 * np.sin(2 * np.pi * 2640 * t)
+        )
+        rng = np.random.default_rng(seed=7)
+        noise = rng.uniform(-1.0, 1.0, n)
+        noise = np.convolve(noise, np.ones(6) / 6, mode="same")
+        envelope = np.exp(-28 * t)
+        return self._make_sound((tonal * 0.55 + noise * 0.45) * envelope * 0.72)
+
+    def _ball_ping(self) -> pygame.mixer.Sound:
+        np = self._np
+        duration = 0.08
+        n = max(1, int(self.frequency * duration))
+        t = np.linspace(0, duration, n, endpoint=False)
+        freq = 700 * np.exp(t * np.log(350 / 700) / duration)
+        phase = 2 * np.pi * np.cumsum(freq) / self.frequency
+        wave = np.sin(phase) + 0.35 * np.sin(2 * phase)
+        envelope = np.exp(-50 * t)
+        return self._make_sound(wave * envelope * 0.62)
 
     def _tone(self, frequency: float, duration: float, volume: float) -> pygame.mixer.Sound:
         return self._make_sound(self._tone_wave(frequency, duration, volume))
