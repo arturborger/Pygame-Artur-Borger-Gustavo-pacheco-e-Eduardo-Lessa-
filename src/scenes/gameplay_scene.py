@@ -315,6 +315,10 @@ class GameplayScene(BaseScene):
             return
 
         hit_result = server.handle_event(event, self.ball)
+        if hit_result == "out_hit":
+            receiver_side = self._other_score_side(self.ball.server_side)
+            self._show_out_message(receiver_side)
+            return
         if hit_result not in ("normal", "winner"):
             return
 
