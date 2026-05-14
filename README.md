@@ -498,3 +498,13 @@ conforme orientação do curso.
   reduzindo a área vermelha da barra de força e tornando a janela de acerto mais
   generosa.
 
+## src/settings.py e src/entities/ball.py
+- Sub-tarefa: Zona verde da barra de força adjacente ao vermelho e bônus de velocidade
+- Dev integrador: Artur Borger
+- Ajustes manuais: a zona verde (sweet spot) foi deslocada para a direita de forma
+  que seu limite superior coincida com o início da zona vermelha (`SWEET_SPOT_HIGH =
+  POWER_DANGER_LOW = 0.93`, `SWEET_SPOT_LOW = 0.73`), eliminando o espaço vazio entre
+  as duas regiões; foi adicionada a constante `SWEET_SPOT_SPEED_MULTIPLIER = 1.30` e
+  `Ball.apply_shot` passou a multiplicar a velocidade final por esse valor quando a
+  rebatida acerta no sweet spot, tornando a bola 30 % mais rápida nesses casos.
+

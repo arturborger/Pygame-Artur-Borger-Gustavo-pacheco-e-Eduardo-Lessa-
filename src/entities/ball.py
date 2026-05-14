@@ -19,6 +19,7 @@ from src.settings import (
     POWER_MIN,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
+    SWEET_SPOT_SPEED_MULTIPLIER,
     WIDTH,
 )
 from src.utils.asset_cache import AssetCache
@@ -155,6 +156,8 @@ class Ball(pygame.sprite.Sprite):
         t = (power_locked - POWER_MIN) / (POWER_MAX - POWER_MIN)
         t_curved = max(0.0, min(1.0, t)) ** 1.7
         final_speed = BALL_HIT_MIN_SPEED + t_curved * (BALL_MAX_SPEED - BALL_HIT_MIN_SPEED)
+        if is_sweet_spot:
+            final_speed *= SWEET_SPOT_SPEED_MULTIPLIER
         direction_x = 1 if side_origin == "left" else -1
 
         self.velocity = Vector2(
