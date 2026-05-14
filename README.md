@@ -8,11 +8,9 @@ timing sequencial** (trave o ângulo, depois a força!) e **pontuação oficial 
 A janela usa resolução 1440×900 para ocupar melhor a tela do Mac, mantendo a
 quadra no tamanho original de 840×480 e aumentando apenas os recuos ao redor dela.
 
-## Desenvolvedores
+## Desenvolvedor
 
 - Artur Borger
-- Gustavo Pacheco
-- Eduardo Lessa
 
 ## Modos de Jogo
 
@@ -491,4 +489,12 @@ conforme orientação do curso.
   rebateu (antes de cruzar a rede); a `GameplayScene` passa a encerrar o ponto
   com mensagem `OUT` nessa situação, dando o ponto ao adversário, sem alterar
   o comportamento do Modo Treino.
+
+## src/settings.py e README.md
+- Sub-tarefa: Ajuste de velocidade do jogador e zona de perigo da barra de força
+- Dev integrador: Artur Borger
+- Ajustes manuais: `PLAYER_SPEED` passou de 320 para 430 px/s para melhorar a
+  responsividade do jogador humano; `POWER_DANGER_LOW` passou de 0.86 para 0.93,
+  reduzindo a área vermelha da barra de força e tornando a janela de acerto mais
+  generosa.
 
