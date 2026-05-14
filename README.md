@@ -517,3 +517,11 @@ conforme orientação do curso.
   foi feito em `AIPlayer._clamp_to_own_court` usando `AI_SPRITE_WIDTH`, impedindo
   que qualquer personagem atravesse a rede.
 
+## src/settings.py
+- Sub-tarefa: Ton da quadra da primeira fase (Nadal) alterado para saibro
+- Dev integrador: Artur Borger
+- Ajustes manuais: as cores de `SCENERY_COLORS["beach"]` foram alteradas de
+  amarelo-areia (`bg: (255, 220, 130)`, `court: (240, 200, 100)`) para tons de
+  marrom-terra/saibro (`bg: (165, 105, 60)`, `court: (185, 85, 40)`), evocando
+  o saibro característico das quadras em que Rafael Nadal é especialista.
+

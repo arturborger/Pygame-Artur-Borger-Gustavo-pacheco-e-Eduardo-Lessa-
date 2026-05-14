@@ -23,7 +23,7 @@ LINE_OUTLINE = (40, 40, 60)
 
 # Paleta dos cenários cartoon
 SCENERY_COLORS = {
-    "beach": {"bg": (255, 220, 130), "court": (240, 200, 100), "lines": WHITE},
+    "beach": {"bg": (165, 105, 60), "court": (185, 85, 40), "lines": WHITE},
     "forest": {"bg": (60, 130, 80), "court": (90, 170, 100), "lines": WHITE},
     "stadium": {"bg": (30, 90, 150), "court": (50, 130, 200), "lines": WHITE},
 }
