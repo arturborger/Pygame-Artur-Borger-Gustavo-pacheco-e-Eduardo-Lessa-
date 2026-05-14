@@ -14,6 +14,7 @@ from src.settings import (
     AIM_MAX_ANGLE,
     AIM_MIN_ANGLE,
     HEIGHT,
+    NET_X,
     SWEET_SPOT_HIGH,
     SWEET_SPOT_LOW,
     WIDTH,
@@ -120,7 +121,7 @@ class AIPlayer(Player):
         self.rect.center = (round(self.pos.x), round(self.pos.y))
 
     def _clamp_to_own_court(self) -> None:
-        """Restringe a IA às bordas da tela usando as dimensões do sprite da IA.
+        """Restringe a IA à própria metade da quadra sem cruzar a rede.
 
         Sobrescreve o metodo do pai para usar `AI_SPRITE_WIDTH`/`AI_SPRITE_HEIGHT`
         em vez de `PLAYER_WIDTH`/`PLAYER_HEIGHT`, ja que os sprites dos adversarios
@@ -128,7 +129,15 @@ class AIPlayer(Player):
         """
         half_w = AI_SPRITE_WIDTH / 2
         half_h = AI_SPRITE_HEIGHT / 2
-        self.pos.x = max(half_w, min(WIDTH - half_w, self.pos.x))
+        min_x = half_w
+        max_x = WIDTH - half_w
+
+        if self.side == "left":
+            max_x = NET_X - half_w
+        else:
+            min_x = NET_X + half_w
+
+        self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(half_h, min(HEIGHT - half_h, self.pos.y))
 
     def _choose_shot_angle(self, ball) -> float:

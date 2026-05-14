@@ -22,6 +22,7 @@ from src.settings import (
     HEIGHT,
     HIT_RADIUS,
     LINE_OUTLINE,
+    NET_X,
     ORANGE,
     PLAYER_HEIGHT,
     PLAYER_SPEED,
@@ -281,6 +282,11 @@ class Player(pygame.sprite.Sprite):
         max_x = WIDTH - half_width
         min_y = half_height
         max_y = HEIGHT - half_height
+
+        if self.side == "left":
+            max_x = NET_X - half_width
+        else:
+            min_x = NET_X + half_width
 
         self.pos.x = max(min_x, min(max_x, self.pos.x))
         self.pos.y = max(min_y, min(max_y, self.pos.y))

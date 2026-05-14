@@ -508,3 +508,12 @@ conforme orientação do curso.
   `Ball.apply_shot` passou a multiplicar a velocidade final por esse valor quando a
   rebatida acerta no sweet spot, tornando a bola 30 % mais rápida nesses casos.
 
+## src/entities/player.py e src/entities/ai_player.py
+- Sub-tarefa: Bloqueio de personagens na própria metade da quadra
+- Dev integrador: Artur Borger
+- Ajustes manuais: `Player._clamp_to_own_court` passou a usar `NET_X` como
+  limite horizontal — jogadores do lado esquerdo não ultrapassam `NET_X − raio`
+  e jogadores do lado direito não recuam além de `NET_X + raio`; o mesmo ajuste
+  foi feito em `AIPlayer._clamp_to_own_court` usando `AI_SPRITE_WIDTH`, impedindo
+  que qualquer personagem atravesse a rede.
+
