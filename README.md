@@ -93,7 +93,11 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal, do
 Roger Federer e do Novak Djokovic, carregados de `assets/sprites/Nadal.png`,
 `assets/sprites/Federer.png` e `assets/sprites/Djokovic.png` para adversários
-específicos do torneio. Veja `src/assets_generator.py`.
+específicos do torneio. Adicionalmente, os personagens selecionáveis pelo jogador —
+**Borger**, **Dudi** e **Pacheco** — possuem sprites próprios em
+`assets/sprites/Borger.png`, `assets/sprites/Dudi.png` e
+`assets/sprites/Pacheco.png`, exibidos na tela de seleção de personagem antes de
+cada partida. Veja `src/assets_generator.py`.
 Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
@@ -533,4 +537,19 @@ conforme orientação do curso.
   (P1 com setas, P2 com WASD) e substituindo SHIFT direito por ENTER para
   travar as barras do segundo jogador; a tela de instruções e a tabela de
   controles do README foram atualizadas de acordo.
+
+## src/scenes/character_selection_scene.py, src/scenes/menu_scene.py e src/game.py
+- Sub-tarefa: Tela de seleção de personagem
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foi criada a `CharacterSelectionScene`, exibida após a
+  escolha de qualquer modo de jogo (Torneio, 2 Jogadores Local ou Modo Treino)
+  e antes da cena seguinte; a tela apresenta três cartões lado a lado com o
+  sprite e o nome de cada personagem jogável — **Borger** (`Borger.png`),
+  **Dudi** (`Dudi.png`) e **Pacheco** (`Pacheco.png`) —, com navegação por
+  setas, confirmação por ENTER e retorno ao menu por ESC; no modo 2 Jogadores
+  os dois jogadores selecionam sequencialmente, com indicador colorido de qual
+  deles está escolhendo; `MenuScene` ganhou o método `_build_character_selection`
+  e passou a redirecionar os três modos por essa cena; `game.py` recebeu os
+  atributos `player1_character` e `player2_character` para persistir a seleção
+  entre cenas.
 
