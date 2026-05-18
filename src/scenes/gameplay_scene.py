@@ -86,8 +86,9 @@ class GameplayScene(BaseScene):
             ("court", self.scenery),
             lambda: make_court(self.scenery),
         )
-        player1_name = "Player 1" if mode == "2p" else "Voce"
-        self.player1 = Player(self.game.assets, "left", CONTROLS_P1, player1_name)
+        p1_char = getattr(self.game, "player1_character", None)
+        player1_name = p1_char["name"] if p1_char else ("Player 1" if mode == "2p" else "Voce")
+        self.player1 = Player(self.game.assets, "left", CONTROLS_P1, player1_name, p1_char)
         self.training_submode = "bot" if mode == "training" else None
         self.rally_count = 0
         self.saved_training_record = self._training_record()
@@ -279,7 +280,9 @@ class GameplayScene(BaseScene):
             return AIPlayer(self.game.assets, "right", self.opponent_config)
 
         if self.mode == "2p":
-            return Player(self.game.assets, "right", CONTROLS_P2, "Player 2")
+            p2_char = getattr(self.game, "player2_character", None)
+            p2_name = p2_char["name"] if p2_char else "Player 2"
+            return Player(self.game.assets, "right", CONTROLS_P2, p2_name, p2_char)
 
         if self.mode == "training" and self.training_submode == "bot":
             return PracticeBot(self.game.assets)

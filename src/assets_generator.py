@@ -296,6 +296,26 @@ def make_swing_animation_frames(color: tuple[int, int, int]) -> list[pygame.Surf
     return frames
 
 
+def make_player_character_sprite(
+    sprite_filename: str,
+    color: tuple[int, int, int],
+) -> pygame.Surface:
+    """Carrega o sprite PNG do personagem selecionado pelo jogador.
+
+    Args:
+        sprite_filename: Nome do arquivo em ``assets/sprites/``.
+        color: Cor de fallback usada se o arquivo nao puder ser carregado.
+
+    Returns:
+        Superficie escalada para ``(PLAYER_WIDTH, PLAYER_HEIGHT)``.
+    """
+    path = SPRITES_DIR / sprite_filename
+    try:
+        return _load_sprite(path, (PLAYER_WIDTH, PLAYER_HEIGHT))
+    except Exception:
+        return make_player_sprite(color)
+
+
 def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
     """Cria ou carrega o sprite de um adversario do torneio.
 

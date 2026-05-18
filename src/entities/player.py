@@ -7,7 +7,7 @@ from math import cos, radians, sin
 import pygame
 from pygame.math import Vector2
 
-from src.assets_generator import make_player_sprite
+from src.assets_generator import make_player_character_sprite, make_player_sprite
 from src.settings import (
     AIM_ARROW_HEAD_LENGTH,
     AIM_ARROW_HEAD_WIDTH,
@@ -63,6 +63,7 @@ class Player(pygame.sprite.Sprite):
         side: str,
         controls: dict[str, int],
         name: str = "Jogador",
+        character: dict | None = None,
     ) -> None:
         """Inicializa o jogador na metade correspondente da quadra."""
         super().__init__()
@@ -72,10 +73,17 @@ class Player(pygame.sprite.Sprite):
         self.aim_state = "IDLE"
 
         color = BLUE if side == "left" else RED
-        self.image = asset_cache.get(
-            ("player_sprite", side, color),
-            lambda: make_player_sprite(color),
-        )
+        if character is not None:
+            sprite_filename = character.get("sprite", "")
+            self.image = asset_cache.get(
+                ("player_character_sprite", sprite_filename, side),
+                lambda: make_player_character_sprite(sprite_filename, color),
+            )
+        else:
+            self.image = asset_cache.get(
+                ("player_sprite", side, color),
+                lambda: make_player_sprite(color),
+            )
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
