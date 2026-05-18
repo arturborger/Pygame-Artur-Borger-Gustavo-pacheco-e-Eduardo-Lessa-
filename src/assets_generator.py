@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import pygame
@@ -398,6 +399,108 @@ def make_trophy() -> pygame.Surface:
     pygame.draw.rect(surface, BLACK, pygame.Rect(20, 82, 56, 10), border_radius=3)
 
     return surface
+
+
+def _draw_star(
+    surface: pygame.Surface,
+    center: tuple[int, int],
+    outer_radius: int,
+    color: tuple[int, int, int],
+) -> None:
+    """Desenha uma estrela de oito pontas com contorno preto.
+
+    Args:
+        surface: Superficie de destino.
+        center: Coordenadas (x, y) do centro da estrela.
+        outer_radius: Raio externo da estrela em pixels.
+        color: Cor de preenchimento da estrela.
+    """
+    cx, cy = center
+    inner_radius = max(2, outer_radius // 2)
+    raw_pts = []
+    for i in range(8):
+        r = outer_radius if i % 2 == 0 else inner_radius
+        angle = math.radians(i * 45 - 90)
+        raw_pts.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+
+    outline_pts = [(int(p[0]), int(p[1])) for p in raw_pts]
+    pygame.draw.polygon(surface, BLACK, outline_pts)
+    inner_pts = [
+        (int(cx + (p[0] - cx) * 0.68), int(cy + (p[1] - cy) * 0.68))
+        for p in raw_pts
+    ]
+    pygame.draw.polygon(surface, color, inner_pts)
+
+
+def make_victory_animation_frames(
+    sprite_filename: str,
+    color: tuple[int, int, int],
+    frame_count: int = 6,
+) -> list[pygame.Surface]:
+    """Cria quadros de animacao de vitoria do personagem levantando o trofeu.
+
+    Gera uma sequencia de superficies onde o sprite do personagem aparece
+    segurando o trofeu em alturas progressivas, do nivel do peito ate acima
+    da cabeca, com estrelas de celebracao que surgem nas fases finais.
+
+    Args:
+        sprite_filename: Nome do arquivo PNG em ``assets/sprites/``.
+        color: Cor de fallback usada se o sprite nao puder ser carregado.
+        frame_count: Numero de quadros na animacao (minimo 2).
+
+    Returns:
+        Lista de superficies transparentes representando os quadros da
+        animacao de vitoria.
+    """
+    frame_w, frame_h = 260, 380
+    char_w, char_h = 152, 212
+    trophy_size = 84
+
+    path = SPRITES_DIR / sprite_filename
+    try:
+        char_sprite = _load_sprite(path, (char_w, char_h))
+    except Exception:
+        char_sprite = pygame.transform.scale(make_player_sprite(color), (char_w, char_h))
+
+    trophy_surf = pygame.transform.scale(make_trophy(), (trophy_size, trophy_size))
+
+    char_x = (frame_w - char_w) // 2
+    char_y = frame_h - char_h - 14
+
+    # Trofeu sobe do nivel do peito ate acima da cabeca
+    trophy_start_cy = char_y + char_h * 2 // 5
+    trophy_end_cy = char_y - trophy_size // 2 - 10
+    trophy_cx = frame_w // 2
+
+    # Posicoes das estrelas de celebracao ao redor do trofeu levantado
+    star_offsets = [(-58, -18), (58, -18), (-38, -54), (38, -54), (0, -68)]
+    star_sizes = [7, 6, 8, 6, 7]
+    gold = (255, 210, 50)
+
+    frames: list[pygame.Surface] = []
+    for i in range(max(frame_count, 2)):
+        t = i / (frame_count - 1)
+        t_ease = t * t * (3 - 2 * t)  # smooth-step
+
+        trophy_cy = int(trophy_start_cy + (trophy_end_cy - trophy_start_cy) * t_ease)
+
+        frame = pygame.Surface((frame_w, frame_h), pygame.SRCALPHA)
+        frame.blit(char_sprite, (char_x, char_y))
+        trophy_rect = trophy_surf.get_rect(center=(trophy_cx, trophy_cy))
+        frame.blit(trophy_surf, trophy_rect)
+
+        # Estrelas aparecem progressivamente na segunda metade da animacao
+        if t > 0.45:
+            for idx, ((dx, dy), size) in enumerate(zip(star_offsets, star_sizes)):
+                wave = math.sin(i * 1.3 + idx * 1.1) * 4
+                sx = trophy_cx + dx
+                sy = trophy_cy + dy + int(wave)
+                if 4 < sx < frame_w - 4 and 4 < sy < frame_h - 4:
+                    _draw_star(frame, (sx, sy), size, gold)
+
+        frames.append(frame)
+
+    return frames
 
 
 def make_button(

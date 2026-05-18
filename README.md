@@ -553,3 +553,17 @@ conforme orientação do curso.
   atributos `player1_character` e `player2_character` para persistir a seleção
   entre cenas.
 
+## src/assets_generator.py e src/scenes/game_over_scene.py
+- Sub-tarefa: Animação de vitória do personagem
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi adicionada a função `make_victory_animation_frames` em
+  `assets_generator.py`, que gera 6 quadros mostrando o personagem escolhido
+  pelo jogador erguendo progressivamente o troféu do nível do peito até acima
+  da cabeça, com estrelas douradas de celebração que surgem nas fases finais
+  via `_draw_star`; `GameOverScene` passou a identificar o personagem vencedor
+  com `_winning_character` (suporta modos 1P, 2P e treino), gerar os quadros
+  em `_load_victory_frames`, exibi-los animados com efeito de balanço em
+  `_draw_victory_player_animation` e usá-los sempre que o jogador vencer,
+  com fallback para o troféu isolado quando nenhum personagem estiver
+  selecionado.
+

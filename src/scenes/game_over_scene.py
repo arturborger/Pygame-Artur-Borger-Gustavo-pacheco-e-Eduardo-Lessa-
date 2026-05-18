@@ -6,7 +6,7 @@ import math
 
 import pygame
 
-from src.assets_generator import make_button, make_trophy
+from src.assets_generator import make_button, make_trophy, make_victory_animation_frames
 from src.scenes.base_scene import BaseScene
 from src.scenes.menu_scene import MenuScene
 from src.settings import BLACK, BLUE, HEIGHT, ORANGE, TOURNAMENT_OPPONENTS, WHITE, WIDTH
@@ -38,13 +38,15 @@ class GameOverScene(BaseScene):
         super().__init__(game)
         self.winner_name = winner_name
         self.mode = mode
-        self.player_won = mode == "2p" or winner_name in ("Voce", "Você")
+        self.player_won = mode == "2p" or self._check_player_won(winner_name, mode)
         self.opponents_beaten = self._resolve_opponents_beaten(opponents_beaten)
         self._next_scene = None
         self._title_font = pygame.font.Font(None, 82)
         self._title_font.set_bold(True)
         self._body_font = pygame.font.Font(None, 34)
         self._small_font = pygame.font.Font(None, 24)
+        self._victory_frames: list[pygame.Surface] = self._load_victory_frames()
+        self._anim_fps: float = 1.8
         self._save_result()
 
     def handle_events(self, events: list[pygame.event.Event]) -> None:
@@ -81,8 +83,8 @@ class GameOverScene(BaseScene):
             title = "VITÓRIA!" if self.player_won else "DERROTA"
         self._draw_outlined_text(surface, title, self._title_font, (WIDTH // 2, 98))
         self._draw_result_details(surface)
-        if self.mode == "1p" and self.player_won:
-            self._draw_animated_trophy(surface)
+        if self.player_won:
+            self._draw_victory_player_animation(surface)
         self._draw_return_button(surface)
 
     def next_scene(self):
@@ -94,6 +96,88 @@ class GameOverScene(BaseScene):
         next_scene = self._next_scene
         self._next_scene = None
         return next_scene
+
+    def _check_player_won(self, winner_name: str, mode: str) -> bool:
+        """Verifica se o vencedor e o jogador humano (P1).
+
+        Compara o nome do vencedor com o nome do personagem escolhido pelo
+        jogador ou com os nomes padrao quando nenhum personagem esta selecionado.
+
+        Args:
+            winner_name: Nome retornado pelo ScoreManager para o vencedor.
+            mode: Modo de jogo encerrado.
+
+        Returns:
+            True se o jogador humano (P1) venceu a partida.
+        """
+        p1_char = getattr(self.game, "player1_character", None)
+        p1_names = {"Voce", "Você", "Player 1"}
+        if p1_char:
+            p1_names.add(p1_char.get("name", ""))
+        return winner_name in p1_names
+
+    def _winning_character(self) -> dict | None:
+        """Retorna o dict do personagem vencedor para exibir na animacao.
+
+        Returns:
+            Dict com chaves ``sprite`` e ``name`` do personagem, ou ``None``
+            se nao houver personagem associado ao vencedor.
+        """
+        p1_char = getattr(self.game, "player1_character", None)
+        p2_char = getattr(self.game, "player2_character", None)
+
+        if self.mode == "1p":
+            return p1_char if self.player_won else None
+
+        if self.mode == "2p":
+            if p1_char and self.winner_name == p1_char.get("name"):
+                return p1_char
+            if p2_char and self.winner_name == p2_char.get("name"):
+                return p2_char
+            return p1_char
+
+        return p1_char if self.player_won else None
+
+    def _load_victory_frames(self) -> list[pygame.Surface]:
+        """Gera os quadros de animacao de vitoria para o personagem vencedor.
+
+        Returns:
+            Lista de superficies da animacao, ou lista vazia se nenhum
+            personagem estiver disponivel.
+        """
+        char = self._winning_character()
+        if char is None:
+            return []
+        sprite_filename = char.get("sprite", "")
+        if not sprite_filename:
+            return []
+        color = char.get("color", BLUE)
+        try:
+            return make_victory_animation_frames(sprite_filename, color)
+        except Exception:
+            return []
+
+    def _draw_victory_player_animation(self, surface: pygame.Surface) -> None:
+        """Desenha a animacao do personagem vencedor levantando o trofeu.
+
+        Quando nao ha quadros disponiveis (sem personagem selecionado),
+        exibe o trofeu animado como fallback.
+
+        Args:
+            surface: Superficie principal onde a animacao deve renderizar.
+        """
+        if not self._victory_frames:
+            self._draw_animated_trophy(surface)
+            return
+
+        elapsed = pygame.time.get_ticks() / 1000.0
+        frame_index = int(elapsed * self._anim_fps) % len(self._victory_frames)
+        frame = self._victory_frames[frame_index]
+
+        bob_offset = round(math.sin(elapsed * 2.4) * 9)
+        center_y = 510 + bob_offset
+        frame_rect = frame.get_rect(center=(WIDTH // 2, center_y))
+        surface.blit(frame, frame_rect)
 
     def _resolve_opponents_beaten(self, opponents_beaten: int | None) -> int:
         current_progress = getattr(self.game, "tournament_progress", 0)
