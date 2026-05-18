@@ -39,6 +39,8 @@ class Game:
         self.sound_manager = SoundManager()
         self.highscore_manager = HighscoreManager()
         self.tournament_progress = 0
+        self.player1_character: dict | None = None
+        self.player2_character: dict | None = None
         self.scene = MenuScene(self)
 
     def change_scene(self, scene: object) -> None:
