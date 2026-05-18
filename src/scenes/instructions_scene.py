@@ -30,14 +30,18 @@ class InstructionsScene(BaseScene):
     """
 
     TEXT_LINES = (
-        "Controles do Player 1",
-        "← → ↑ ↓ movem o jogador pelo proprio campo.",
+        "Controles do Player 1: W A S D + ESPAÇO",
+        "W A S D movem o jogador pelo proprio campo.",
         "ESPAÇO trava as barras: primeiro angulo, depois forca.",
         "",
+        "Controles do Player 2: Setas + ENTER",
+        "← → ↑ ↓ movem o Player 2 pelo proprio campo.",
+        "ENTER trava as barras: primeiro angulo, depois forca.",
+        "",
         "1. Quando a bola se aproxima, a BARRA DE ÂNGULO aparece e oscila.",
-        "Pressione ESPAÇO para travar a direção.",
+        "Pressione a tecla de ataque para travar a direção.",
         "2. Em seguida a BARRA DE FORÇA oscila.",
-        "Acerte na zona VERDE para um winner e pressione ESPAÇO de novo.",
+        "Acerte na zona VERDE para um winner e pressione de novo.",
         "",
         "Pontuação oficial: 0, 15, 30, 40, game, sets e tie-break em 6-6.",
     )

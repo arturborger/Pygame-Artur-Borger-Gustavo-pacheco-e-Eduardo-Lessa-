@@ -34,8 +34,8 @@ python main.py
 
 | Ação | P1 | P2 |
 |------|----|----|
-| Mover | Setas | W A S D |
-| Travar barras (ângulo, depois força) | ESPAÇO | SHIFT direito |
+| Mover | W A S D | Setas |
+| Travar barras (ângulo, depois força) | ESPAÇO | ENTER |
 | Pause | P / ESC | - |
 
 ## Como funciona a mecânica
@@ -524,4 +524,13 @@ conforme orientação do curso.
   amarelo-areia (`bg: (255, 220, 130)`, `court: (240, 200, 100)`) para tons de
   marrom-terra/saibro (`bg: (165, 105, 60)`, `court: (185, 85, 40)`), evocando
   o saibro característico das quadras em que Rafael Nadal é especialista.
+
+## src/settings.py, src/scenes/instructions_scene.py e README.md
+- Sub-tarefa: Troca de controles no modo 2 jogadores
+- Dev integrador: Artur Borger
+- Ajustes manuais: `CONTROLS_P1` passou a usar W/A/S/D + ESPAÇO e
+  `CONTROLS_P2` passou a usar setas + ENTER, invertendo o mapeamento anterior
+  (P1 com setas, P2 com WASD) e substituindo SHIFT direito por ENTER para
+  travar as barras do segundo jogador; a tela de instruções e a tabela de
+  controles do README foram atualizadas de acordo.
 
