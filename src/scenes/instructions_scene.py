@@ -121,7 +121,7 @@ class InstructionsScene(BaseScene):
         y = 126
         for line in self.TEXT_LINES:
             if not line:
-                y += 12
+                y += 16
                 continue
 
             font = (
@@ -133,11 +133,11 @@ class InstructionsScene(BaseScene):
             text = font.render(line, True, color)
             rect = text.get_rect(center=(WIDTH // 2, y))
             surface.blit(text, rect)
-            y += 32
+            y += 34
 
     def _draw_bar_demo(self, surface: pygame.Surface) -> None:
         base_x = (WIDTH - BAR_WIDTH) // 2
-        angle_y = 424
+        angle_y = 568
         power_y = angle_y + 46
         self._draw_demo_bar(surface, base_x, angle_y, "ÂNGULO", 0.66, ORANGE)
         self._draw_demo_bar(surface, base_x, power_y, "FORÇA", 0.78, GREEN_SWEET)
