@@ -37,6 +37,7 @@ class Game:
         self.running = True
         self.assets = AssetCache()
         self.sound_manager = SoundManager()
+        self.sound_manager.play_music("menu")
         self.highscore_manager = HighscoreManager()
         self.tournament_progress = 0
         self.player1_character: dict | None = None

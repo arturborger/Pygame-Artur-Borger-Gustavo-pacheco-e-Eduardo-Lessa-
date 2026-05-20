@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import os
+
 import pygame
+
+from src.settings import MUSIC_PATH
 
 
 class SoundManager:
@@ -15,6 +19,7 @@ class SoundManager:
         self._music_loops: dict[str, pygame.mixer.Sound] = {}
         self._music_channel: pygame.mixer.Channel | None = None
         self._current_music_id: str | None = None
+        self._using_file_music: bool = False
         self._np = None
         self.frequency = 44100
         self.channels = 1
@@ -45,18 +50,35 @@ class SoundManager:
             sound.play()
 
     def play_music(self, scenery_id: str) -> None:
-        """Toca em loop a musica sintetica do cenario informado."""
+        """Toca em loop a musica de fundo do jogo.
+
+        Usa o arquivo MP3 em MUSIC_PATH se disponivel; caso contrario,
+        gera um loop sintetico especifico para o cenario informado.
+
+        Args:
+            scenery_id: Identificador do cenario (beach, forest, stadium).
+        """
         if not self.enabled:
             return
 
-        if (
-            self._current_music_id == scenery_id
-            and self._music_channel is not None
-            and self._music_channel.get_busy()
-        ):
+        if self._current_music_id == scenery_id and self._music_is_playing():
             return
 
         self.stop_music()
+
+        if os.path.exists(MUSIC_PATH):
+            try:
+                pygame.mixer.music.load(MUSIC_PATH)
+                pygame.mixer.music.set_volume(0.55)
+                pygame.mixer.music.play(-1)
+                self._current_music_id = scenery_id
+                self._using_file_music = True
+                return
+            except pygame.error:
+                pass
+
+        # Fallback para musica sintetica gerada em runtime
+        self._using_file_music = False
         sound = self._music_loops.get(scenery_id)
         if sound is None:
             try:
@@ -70,10 +92,25 @@ class SoundManager:
 
     def stop_music(self) -> None:
         """Interrompe a musica ambiente atual, se houver."""
+        if self._using_file_music:
+            try:
+                pygame.mixer.music.stop()
+            except pygame.error:
+                pass
+            self._using_file_music = False
         if self._music_channel is not None:
             self._music_channel.stop()
         self._music_channel = None
         self._current_music_id = None
+
+    def _music_is_playing(self) -> bool:
+        """Retorna True se ha musica tocando no momento."""
+        if self._using_file_music:
+            try:
+                return pygame.mixer.music.get_busy()
+            except pygame.error:
+                return False
+        return self._music_channel is not None and self._music_channel.get_busy()
 
     def _build_base_sounds(self) -> None:
         self._sounds["hit"] = self._racket_hit()

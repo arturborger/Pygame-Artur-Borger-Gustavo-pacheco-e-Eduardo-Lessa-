@@ -30,3 +30,7 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Arquivos de música (muito grandes para o GitHub — adicione localmente)
+*.mp3
+assets/music/

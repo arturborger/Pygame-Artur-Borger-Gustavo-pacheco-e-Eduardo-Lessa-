@@ -143,3 +143,4 @@ TOURNAMENT_OPPONENTS = [
 
 # Caminhos
 HIGHSCORE_PATH = "data/highscores.json"
+MUSIC_PATH = "assets/music/background.mp3"

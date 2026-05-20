@@ -98,7 +98,12 @@ específicos do torneio. Adicionalmente, os personagens selecionáveis pelo joga
 `assets/sprites/Borger.png`, `assets/sprites/Dudi.png` e
 `assets/sprites/Pacheco.png`, exibidos na tela de seleção de personagem antes de
 cada partida. Veja `src/assets_generator.py`.
-Os sons também são sintetizados em runtime via numpy + pygame.sndarray.
+
+### Música
+A trilha de fundo (`assets/music/background.mp3`) toca em loop desde o menu principal
+até o fim da partida, gerenciada por `SoundManager` via `pygame.mixer.music`.
+Os efeitos sonoros (raquetada, quique, ponto, ace, clique de menu) continuam
+sendo sintetizados em runtime via numpy + pygame.sndarray.
 
 ## Dependências
 
@@ -552,6 +557,16 @@ conforme orientação do curso.
   e passou a redirecionar os três modos por essa cena; `game.py` recebeu os
   atributos `player1_character` e `player2_character` para persistir a seleção
   entre cenas.
+
+## src/utils/sound_manager.py, src/game.py e src/settings.py
+- Sub-tarefa: Integração de música de fundo real (MP3)
+- Dev integrador: Artur Borger
+- Ajustes manuais: `SoundManager.play_music` foi atualizado para carregar
+  `assets/music/background.mp3` via `pygame.mixer.music.load` com loop infinito
+  e volume 0.55; adicionado fallback para música sintética quando o arquivo não
+  estiver presente; `stop_music` passa a parar também o stream de `pygame.mixer.music`;
+  `game.py` chama `play_music("menu")` ao inicializar para que a trilha comece
+  já no menu; `settings.py` recebeu a constante `MUSIC_PATH`.
 
 ## src/assets_generator.py e src/scenes/game_over_scene.py
 - Sub-tarefa: Animação de vitória do personagem
