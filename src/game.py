@@ -40,6 +40,7 @@ class Game:
         self.sound_manager.play_music("menu")
         self.highscore_manager = HighscoreManager()
         self.tournament_progress = 0
+        self.games_target_set: int = 6
         self.player1_character: dict | None = None
         self.player2_character: dict | None = None
         self.scene = MenuScene(self)

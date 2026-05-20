@@ -86,18 +86,22 @@ class CharacterSelectionScene(BaseScene):
         if self.mode == "2p":
             self.game.player1_character = self._p1_choice
             self.game.player2_character = chosen
-            self._next_scene = self._build_gameplay("2p")
+            self._next_scene = self._build_match_format("2p")
         elif self.mode == "training":
             self.game.player1_character = chosen
             self.game.player2_character = None
             self._next_scene = self._build_gameplay("training")
         else:
             self.game.player1_character = chosen
-            self._next_scene = self._build_tournament()
+            self._next_scene = self._build_match_format("tournament")
 
     def _build_gameplay(self, mode: str) -> object:
         from src.scenes.gameplay_scene import GameplayScene
         return GameplayScene(self.game, mode=mode)
+
+    def _build_match_format(self, mode: str) -> object:
+        from src.scenes.match_format_scene import MatchFormatScene
+        return MatchFormatScene(self.game, mode=mode)
 
     def _build_tournament(self) -> object:
         from src.scenes.tournament_scene import TournamentScene

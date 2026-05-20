@@ -26,15 +26,17 @@ class ScoreManager:
     _VALID_SIDES = ("p1", "p2")
     _VALID_POINT_TYPES = ("normal", "ace", "winner")
 
-    def __init__(self, p1_name: str, p2_name: str) -> None:
+    def __init__(self, p1_name: str, p2_name: str, games_target_set: int = GAMES_TARGET_SET) -> None:
         """Inicializa uma partida com placar zerado.
 
         Args:
             p1_name: Nome exibido para o jogador 1.
             p2_name: Nome exibido para o jogador 2.
+            games_target_set: Games necessarios para fechar um set (3 ou 6).
         """
         self.p1_name = p1_name
         self.p2_name = p2_name
+        self._games_target_set = games_target_set
         self._game_points = {"p1": 0, "p2": 0}
         self._set_games = {"p1": 0, "p2": 0}
         self._sets_won = {"p1": 0, "p2": 0}
@@ -203,12 +205,12 @@ class ScoreManager:
         max_games = max(p1_games, p2_games)
         diff = p1_games - p2_games
 
-        if max_games >= GAMES_TARGET_SET and abs(diff) >= 2:
+        if max_games >= self._games_target_set and abs(diff) >= 2:
             winner_side = "p1" if diff > 0 else "p2"
             self._on_set_won(winner_side)
             return
 
-        if p1_games == GAMES_TARGET_SET and p2_games == GAMES_TARGET_SET:
+        if p1_games == self._games_target_set and p2_games == self._games_target_set:
             self._is_tiebreak = True
             self._tiebreak_start_server = self._server
             self._game_points = {"p1": 0, "p2": 0}

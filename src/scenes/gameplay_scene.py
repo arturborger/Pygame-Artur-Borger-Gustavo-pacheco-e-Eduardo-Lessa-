@@ -302,7 +302,8 @@ class GameplayScene(BaseScene):
         if self.mode == "training":
             return None
 
-        return ScoreManager(self.player1.name, self.player2.name)
+        games_target = getattr(self.game, "games_target_set", 6)
+        return ScoreManager(self.player1.name, self.player2.name, games_target_set=games_target)
 
     def _update_second_player(self, dt: float) -> None:
         if self.player2 is None:

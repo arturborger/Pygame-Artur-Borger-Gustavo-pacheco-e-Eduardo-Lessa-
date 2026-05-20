@@ -72,8 +72,8 @@ joga pela direita.
 
 ## Pontuação
 
-Sistema oficial do tênis: 0 → 15 → 30 → 40 → game · 6 games = set (com 2 de vantagem) ·
-tie-break a 7 quando 6-6 · melhor de 3 sets vence a partida.
+Sistema oficial do tênis: 0 → 15 → 30 → 40 → game · games = set (com 2 de vantagem, escolha 3 ou 6 games) ·
+tie-break quando empatado no limite · melhor de 3 sets vence a partida.
 
 ## Estatísticas
 
@@ -581,4 +581,16 @@ conforme orientação do curso.
   `_draw_victory_player_animation` e usá-los sempre que o jogador vencer,
   com fallback para o troféu isolado quando nenhum personagem estiver
   selecionado.
+
+## src/scenes/match_format_scene.py, src/scenes/character_selection_scene.py, src/systems/score_manager.py, src/scenes/gameplay_scene.py, src/game.py e README.md
+- Sub-tarefa: Seleção do formato da partida (3 ou 6 games por set)
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi criada a `MatchFormatScene`, exibida após a seleção de
+  personagem nos modos Torneio e 2 Jogadores Local, que pergunta ao jogador se
+  quer disputar sets de 3 ou de 6 games; a escolha é armazenada em
+  `game.games_target_set`; `CharacterSelectionScene` passou a redirecionar para
+  `MatchFormatScene` em vez de ir diretamente ao jogo nesses dois modos; o
+  `ScoreManager` ganhou o parâmetro `games_target_set` para usar o valor
+  escolhido em vez da constante fixa; `GameplayScene._build_score_manager`
+  repassa o valor armazenado no jogo ao criar o placar.
 
