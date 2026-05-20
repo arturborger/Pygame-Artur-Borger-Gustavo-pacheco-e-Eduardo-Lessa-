@@ -6,7 +6,7 @@ import random
 
 import pygame
 
-from src.assets_generator import make_ai_sprite
+from src.assets_generator import make_ai_sprites
 from src.entities.player import Player
 from src.settings import (
     AI_SPRITE_HEIGHT,
@@ -50,10 +50,12 @@ class AIPlayer(Player):
 
         opponent_id = opponent_config["id"]
         center = self.rect.center
-        self.image = asset_cache.get(
-            ("ai_sprite", opponent_id),
-            lambda: make_ai_sprite(opponent_id),
+        sprites = asset_cache.get(
+            ("ai_sprites", opponent_id),
+            lambda: make_ai_sprites(opponent_id),
         )
+        self._sprite_idle, self._sprite_run = sprites
+        self.image = self._sprite_idle
         self.rect = self.image.get_rect(center=center)
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -106,7 +108,10 @@ class AIPlayer(Player):
         Returns:
             Resultado textual da tentativa de rebatida.
         """
-        return self.decide(ball, dt)
+        self._is_moving = False
+        result = self.decide(ball, dt)
+        self._update_animation(dt)
+        return result
 
     def _move_toward_target(self, dt: float) -> None:
         max_step = self.opponent_config["max_speed"] * dt
@@ -116,6 +121,7 @@ class AIPlayer(Player):
             self.pos.y = self.target_y
         else:
             self.pos.y += max_step if distance > 0 else -max_step
+            self._is_moving = True
 
         self._clamp_to_own_court()
         self.rect.center = (round(self.pos.x), round(self.pos.y))

@@ -10,9 +10,9 @@ from src.scenes.base_scene import BaseScene
 from src.settings import BLACK, BLUE, HEIGHT, ORANGE, WHITE, WIDTH, YELLOW
 
 CHARACTERS = [
-    {"id": "borger", "name": "Borger", "sprite": "Borger.png"},
-    {"id": "dudi", "name": "Dudi", "sprite": "Dudi.png"},
-    {"id": "pacheco", "name": "Pacheco", "sprite": "Pacheco.png"},
+    {"id": "borger", "name": "Borger", "sprite": "Borger parado.png"},
+    {"id": "dudi", "name": "Dudi", "sprite": "Dudi parado.png"},
+    {"id": "pacheco", "name": "Pacheco", "sprite": "Pacheco parado.png"},
 ]
 
 CARD_W = 300

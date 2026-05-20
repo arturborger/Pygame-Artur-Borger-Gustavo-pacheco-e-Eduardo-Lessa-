@@ -7,7 +7,7 @@ import random
 import pygame
 from pygame.math import Vector2
 
-from src.assets_generator import make_ai_sprite
+from src.assets_generator import make_ai_sprites
 from src.settings import (
     COURT_MARGIN_X,
     COURT_MARGIN_Y,
@@ -28,18 +28,25 @@ class PracticeBot(pygame.sprite.Sprite):
         self.side = "right"
         self.name = "Bot Treino"
         self.speed = 250
-        self.image = asset_cache.get(
-            ("practice_bot", "forest"),
-            lambda: make_ai_sprite("forest"),
+        sprites = asset_cache.get(
+            ("practice_bot_sprites", "forest"),
+            lambda: make_ai_sprites("forest"),
         )
+        self._sprite_idle, self._sprite_run = sprites
+        self.image = self._sprite_idle
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.pos = Vector2(WIDTH - COURT_MARGIN_X - PLAYER_WIDTH // 2, HEIGHT / 2)
         self.rect.center = (round(self.pos.x), round(self.pos.y))
+        self._anim_timer = 0.0
+        self._anim_frame = 0
+        self._is_moving = False
 
     def update(self, dt: float, ball) -> str:
         """Move em direcao a bola e rebate quando ela esta perto."""
+        self._is_moving = False
         self._follow_ball(dt, ball)
+        self._update_animation(dt)
         if self._can_hit(ball) and ball.velocity.x > 0:
             angle = random.uniform(-30, 30)
             ball.apply_shot(angle, 0.6, self.side, False)
@@ -48,6 +55,18 @@ class PracticeBot(pygame.sprite.Sprite):
             return "normal"
 
         return "no_hit"
+
+    def _update_animation(self, dt: float) -> None:
+        if self._is_moving:
+            self._anim_timer += dt
+            if self._anim_timer >= 0.10:
+                self._anim_timer -= 0.10
+                self._anim_frame ^= 1
+            self.image = self._sprite_run if self._anim_frame else self._sprite_idle
+        else:
+            self._anim_frame = 0
+            self._anim_timer = 0.0
+            self.image = self._sprite_idle
 
     def _follow_ball(self, dt: float, ball) -> None:
         target_y = ball.pos.y
@@ -58,6 +77,7 @@ class PracticeBot(pygame.sprite.Sprite):
             self.pos.y = target_y
         else:
             self.pos.y += max_step if distance > 0 else -max_step
+            self._is_moving = True
 
         half_height = self.rect.height / 2
         self.pos.y = max(

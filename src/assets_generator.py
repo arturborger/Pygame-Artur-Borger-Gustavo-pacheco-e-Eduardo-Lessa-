@@ -34,9 +34,12 @@ SHADOW_COLOR = (0, 0, 0, 60)
 COURT_LINE_WIDTH = 4
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SPRITES_DIR = PROJECT_ROOT / "assets" / "sprites"
-NADAL_SPRITE_PATH = SPRITES_DIR / "Nadal.png"
-FEDERER_SPRITE_PATH = SPRITES_DIR / "Federer.png"
-DJOKOVIC_SPRITE_PATH = SPRITES_DIR / "Djokovic.png"
+NADAL_IDLE_PATH = SPRITES_DIR / "Nadal parado.png"
+NADAL_RUN_PATH = SPRITES_DIR / "Nadal correndo.png"
+FEDERER_IDLE_PATH = SPRITES_DIR / "Federer parado.png"
+FEDERER_RUN_PATH = SPRITES_DIR / "Federer correndo.png"
+DJOKOVIC_IDLE_PATH = SPRITES_DIR / "Djokovic parado.png"
+DJOKOVIC_RUN_PATH = SPRITES_DIR / "Djokovic correndo.png"
 
 
 def _shadowed_rect(
@@ -297,49 +300,66 @@ def make_swing_animation_frames(color: tuple[int, int, int]) -> list[pygame.Surf
     return frames
 
 
-def make_player_character_sprite(
+def make_player_character_sprites(
     sprite_filename: str,
     color: tuple[int, int, int],
-) -> pygame.Surface:
-    """Carrega o sprite PNG do personagem selecionado pelo jogador.
+) -> tuple[pygame.Surface, pygame.Surface]:
+    """Carrega os sprites parado e correndo do personagem selecionado.
 
     Args:
-        sprite_filename: Nome do arquivo em ``assets/sprites/``.
+        sprite_filename: Nome do arquivo ``* parado.png`` em ``assets/sprites/``.
         color: Cor de fallback usada se o arquivo nao puder ser carregado.
 
     Returns:
-        Superficie escalada para ``(PLAYER_WIDTH, PLAYER_HEIGHT)``.
+        Tupla ``(idle, run)`` com superficies escaladas para
+        ``(PLAYER_WIDTH, PLAYER_HEIGHT)``.
     """
-    path = SPRITES_DIR / sprite_filename
+    size = (PLAYER_WIDTH, PLAYER_HEIGHT)
+    idle_path = SPRITES_DIR / sprite_filename
+    run_filename = sprite_filename.replace(" parado", " correndo")
+    run_path = SPRITES_DIR / run_filename
     try:
-        return _load_sprite(path, (PLAYER_WIDTH, PLAYER_HEIGHT))
+        idle = _load_sprite(idle_path, size)
     except Exception:
-        return make_player_sprite(color)
+        idle = make_player_sprite(color)
+    try:
+        run = _load_sprite(run_path, size)
+    except Exception:
+        run = idle
+    return idle, run
 
 
 def make_ai_sprite(opponent_id: int | str) -> pygame.Surface:
-    """Cria ou carrega o sprite de um adversario do torneio.
+    """Carrega o sprite parado de um adversario do torneio."""
+    idle, _ = make_ai_sprites(opponent_id)
+    return idle
+
+
+def make_ai_sprites(opponent_id: int | str) -> tuple[pygame.Surface, pygame.Surface]:
+    """Carrega os sprites parado e correndo de um adversario do torneio.
 
     Args:
         opponent_id: Indice ou identificador textual do adversario em
             `TOURNAMENT_OPPONENTS`.
 
     Returns:
-        Superficie transparente com o sprite do adversario.
+        Tupla ``(idle, run)`` com superficies do adversario.
     """
     if isinstance(opponent_id, int):
         opponent_id = TOURNAMENT_OPPONENTS[opponent_id]["id"]
 
+    size = (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT)
     if opponent_id == "beach":
-        return _load_sprite(NADAL_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
+        return _load_sprite(NADAL_IDLE_PATH, size), _load_sprite(NADAL_RUN_PATH, size)
 
     if opponent_id == "forest":
-        return _load_sprite(FEDERER_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
+        return _load_sprite(FEDERER_IDLE_PATH, size), _load_sprite(FEDERER_RUN_PATH, size)
 
     if opponent_id == "stadium":
-        return _load_sprite(DJOKOVIC_SPRITE_PATH, (AI_SPRITE_WIDTH, AI_SPRITE_HEIGHT))
+        return _load_sprite(DJOKOVIC_IDLE_PATH, size), _load_sprite(DJOKOVIC_RUN_PATH, size)
 
-    return make_player_sprite(_get_opponent_color(opponent_id))
+    fallback = make_player_sprite(_get_opponent_color(opponent_id))
+    return fallback, fallback
 
 
 def make_ball() -> pygame.Surface:

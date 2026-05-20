@@ -7,7 +7,7 @@ from math import cos, radians, sin
 import pygame
 from pygame.math import Vector2
 
-from src.assets_generator import make_player_character_sprite, make_player_sprite
+from src.assets_generator import make_player_character_sprites, make_player_sprite
 from src.settings import (
     AIM_ARROW_HEAD_LENGTH,
     AIM_ARROW_HEAD_WIDTH,
@@ -34,6 +34,8 @@ from src.settings import (
 )
 from src.systems.timing_bars import TimingBars
 from src.utils.asset_cache import AssetCache
+
+_ANIM_INTERVAL = 0.10
 
 
 class Player(pygame.sprite.Sprite):
@@ -75,15 +77,19 @@ class Player(pygame.sprite.Sprite):
         color = BLUE if side == "left" else RED
         if character is not None:
             sprite_filename = character.get("sprite", "")
-            self.image = asset_cache.get(
-                ("player_character_sprite", sprite_filename, side),
-                lambda: make_player_character_sprite(sprite_filename, color),
+            sprites = asset_cache.get(
+                ("player_char_sprites", sprite_filename),
+                lambda: make_player_character_sprites(sprite_filename, color),
             )
+            self._sprite_idle, self._sprite_run = sprites
         else:
-            self.image = asset_cache.get(
-                ("player_sprite", side, color),
+            plain = asset_cache.get(
+                ("player_sprite", color),
                 lambda: make_player_sprite(color),
             )
+            self._sprite_idle = plain
+            self._sprite_run = plain
+        self.image = self._sprite_idle
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -97,6 +103,9 @@ class Player(pygame.sprite.Sprite):
 
         lock_key = controls.get("lock", pygame.K_SPACE)
         self.timing_bars = TimingBars(side, lock_key)
+        self._anim_timer = 0.0
+        self._anim_frame = 0
+        self._is_moving = False
 
     def handle_input(self, keys: pygame.key.ScancodeWrapper, dt: float) -> None:
         """Move o jogador conforme as teclas pressionadas.
@@ -117,6 +126,7 @@ class Player(pygame.sprite.Sprite):
             direction.y += 1
 
         if direction.length_squared() > 0:
+            self._is_moving = True
             direction = direction.normalize()
             self.pos += direction * PLAYER_SPEED * dt
             self._clamp_to_own_court()
@@ -246,6 +256,7 @@ class Player(pygame.sprite.Sprite):
             dt: Tempo decorrido desde o ultimo quadro, em segundos.
             ball: Bola usada para acompanhar o jogador durante a mira.
         """
+        self._is_moving = False
         is_holding_ball = getattr(ball, "held_by_side", None) == self.side
         if not is_holding_ball:
             keys = pygame.key.get_pressed()
@@ -254,6 +265,19 @@ class Player(pygame.sprite.Sprite):
         if ball is not None:
             self._follow_held_ball(ball)
         self.timing_bars.update(dt)
+        self._update_animation(dt)
+
+    def _update_animation(self, dt: float) -> None:
+        if self._is_moving:
+            self._anim_timer += dt
+            if self._anim_timer >= _ANIM_INTERVAL:
+                self._anim_timer -= _ANIM_INTERVAL
+                self._anim_frame ^= 1
+            self.image = self._sprite_run if self._anim_frame else self._sprite_idle
+        else:
+            self._anim_frame = 0
+            self._anim_timer = 0.0
+            self.image = self._sprite_idle
 
     def _follow_held_ball(self, ball) -> None:
         if getattr(ball, "held_by_side", None) == self.side:

@@ -90,14 +90,22 @@ vazio e é recriado automaticamente ao salvar um novo resultado.
 ## Assets
 
 **A maior parte dos gráficos é gerada em código Python via `pygame.draw`** (formas
-geométricas cartoon coloridas). As exceções são os sprites do Rafael Nadal, do
-Roger Federer e do Novak Djokovic, carregados de `assets/sprites/Nadal.png`,
-`assets/sprites/Federer.png` e `assets/sprites/Djokovic.png` para adversários
-específicos do torneio. Adicionalmente, os personagens selecionáveis pelo jogador —
-**Borger**, **Dudi** e **Pacheco** — possuem sprites próprios em
-`assets/sprites/Borger.png`, `assets/sprites/Dudi.png` e
-`assets/sprites/Pacheco.png`, exibidos na tela de seleção de personagem antes de
-cada partida. Veja `src/assets_generator.py`.
+geométricas cartoon coloridas). As exceções são os sprites dos personagens jogáveis
+e dos adversários do torneio, que possuem dois quadros cada um — **parado** e
+**correndo** — alternados em 10 FPS durante o movimento para criar animação de
+corrida. Os arquivos ficam em `assets/sprites/` com o padrão `<Nome> parado.png`
+e `<Nome> correndo.png`:
+
+| Personagem | Parado | Correndo |
+|---|---|---|
+| Borger | `Borger parado.png` | `Borger correndo.png` |
+| Dudi | `Dudi parado.png` | `Dudi correndo.png` |
+| Pacheco | `Pacheco parado.png` | `Pacheco correndo.png` |
+| Rafael Nadal | `Nadal parado.png` | `Nadal correndo.png` |
+| Roger Federer | `Federer parado.png` | `Federer correndo.png` |
+| Novak Djokovic | `Djokovic parado.png` | `Djokovic correndo.png` |
+
+Quando o personagem para, volta automaticamente ao quadro `parado`. Veja `src/assets_generator.py`.
 
 ### Música
 A trilha de fundo (`assets/music/background.mp3`) toca em loop desde o menu principal
@@ -593,4 +601,19 @@ conforme orientação do curso.
   `ScoreManager` ganhou o parâmetro `games_target_set` para usar o valor
   escolhido em vez da constante fixa; `GameplayScene._build_score_manager`
   repassa o valor armazenado no jogo ao criar o placar.
+
+## src/assets_generator.py, src/entities/player.py, src/entities/ai_player.py, src/entities/practice_bot.py, src/scenes/character_selection_scene.py e README.md
+- Sub-tarefa: Animação de corrida dos personagens
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: cada personagem (jogáveis e adversários do torneio) passou a
+  ter dois quadros de sprite — `<Nome> parado.png` e `<Nome> correndo.png`; os
+  caminhos das imagens foram atualizados em `assets_generator.py`
+  (`NADAL_IDLE_PATH`, `FEDERER_IDLE_PATH`, `DJOKOVIC_IDLE_PATH` e variantes
+  `_RUN_PATH`); `make_player_character_sprite` foi substituída por
+  `make_player_character_sprites`, que retorna uma tupla `(idle, run)`; foi
+  adicionada `make_ai_sprites` para os adversários do torneio; as classes
+  `Player`, `AIPlayer` e `PracticeBot` passaram a alternar entre os dois quadros
+  a 10 FPS (`_ANIM_INTERVAL = 0.10 s`) enquanto o personagem está em movimento,
+  voltando ao quadro parado automaticamente quando para; `CharacterSelectionScene`
+  foi atualizada para referenciar os novos nomes de arquivo.
 
