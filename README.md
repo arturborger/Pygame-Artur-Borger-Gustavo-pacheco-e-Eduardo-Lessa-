@@ -677,3 +677,16 @@ conforme orientação do curso.
   concluído; a `RecordesScene` exibe a tabela de ranking na aba **Recordes** do
   menu principal; `game.py` recebeu os atributos `player_name` e
   `tournament_time_ms`.
+
+## src/scenes/game_over_scene.py e README.md
+- Sub-tarefa: Correção do texto de vitória quando nome customizado está ativo
+- Dev integrador: Artur Borger
+- Ajustes manuais: `GameOverScene._check_player_won` só comparava o nome do
+  vencedor com um conjunto fixo `{"Voce", "Você", "Player 1"}` e o nome do
+  personagem selecionado; quando o jogador digitava um nome customizado na
+  `NameInputScene` (ex.: "Artur"), esse nome não estava no conjunto e a cena
+  exibia "DERROTA" mesmo em vitórias; a correção adiciona `game.player_name`
+  ao conjunto de nomes válidos de P1, garantindo que qualquer nome digitado
+  pelo jogador seja reconhecido corretamente; o avanço de fase (`tournament_progress`)
+  já era incrementado em `_resolve_opponents_beaten` e segue funcionando sem
+  alterações.

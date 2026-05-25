@@ -100,8 +100,8 @@ class GameOverScene(BaseScene):
     def _check_player_won(self, winner_name: str, mode: str) -> bool:
         """Verifica se o vencedor e o jogador humano (P1).
 
-        Compara o nome do vencedor com o nome do personagem escolhido pelo
-        jogador ou com os nomes padrao quando nenhum personagem esta selecionado.
+        Compara o nome do vencedor com o nome customizado digitado pelo jogador,
+        o nome do personagem selecionado ou os nomes padrao de P1.
 
         Args:
             winner_name: Nome retornado pelo ScoreManager para o vencedor.
@@ -114,6 +114,9 @@ class GameOverScene(BaseScene):
         p1_names = {"Voce", "Você", "Player 1"}
         if p1_char:
             p1_names.add(p1_char.get("name", ""))
+        custom_name = getattr(self.game, "player_name", "").strip()
+        if custom_name:
+            p1_names.add(custom_name)
         return winner_name in p1_names
 
     def _winning_character(self) -> dict | None:
