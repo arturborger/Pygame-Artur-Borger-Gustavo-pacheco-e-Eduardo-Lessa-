@@ -637,3 +637,21 @@ conforme orientação do curso.
   informações incorretas que estavam descritas na aba "Como Jogar"; a tabela de
   controles do README foi revisada de acordo.
 
+## src/entities/ai_player.py, src/entities/player.py e src/assets_generator.py
+- Sub-tarefa: Correção da animação de movimentação do Roger Federer
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: foram corrigidos dois bugs na animação do Federer. (1) Em
+  `AIPlayer._move_toward_target`, `_is_moving` só era definido como `True` quando
+  a distância ao alvo era maior que um passo inteiro (`max_step`); movimentos
+  curtos de "snap" não ativavam a animação. Corrigido para setar `_is_moving = True`
+  sempre que `distance > 0`. (2) Em `Player._update_animation`, o ciclo começava
+  com `_anim_frame = 0` exibindo o sprite **parado** pelos primeiros 0,1 s de
+  movimento; em deslocamentos breves (comuns na IA), o sprite correndo nunca
+  aparecia. Corrigido para exibir o sprite correndo imediatamente ao iniciar o
+  movimento (`_anim_frame = 0` → correndo). Adicionalmente, a função
+  `_remove_near_white_background` em `assets_generator.py` foi reescrita para usar
+  **flood fill a partir das bordas** em vez de remover todos os pixels quase-brancos
+  globalmente; isso preserva partes brancas no interior do personagem (roupas,
+  reflexos) que antes ficavam transparentes, eliminando o efeito de sprite
+  "apagado" no Federer.
+

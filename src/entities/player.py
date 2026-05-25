@@ -273,7 +273,7 @@ class Player(pygame.sprite.Sprite):
             if self._anim_timer >= _ANIM_INTERVAL:
                 self._anim_timer -= _ANIM_INTERVAL
                 self._anim_frame ^= 1
-            self.image = self._sprite_run if self._anim_frame else self._sprite_idle
+            self.image = self._sprite_idle if self._anim_frame else self._sprite_run
         else:
             self._anim_frame = 0
             self._anim_timer = 0.0

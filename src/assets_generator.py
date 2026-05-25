@@ -189,12 +189,10 @@ def make_player_sprite(color: tuple[int, int, int]) -> pygame.Surface:
 
 
 def _remove_near_white_background(image: pygame.Surface, threshold: int = 20) -> pygame.Surface:
-    """Remove fundo quase-branco de uma imagem tornando pixels claros transparentes.
+    """Remove fundo quase-branco de uma imagem usando flood fill a partir das bordas.
 
-    Usado para PNGs de 24 bits sem canal alpha que possuem fundo branco
-    (como Federer.png e Djokovic.png). Cria uma nova superficie SRCALPHA e
-    zera o alpha de todos os pixels cujos tres canais RGB estejam a menos de
-    `threshold` unidades de 255.
+    Apenas pixels brancos conectados à borda da imagem (o fundo) são removidos.
+    Pixels brancos no interior do personagem (roupas, reflexos) são preservados.
 
     Args:
         image: Superficie pygame original (sem canal alpha proprio).
@@ -209,15 +207,41 @@ def _remove_near_white_background(image: pygame.Surface, threshold: int = 20) ->
 
     try:
         import numpy as np  # noqa: PLC0415
+        from collections import deque  # noqa: PLC0415
 
+        width, height = result.get_size()
         rgb = pygame.surfarray.pixels3d(result)
         alpha = pygame.surfarray.pixels_alpha(result)
+
         white_mask = (
             (rgb[:, :, 0] >= 255 - threshold)
             & (rgb[:, :, 1] >= 255 - threshold)
             & (rgb[:, :, 2] >= 255 - threshold)
         )
-        alpha[white_mask] = 0
+
+        visited = np.zeros((width, height), dtype=bool)
+        queue = deque()
+
+        for x in range(width):
+            for y in (0, height - 1):
+                if white_mask[x, y] and not visited[x, y]:
+                    visited[x, y] = True
+                    queue.append((x, y))
+        for y in range(height):
+            for x in (0, width - 1):
+                if white_mask[x, y] and not visited[x, y]:
+                    visited[x, y] = True
+                    queue.append((x, y))
+
+        while queue:
+            x, y = queue.popleft()
+            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < width and 0 <= ny < height and not visited[nx, ny] and white_mask[nx, ny]:
+                    visited[nx, ny] = True
+                    queue.append((nx, ny))
+
+        alpha[visited] = 0
         del rgb, alpha
     except ImportError:
         result.set_colorkey(WHITE)

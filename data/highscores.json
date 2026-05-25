@@ -29,6 +29,11 @@
   "2p": [],
   "training": [
     {
+      "name": "Dudi",
+      "maior_rally": 6,
+      "date": "2026-05-25"
+    },
+    {
       "name": "Voce",
       "maior_rally": 3,
       "date": "2026-05-06"

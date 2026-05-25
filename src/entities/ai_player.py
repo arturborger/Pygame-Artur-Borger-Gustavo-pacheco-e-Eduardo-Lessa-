@@ -121,6 +121,8 @@ class AIPlayer(Player):
             self.pos.y = self.target_y
         else:
             self.pos.y += max_step if distance > 0 else -max_step
+
+        if abs(distance) > 0:
             self._is_moving = True
 
         self._clamp_to_own_court()
