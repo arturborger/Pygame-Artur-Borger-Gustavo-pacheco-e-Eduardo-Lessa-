@@ -629,3 +629,11 @@ conforme orientação do curso.
   alteração de código foi necessária pois `SoundManager.play_music` já carrega
   `MUSIC_PATH = "assets/music/background.mp3"` com loop infinito e volume 0.55.
 
+## src/scenes/instructions_scene.py e README.md
+- Sub-tarefa: Correção dos controles de movimento do Player 2 na aba "Como Jogar"
+- Dev integrador: Eduardo Lessa
+- Ajustes manuais: a tela de instruções foi atualizada para exibir corretamente
+  os controles de movimentação do segundo jogador (setas direcionais), corrigindo
+  informações incorretas que estavam descritas na aba "Como Jogar"; a tabela de
+  controles do README foi revisada de acordo.
+
