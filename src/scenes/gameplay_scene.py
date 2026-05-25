@@ -87,7 +87,13 @@ class GameplayScene(BaseScene):
             lambda: make_court(self.scenery),
         )
         p1_char = getattr(self.game, "player1_character", None)
-        player1_name = p1_char["name"] if p1_char else ("Player 1" if mode == "2p" else "Voce")
+        custom_name = getattr(self.game, "player_name", "").strip()
+        if custom_name:
+            player1_name = custom_name
+        elif p1_char:
+            player1_name = p1_char["name"]
+        else:
+            player1_name = "Player 1" if mode == "2p" else "Voce"
         self.player1 = Player(self.game.assets, "left", CONTROLS_P1, player1_name, p1_char)
         self.training_submode = "bot" if mode == "training" else None
         self.rally_count = 0
@@ -108,6 +114,7 @@ class GameplayScene(BaseScene):
         self.point_message_until = 0
         self.pending_point_winner: str | None = None
         self._next_scene = None
+        self._match_start_time: int = pygame.time.get_ticks()
         self._hud_font = pygame.font.Font(None, 26)
         self._hud_font.set_bold(True)
         self._score_font = pygame.font.Font(None, 48)
@@ -859,6 +866,12 @@ class GameplayScene(BaseScene):
         self.player1.timing_bars.reset()
         if self.player2 is not None and hasattr(self.player2, "timing_bars"):
             self.player2.timing_bars.reset()
+
+        if self.mode == "1p":
+            elapsed = pygame.time.get_ticks() - self._match_start_time
+            self.game.tournament_time_ms = (
+                getattr(self.game, "tournament_time_ms", 0) + elapsed
+            )
 
     def _build_stats_scene(self):
         try:

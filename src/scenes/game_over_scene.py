@@ -197,7 +197,10 @@ class GameOverScene(BaseScene):
             return
 
         if self.mode == "1p":
-            highscore_manager.add_tournament_record("Voce", self.opponents_beaten)
+            if self.player_won and self.opponents_beaten >= len(TOURNAMENT_OPPONENTS):
+                player_name = getattr(self.game, "player_name", "").strip() or "Voce"
+                time_seconds = getattr(self.game, "tournament_time_ms", 0) / 1000.0
+                highscore_manager.add_tournament_time_record(player_name, time_seconds)
         elif self.mode == "2p":
             highscore_manager.add_2p_record(self.winner_name, 1)
         elif self.mode == "training":

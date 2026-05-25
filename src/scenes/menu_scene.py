@@ -95,11 +95,13 @@ class MenuScene(BaseScene):
         elif selected_option == "Como Jogar":
             self._next_scene = self._build_scene("instructions_scene", "InstructionsScene")
         elif selected_option == "Torneio (1P vs CPU)":
-            self._next_scene = self._build_character_selection("tournament")
+            self._next_scene = self._build_name_input("tournament")
         elif selected_option == "2 Jogadores Local":
-            self._next_scene = self._build_character_selection("2p")
+            self._next_scene = self._build_name_input("2p")
         elif selected_option == "Modo Treino":
-            self._next_scene = self._build_character_selection("training")
+            self._next_scene = self._build_name_input("training")
+        elif selected_option == "Recordes":
+            self._next_scene = self._build_recordes()
         else:
             self._next_scene = None
 
@@ -120,6 +122,30 @@ class MenuScene(BaseScene):
 
         scene_class = getattr(module, "GameplayScene")
         return scene_class(self.game, mode=mode)
+
+    def _build_name_input(self, mode: str):
+        try:
+            module = __import__(
+                "src.scenes.name_input_scene",
+                fromlist=["NameInputScene"],
+            )
+        except ModuleNotFoundError:
+            return None
+
+        scene_class = getattr(module, "NameInputScene")
+        return scene_class(self.game, mode=mode)
+
+    def _build_recordes(self):
+        try:
+            module = __import__(
+                "src.scenes.recordes_scene",
+                fromlist=["RecordesScene"],
+            )
+        except ModuleNotFoundError:
+            return None
+
+        scene_class = getattr(module, "RecordesScene")
+        return scene_class(self.game)
 
     def _build_character_selection(self, mode: str):
         try:

@@ -33,6 +33,26 @@ class HighscoreManager:
         """
         self._add_record("tournament", name, "opponents", opponents_beaten)
 
+    def add_tournament_time_record(self, name: str, time_seconds: float) -> None:
+        """Adiciona um recorde de torneio concluido com o tempo total e salva o top 5.
+
+        Apenas partidas concluidas (todos os adversarios vencidos) devem chamar
+        este metodo. Registros com menor tempo ficam em posicoes superiores.
+
+        Args:
+            name: Nome do jogador conforme digitado na tela de entrada.
+            time_seconds: Tempo total em segundos para completar o torneio.
+        """
+        self._validate_category("tournament")
+        record = {
+            "name": name,
+            "time": round(float(time_seconds), 1),
+            "date": date.today().isoformat(),
+        }
+        self._data["tournament"].append(record)
+        self._trim_category("tournament", self._data)
+        self.save()
+
     def add_2p_record(self, name: str, opponents_beaten: int) -> None:
         """Adiciona um resultado do modo 2P e salva o top 5.
 
@@ -122,11 +142,29 @@ class HighscoreManager:
         category: str,
         data: dict[str, list[dict[str, int | str]]],
     ) -> None:
-        score_key = "maior_rally" if category == "training" else "opponents"
-        data[category].sort(
-            key=lambda record: self._score_value(record, score_key),
-            reverse=True,
-        )
+        if category == "tournament":
+            # Registros com campo "time" ordenados por tempo crescente (menor = melhor).
+            # Registros antigos sem "time" (apenas "opponents") vao para o final.
+            def _tournament_key(record: dict) -> tuple:
+                time_val = record.get("time")
+                if time_val is not None:
+                    try:
+                        return (0, float(time_val))
+                    except (TypeError, ValueError):
+                        pass
+                return (1, 0.0)
+
+            data[category].sort(key=_tournament_key)
+        elif category == "training":
+            data[category].sort(
+                key=lambda record: self._score_value(record, "maior_rally"),
+                reverse=True,
+            )
+        else:
+            data[category].sort(
+                key=lambda record: self._score_value(record, "opponents"),
+                reverse=True,
+            )
         data[category] = data[category][: self._MAX_RECORDS]
 
     def _score_value(self, record: dict[str, int | str], score_key: str) -> int:

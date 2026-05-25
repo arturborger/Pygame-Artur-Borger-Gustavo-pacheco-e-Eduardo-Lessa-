@@ -43,18 +43,19 @@ python main.py
 As partidas usam a quadra na horizontal: o P1 joga pela esquerda e o P2/CPU
 joga pela direita.
 
-1. No início de cada ponto, o sacador fica parado com a bola à frente dele.
-2. No saque humano, trave primeiro o ângulo e depois a força com a tecla de trava.
-3. A barra de ângulo do saque mostra uma faixa verde para os ângulos que miram no quadrado correto.
-4. O devolvedor começa no fundo da quadra, pode se mover, mas não entra no quadrado onde o saque conta como dentro.
-5. Se o saque não passar pelo quadrado correto, aparece `OUT` e o sacador perde o ponto.
-6. Quando a bola bate no jogador humano durante o rally, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
-7. Pressione a tecla de trava para fixar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
-8. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
-9. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
-10. Acertar no sweet spot evita erros de mira e marca um winner.
-11. Para o ponto continuar, a bola precisa cruzar a linha central dentro do trecho da rede. Se ela contornar a rede por fora, aparece `OUT` e o ponto termina.
-12. Se a bola tocar na parede (borda superior ou inferior) ainda no lado de quem a rebateu — ou seja, antes de cruzar a rede — a jogada é `OUT` e o ponto vai para o adversário.
+1. No início do jogo, o sistema pede o **nome do jogador**.
+2. No início de cada ponto, o sacador fica parado com a bola à frente dele.
+3. No saque humano, trave primeiro o ângulo e depois a força com a tecla de trava.
+4. A barra de ângulo do saque mostra uma faixa verde para os ângulos que miram no quadrado correto.
+5. O devolvedor começa no fundo da quadra, pode se mover, mas não entra no quadrado onde o saque conta como dentro.
+6. Se o saque não passar pelo quadrado correto, aparece `OUT` e o sacador perde o ponto.
+7. Quando a bola bate no jogador humano durante o rally, ela para ao lado dele e abre a **BARRA DE ÂNGULO**.
+8. Pressione a tecla de trava para fixar o ângulo; depois a **BARRA DE FORÇA** oscila com uma zona verde (sweet spot 70-90%).
+9. Uma flecha mostra a direção prevista da bola e muda de tamanho conforme a força selecionada.
+10. Pressione a tecla de trava de novo para fixar a força e soltar a bola a partir do jogador.
+11. Acertar no sweet spot evita erros de mira e marca um winner.
+12. Para o ponto continuar, a bola precisa cruzar a linha central dentro do trecho da rede. Se ela contornar a rede por fora, aparece `OUT` e o ponto termina.
+13. Se a bola tocar na parede (borda superior ou inferior) ainda no lado de quem a rebateu — ou seja, antes de cruzar a rede — a jogada é `OUT` e o ponto vai para o adversário.
 
 ### Saque
 
@@ -75,6 +76,13 @@ joga pela direita.
 Sistema oficial do tênis: 0 → 15 → 30 → 40 → game · games = set (com 2 de vantagem, escolha 3 ou 6 games) ·
 tie-break quando empatado no limite · melhor de 3 sets vence a partida.
 
+## Ranking
+
+- Antes de jogar qualquer modo, o jogo pede o **nome do jogador**.
+- Ao completar o **torneio inteiro** (vencer Nadal, Federer e Djokovic), o tempo total de jogo é salvo automaticamente.
+- O **menor tempo** fica no topo do ranking — visível em **Recordes** no menu principal.
+- Cada nova tentativa de torneio começa com tempo zerado e nome novo.
+
 ## Estatísticas
 
 Ao fim de cada partida você vê: aces e winners de cada jogador. Essas métricas
@@ -83,9 +91,9 @@ sem depender da lógica completa do placar.
 
 ## Highscores
 
-O jogo salva rankings top 5 em `data/highscores.json` para torneio, 2 jogadores
-local e treino. Se o arquivo não existir ou estiver inválido, o ranking começa
-vazio e é recriado automaticamente ao salvar um novo resultado.
+O jogo salva rankings top 5 em `data/highscores.json` para torneio (por tempo),
+2 jogadores local e treino. Se o arquivo não existir ou estiver inválido, o ranking
+começa vazio e é recriado automaticamente ao salvar um novo resultado.
 
 ## Assets
 
@@ -655,3 +663,17 @@ conforme orientação do curso.
   reflexos) que antes ficavam transparentes, eliminando o efeito de sprite
   "apagado" no Federer.
 
+## src/scenes/name_input_scene.py, src/scenes/recordes_scene.py, src/systems/highscore.py, src/scenes/menu_scene.py, src/scenes/gameplay_scene.py, src/scenes/game_over_scene.py, src/game.py e README.md
+- Sub-tarefa: Sistema de ranking por tempo com entrada de nome
+- Dev integrador: Artur Borger
+- Ajustes manuais: foi criada a `NameInputScene`, exibida antes da seleção de
+  personagem em todos os modos de jogo, que solicita o nome do jogador; ao
+  confirmar no modo torneio, o progresso e o cronômetro são zerados; a
+  `GameplayScene` passou a usar o nome digitado na HUD e a acumular o tempo
+  de cada partida no torneio em `game.tournament_time_ms`; o `HighscoreManager`
+  recebeu `add_tournament_time_record` para salvar registros com tempo no formato
+  MM:SS, ordenados crescentemente (menor tempo = melhor posição); a
+  `GameOverScene` passa a salvar o recorde apenas quando o torneio inteiro é
+  concluído; a `RecordesScene` exibe a tabela de ranking na aba **Recordes** do
+  menu principal; `game.py` recebeu os atributos `player_name` e
+  `tournament_time_ms`.

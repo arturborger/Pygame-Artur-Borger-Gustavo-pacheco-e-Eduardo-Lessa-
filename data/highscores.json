@@ -1,6 +1,16 @@
 {
   "tournament": [
     {
+      "name": "Borger",
+      "time": 98.2,
+      "date": "2026-05-25"
+    },
+    {
+      "name": "Artur",
+      "time": 125.5,
+      "date": "2026-05-25"
+    },
+    {
       "name": "Voce",
       "opponents": 3,
       "date": "2026-05-25"
@@ -14,16 +24,6 @@
       "name": "Voce",
       "opponents": 2,
       "date": "2026-05-25"
-    },
-    {
-      "name": "Voce",
-      "opponents": 1,
-      "date": "2026-05-12"
-    },
-    {
-      "name": "Voce",
-      "opponents": 1,
-      "date": "2026-05-13"
     }
   ],
   "2p": [],

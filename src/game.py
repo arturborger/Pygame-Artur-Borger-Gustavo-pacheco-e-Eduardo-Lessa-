@@ -43,6 +43,8 @@ class Game:
         self.games_target_set: int = 6
         self.player1_character: dict | None = None
         self.player2_character: dict | None = None
+        self.player_name: str = ""
+        self.tournament_time_ms: int = 0
         self.scene = MenuScene(self)
 
     def change_scene(self, scene: object) -> None:
