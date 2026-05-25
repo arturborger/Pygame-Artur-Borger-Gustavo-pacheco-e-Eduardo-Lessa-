@@ -2,8 +2,18 @@
   "tournament": [
     {
       "name": "Voce",
+      "opponents": 3,
+      "date": "2026-05-25"
+    },
+    {
+      "name": "Voce",
       "opponents": 2,
       "date": "2026-05-12"
+    },
+    {
+      "name": "Voce",
+      "opponents": 2,
+      "date": "2026-05-25"
     },
     {
       "name": "Voce",
@@ -14,16 +24,6 @@
       "name": "Voce",
       "opponents": 1,
       "date": "2026-05-13"
-    },
-    {
-      "name": "Voce",
-      "opponents": 1,
-      "date": "2026-05-20"
-    },
-    {
-      "name": "Voce",
-      "opponents": 0,
-      "date": "2026-05-05"
     }
   ],
   "2p": [],
