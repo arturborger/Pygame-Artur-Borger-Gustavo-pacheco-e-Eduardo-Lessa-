@@ -617,3 +617,15 @@ conforme orientação do curso.
   voltando ao quadro parado automaticamente quando para; `CharacterSelectionScene`
   foi atualizada para referenciar os novos nomes de arquivo.
 
+## assets/music/background.mp3 e .gitignore
+- Sub-tarefa: Trilha sonora de fundo comprimida para o repositório
+- Dev integrador: Artur Borger
+- Ajustes manuais: o arquivo `YTDown_YouTube_Media_qOIpnyigqdk_007_128k.mp3`
+  foi adicionado como nova trilha principal; os primeiros 3 minutos (≈ 3,5 MB)
+  foram extraídos via Python usando offset e bitrate lidos pelo `afinfo` (346 bytes
+  de cabeçalho ID3 + 161 848 bps × 180 s ÷ 8), gerando `assets/music/background.mp3`
+  dentro do limite de 100 MB do GitHub; o `.gitignore` foi atualizado para não
+  mais excluir `*.mp3`, permitindo rastrear o arquivo comprimido; nenhuma
+  alteração de código foi necessária pois `SoundManager.play_music` já carrega
+  `MUSIC_PATH = "assets/music/background.mp3"` com loop infinito e volume 0.55.
+

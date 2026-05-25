@@ -31,6 +31,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Arquivos de música (muito grandes para o GitHub — adicione localmente)
-*.mp3
-assets/music/
+# Arquivos de música grandes — adicione localmente (background.mp3 já está no repo, comprimido)
+assets/music/*.m4a
+assets/music/*.wav
